@@ -8,33 +8,33 @@ import androidx.room.PrimaryKey;
 public class GameDE {
     @PrimaryKey
     //game id
-    int game_id;
+    public int game_id;
     //Creating the different columns for the database
     @ColumnInfo(name = "game_name")
-    String gameName;
+    public String gameName;
     @ColumnInfo(name = "game_description")
-    String gameDescription;
+    public String gameDescription;
     @ColumnInfo(name = "game_time")
-    float gameTime;
+    public float gameTime;
     @ColumnInfo(name = "total_achievements")
-    float totalAchievements;
+    public float totalAchievements;
     @ColumnInfo(name = "earned_achievements")
-    float earnedAchievements;
+    public float earnedAchievements;
     @ColumnInfo(name = "game_cover")
-    String gameCover;
+    public String gameCover;
     @ColumnInfo(name = "game_completed")
-    boolean gameCompleted;
+    public boolean gameCompleted;
     @ColumnInfo(name = "game_fully_completed")
-    boolean gameFullyCompleted;
+    public boolean gameFullyCompleted;
     @ColumnInfo(name = "time_to_beat")
-    boolean timeToBeat;
+    public boolean timeToBeat;
     @ColumnInfo(name = "game_platform")
-    String gamePlatform;
+    public String gamePlatform;
     @ColumnInfo(name = "cover_URL")
-    String coverURL;
+    public String coverURL;
     @ColumnInfo(name = "game_genre")
-    String gameGenre;
+    public String gameGenre;
     @ColumnInfo(name = "release_date")
-    String releaseDate;
+    public String releaseDate;
 
 }
