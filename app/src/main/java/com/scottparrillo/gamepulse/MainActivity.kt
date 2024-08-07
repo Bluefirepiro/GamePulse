@@ -1,5 +1,6 @@
 package com.scottparrillo.gamepulse
 
+import android.hardware.lights.Light
 import android.os.Bundle
 import android.view.RoundedCorner
 import androidx.activity.ComponentActivity
@@ -38,12 +39,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.scottparrillo.gamepulse.ui.theme.CopperRose
 
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import com.scottparrillo.gamepulse.ui.theme.LightBlue
+import com.scottparrillo.gamepulse.ui.theme.Lime
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -201,9 +208,19 @@ fun DefaultPreview() {
 @Composable
 fun LibraryScreen(){
     //Main column
-    Column (modifier = Modifier.fillMaxSize()){
+    Column (modifier = Modifier
+        .fillMaxSize()
+        .background(color = CopperRose)    ){
         //Title text
-        Row{
+        Row(verticalAlignment = Alignment.CenterVertically){
+            Image(painter = painterResource(id =R.drawable.arrow),
+                contentDescription ="A back arrow",
+                contentScale = ContentScale.Inside,
+                modifier = Modifier
+                    .size(65.dp)
+                    .padding(8.dp)
+                )
+
             Text(
                 text = "Library Screen",
                 style = MaterialTheme.typography.headlineLarge,
@@ -214,20 +231,20 @@ fun LibraryScreen(){
         LazyRow (
             horizontalArrangement = Arrangement.spacedBy(32.dp),
             modifier = Modifier
-                .background(Color.Transparent)
+                //.background(Color.Transparent)
                 ){
 
             item{
                 Box (
                     modifier = Modifier
                         .width(120.dp)
-                        .height(40.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .height(50.dp)
                         .clickable { /* TODO: Handle Category clicks */ }
                         .padding(8.dp)
-                        .clip(RoundedCornerShape(30.dp))
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(color = Lime)
                 ){
-                    Text(text = "Recent")
+                    Text(text =  "Recent", textAlign = TextAlign.Center)
 
                 }
             }
@@ -235,73 +252,76 @@ fun LibraryScreen(){
                 Box (
                     modifier = Modifier
                         .width(120.dp)
-                        .height(40.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .height(50.dp)
                         .clickable { /* TODO: Handle Category clicks */ }
                         .padding(8.dp)
-                        .clip(RoundedCornerShape(30.dp))
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(color = Lime)
+
                 ){
-                    Text(text = "Current")
+                    Text(text = "Current", textAlign = TextAlign.Center)
 
                 }
             }
             item{
+
                 Box (
                     modifier = Modifier
                         .width(120.dp)
-                        .height(40.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .height(50.dp)
                         .clickable { /* TODO: Handle Category clicks */ }
                         .padding(8.dp)
-                        .clip(RoundedCornerShape(30.dp))
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(color = Lime)
                 ){
-                    Text(text = "Beaten")
+                    Text(text = "Beaten", textAlign = TextAlign.Center)
 
                 }
             }
             item{
-                Box (
-                    modifier = Modifier
-                        .width(120.dp)
-                        .height(40.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .clickable { /* TODO: Handle Category clicks */ }
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(30.dp))
+                    Box (
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(50.dp)
+                            .clickable { /* TODO: Handle Category clicks */ }
+                            .padding(8.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(color = Lime)
 
-                ){
-
-                    Text(text = "New", )
-
+                    ){
+                        Text(text = "New", textAlign = TextAlign.Center )
+                    }
                 }
-            }
-
         }
         //This row should contain the sort icon
         Row {
-            Image(painter = painterResource(id = R.drawable.profile_picture_placeholder),
-                contentDescription = "Profile Picture",)
+            Image(painter = painterResource(id = R.drawable.sort),
+                contentDescription = "Sorting Arrow",
+                modifier = Modifier
+                    .size(35.dp)
+                 )
+
         }
         LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp)) {
-            //Replace these with images and two text blocks below them
+
+            item {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(painter = painterResource(id = R.drawable.cyberpunk_2077_cover),
+                        contentDescription = "A cover of the game Cyberpunk 2022",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(135.dp)
+                            .clip(CircleShape)
+                    );
+                    Text(text = "Cyber Punk 2022");
+                    Text(text = "Update fill")}
+                }
+
+
             item { Text(text = "test") }
             item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
-            item { Text(text = "test") }
+
+
         }
 
     }
