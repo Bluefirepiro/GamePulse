@@ -35,6 +35,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -229,67 +231,72 @@ fun LibraryScreen(){
             }
         //This contains the game catagories
         LazyRow (
-            horizontalArrangement = Arrangement.spacedBy(32.dp),
+            //horizontalArrangement = Arrangement.spacedBy(1.dp),
             modifier = Modifier
                 //.background(Color.Transparent)
                 ){
 
             item{
                 Box (
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .width(120.dp)
-                        .height(50.dp)
+                        .height(31.dp)
                         .clickable { /* TODO: Handle Category clicks */ }
-                        .padding(8.dp)
+                        .padding(2.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(color = Lime)
+
                 ){
-                    Text(text =  "Recent", textAlign = TextAlign.Center)
+                    Text(text =  "Recent")
+
+                 }
+
+            }
+            item{
+                Box (
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(31.dp)
+                        .clickable { /* TODO: Handle Category clicks */ }
+                        .padding(2.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(color = Lime)
+
+                ){
+                    Text(text = "Current")
 
                 }
             }
             item{
-                Box (
-                    modifier = Modifier
-                        .width(120.dp)
-                        .height(50.dp)
-                        .clickable { /* TODO: Handle Category clicks */ }
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(color = Lime)
-
-                ){
-                    Text(text = "Current", textAlign = TextAlign.Center)
-
-                }
-            }
-            item{
 
                 Box (
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .width(120.dp)
-                        .height(50.dp)
+                        .height(31.dp)
                         .clickable { /* TODO: Handle Category clicks */ }
-                        .padding(8.dp)
+                        .padding(2.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(color = Lime)
                 ){
-                    Text(text = "Beaten", textAlign = TextAlign.Center)
+                    Text(text = "Beaten")
 
                 }
             }
             item{
                     Box (
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .width(120.dp)
-                            .height(50.dp)
+                            .height(31.dp)
                             .clickable { /* TODO: Handle Category clicks */ }
-                            .padding(8.dp)
+                            .padding(2.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .background(color = Lime)
-
                     ){
-                        Text(text = "New", textAlign = TextAlign.Center )
+                        Text(text = "New")
                     }
                 }
         }
