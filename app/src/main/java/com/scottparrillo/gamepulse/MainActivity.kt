@@ -3,6 +3,7 @@ package com.scottparrillo.gamepulse
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -226,13 +227,15 @@ fun DefaultPreview() {
 @Preview(showBackground = true)
 @Composable
 fun LibraryScreen() {
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
     // Main column
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = CopperRose)
     ) {
-        // Title text
+        // Title text with a clickable back arrow
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = painterResource(id = R.drawable.arrow),
@@ -241,7 +244,11 @@ fun LibraryScreen() {
                 modifier = Modifier
                     .size(65.dp)
                     .padding(8.dp)
+                    .clickable {
+                        onBackPressedDispatcher?.onBackPressed() // Handle the back press
+                    }
             )
+
 
             Text(
                 text = "Library Screen",

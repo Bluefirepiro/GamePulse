@@ -10,15 +10,25 @@ class AchievementActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_achievement)
 
-        // Set up the toolbar
+        // Set up the toolbar with a back button
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true) // Enables the back button in the toolbar
 
         // Set up the RecyclerView
         val recyclerView: RecyclerView = findViewById(R.id.recyclerViewAchievements)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = AchievementAdapter(getAchievements())
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed() // Handle back button press to go back to the previous screen
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     // Sample data for achievements

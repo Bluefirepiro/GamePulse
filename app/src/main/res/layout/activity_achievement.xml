@@ -8,9 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".AchievementActivity">
 
-    <!-- Toolbar -->
-
-    <!-- List of Achievements -->
+    <!-- Toolbar with Back Button -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -19,6 +17,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         android:title="@string/achievement_title"
         android:titleTextColor="@android:color/white"
+        app:navigationIcon="@drawable/ic_back_arrow"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     <androidx.recyclerview.widget.RecyclerView
