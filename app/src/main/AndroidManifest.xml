@@ -19,10 +19,17 @@
             android:theme="@style/Theme.GamePulse">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".AchievementActivity"
+            android:label="Achievements"
+            android:theme="@style/Theme.GamePulse" />
+        <activity
+            android:name=".LibraryActivity"
+            android:label="Library"
+            android:theme="@style/Theme.GamePulse" />
     </application>
 
 </manifest>

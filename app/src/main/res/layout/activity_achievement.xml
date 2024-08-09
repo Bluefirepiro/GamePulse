@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_achievement"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AchievementActivity">
+
+    <!-- Toolbar -->
+
+    <!-- List of Achievements -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/copper_rose"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        android:title="@string/achievement_title"
+        android:titleTextColor="@android:color/white"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewAchievements"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:background="@color/copper_rose"
+        android:padding="16dp"
+        tools:listitem="@layout/item_achievement" />
+
+</RelativeLayout>

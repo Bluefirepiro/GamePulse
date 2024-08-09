@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">GamePulse</string>
+    <string name="achievement_icon">Achievement Icon</string>
+    <string name="achievement_title">Achievements</string>
+    <string name="back_arrow">Back Arrow</string>
+    <string name="library_title">Library Screen</string>
+    <string name="recent">Recent</string>
+    <string name="current">Current</string>
+    <string name="beaten">Beaten</string>
+    <string name="new_category">New</string>
+    <string name="sort_icon">Sort Icon</string>
+    <string name="game_cover">Game Cover</string>
 </resources>
