@@ -1,7 +1,11 @@
 package com.scottparrillo.gamepulse
 
+import android.app.Dialog
+import android.app.ListActivity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.renderscript.ScriptGroup.Input
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
@@ -20,6 +24,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -31,20 +37,33 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.wear.compose.material.dialog.Dialog
 import com.scottparrillo.gamepulse.ui.theme.CopperRose
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.Lime
+import com.scottparrillo.gamepulse.ui.theme.PrussainBlue
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,6 +77,7 @@ class MainActivity : ComponentActivity() {
                     onNavigateToLibrary = {
                         startActivity(Intent(this, LibraryActivity::class.java))
                     }
+
                 )
             }
         }
@@ -227,6 +247,7 @@ fun DefaultPreview() {
 @Preview(showBackground = true)
 @Composable
 fun LibraryScreen() {
+    val context = LocalContext.current
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     // Main column
@@ -320,12 +341,27 @@ fun LibraryScreen() {
         }
 
         // This row should contain the sort icon
-        Row(modifier = Modifier.padding(8.dp)) {
+        Row(modifier = Modifier.padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Image(
                 painter = painterResource(id = R.drawable.sort),
                 contentDescription = "Sorting Arrow",
-                modifier = Modifier.size(35.dp)
+                modifier = Modifier
+                    .size(35.dp)
+
+
             )
+            Spacer(modifier = Modifier.width(300.dp))
+            /*Image(
+                painter = painterResource(id = R.drawable.plus),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(35.dp)
+                    .clickable {  }
+
+            )*/
+            Button(onClick =  { context.startActivity(Intent(context, GameInputActivity::class.java))}) {
+
+            }
         }
 
         LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp)) {
@@ -348,3 +384,73 @@ fun LibraryScreen() {
         }
     }
 }
+//This is going to be a series of text fields for the user to input game details in
+@Preview(showBackground = true)
+@Composable
+fun GameInputScreen()
+{
+    //These are the variables for the text inputs
+    var gameName by remember { mutableStateOf("") }
+    var gameDesc by remember { mutableStateOf("") }
+    var gameTime by remember { mutableStateOf("") }
+    var gameDate by remember { mutableStateOf("") }
+    var gamePlatform by remember { mutableStateOf("") }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(0.dp)
+            .background(color = PrussainBlue)
+    )
+    {
+        //Title text
+        item { Text(text = "Game Input", fontSize = 40.sp, modifier = Modifier.padding(vertical = 20.dp))  }
+        item {
+            //Text inputs below
+            LazyRow ()
+        {
+            item{ TextField(value = gameName, onValueChange = {gameName = it},
+                label = {Text("Game Name")})}
+        }}
+        item {
+            LazyRow ()
+            {
+                item{ TextField(value = gameDesc, onValueChange = {gameDesc = it},
+                    label = {Text("Game Description")})}
+            }
+        }
+        item { LazyRow ()
+        {
+            item{ TextField(value = gameTime, onValueChange = {gameTime = it},
+                label = {Text("Game Time")})}
+        } }
+        item { LazyRow ()
+        {
+            item{ TextField(value = gameDate, onValueChange = {gameDate = it},
+                label = {Text("Game Date")})}
+        } }
+        item {LazyRow ()
+        {
+            item{ TextField(value = gamePlatform, onValueChange = {gamePlatform = it},
+                label = {Text("Game Platform")})}
+        }  }
+        //Buttons
+        item { LazyRow {
+            item {
+                Button(onClick = { /*TODO*/ }) {
+                    Text(text = "Back")
+
+            } }
+            item { Button(onClick = { /*TODO*/ }) {
+                Text(text = "Confirm Inputs")
+                
+            } }
+        } }
+
+
+    }
+
+
+
+}
+
+
