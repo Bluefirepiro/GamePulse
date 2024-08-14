@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.IOException
@@ -106,18 +107,19 @@ class AchievementActivity : AppCompatActivity() {
 
     private fun loadAchievements() {
         val savedAchievements = getAchievementFile()
-        if (savedAchievements != null) {
-            achievements.addAll(savedAchievements)
+        val newAchievements = if (savedAchievements != null) {
+            savedAchievements
         } else {
-            // Load default achievements if no saved data exists
-            achievements.addAll(listOf(
+            listOf(
                 Achievement(R.drawable.ic_achievement, "Achievement 1", "Description 1", 50.0, true, 500, 1000, R.raw.sound1),
                 Achievement(R.drawable.ic_achievement, "Achievement 2", "Description 2", 30.0, false, 200, 500, R.raw.sound2),
                 Achievement(R.drawable.ic_achievement, "Achievement 3", "Description 3", 75.0, true, 1000, 1000, null)
-            ))
+            )
         }
-        achievementAdapter.notifyDataSetChanged()
+
+        achievementAdapter.updateList(newAchievements)
     }
+
 
     private fun showAddAchievementDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_achievement, null)
@@ -203,19 +205,42 @@ class AchievementActivity : AppCompatActivity() {
     }
 
     private fun sortAchievementsAlphabetically() {
-        achievements.sortBy { it.title }
-        achievementAdapter.notifyDataSetChanged()
+        val sortedList = achievements.sortedBy { it.title }
+        updateAchievementsList(sortedList)
     }
 
     private fun sortAchievementsByPercentageEarned() {
-        achievements.sortByDescending { it.percentageEarned }
-        achievementAdapter.notifyDataSetChanged()
+        val sortedList = achievements.sortedByDescending { it.percentageEarned }
+        updateAchievementsList(sortedList)
     }
 
     private fun sortAchievementsByEarnedStatus(earned: Boolean) {
-        achievements.sortByDescending { it.isEarned == earned }
-        achievementAdapter.notifyDataSetChanged()
+        val sortedList = achievements.sortedByDescending { it.isEarned == earned }
+        updateAchievementsList(sortedList)
     }
+
+    private fun updateAchievementsList(newList: List<Achievement>) {
+        val diffCallback = AchievementDiffCallback(achievements, newList)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        achievements.clear()
+        achievements.addAll(newList)
+        diffResult.dispatchUpdatesTo(achievementAdapter)
+    }
+
+    // DiffUtil Callback class remains the same
+    class AchievementDiffCallback(
+        private val oldList: List<Achievement>,
+        private val newList: List<Achievement>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize() = oldList.size
+        override fun getNewListSize() = newList.size
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            oldList[oldItemPosition].title == newList[newItemPosition].title
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            oldList[oldItemPosition] == newList[newItemPosition]
+    }
+
 
     private fun filterAchievements(query: String) {
         val filteredList = achievements.filter { it.title.contains(query, ignoreCase = true) }

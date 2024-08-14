@@ -8,10 +8,11 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
 class AchievementAdapter(
-    private val achievements: MutableList<Achievement>,
+    private var achievements: MutableList<Achievement>,
     private val onDelete: (Int) -> Unit // Callback for delete action
 ) : RecyclerView.Adapter<AchievementAdapter.AchievementViewHolder>() {
 
@@ -73,10 +74,26 @@ class AchievementAdapter(
         }
     }
 
-    // Method to update the list of achievements
+    // Method to update the list of achievements using DiffUtil
     fun updateList(newList: List<Achievement>) {
+        val diffCallback = AchievementDiffCallback(achievements, newList)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
         achievements.clear()
         achievements.addAll(newList)
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    // DiffUtil Callback class
+    class AchievementDiffCallback(
+        private val oldList: List<Achievement>,
+        private val newList: List<Achievement>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize() = oldList.size
+        override fun getNewListSize() = newList.size
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            oldList[oldItemPosition].title == newList[newItemPosition].title
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            oldList[oldItemPosition] == newList[newItemPosition]
     }
 }
