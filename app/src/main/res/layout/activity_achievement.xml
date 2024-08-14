@@ -18,7 +18,7 @@
         app:navigationIcon="@drawable/ic_back_arrow"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <!-- Sorting Spinner -->
+
 
     <!-- Add Achievement Button -->
 
@@ -33,6 +33,8 @@
         android:background="@color/copper_rose"
         android:hint="Search Achievements"
         android:padding="8dp" />
+
+    <!-- Sorting Spinner -->
 
     <Spinner
         android:id="@+id/spinnerSortOptions"
