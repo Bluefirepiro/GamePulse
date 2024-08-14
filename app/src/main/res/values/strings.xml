@@ -11,6 +11,7 @@
     <string name="sort_icon">Sort Icon</string>
     <string name="game_cover">Game Cover</string>
     <string name="delete_achievement">Delete Achievement</string>
+    <string name="progress_text">Progress: %1$d/%2$d</string>
 
 
     <!-- Sorting Options -->

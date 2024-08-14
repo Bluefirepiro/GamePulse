@@ -40,11 +40,14 @@ class AchievementAdapter(
         holder.title.text = achievement.title
         holder.description.text = achievement.description
 
-        // Update progress bar and text
+        // Update progress bar and text using resource string
         holder.progressBar.max = achievement.total
         holder.progressBar.progress = achievement.progress
-        holder.progressText.text = "Progress: ${achievement.progress}/${achievement.total}"
-
+        holder.progressText.text = holder.itemView.context.getString(
+            R.string.progress_text,
+            achievement.progress,
+            achievement.total
+        )
         // Play sound if needed
         holder.itemView.setOnClickListener {
             achievement.soundResId?.let { soundId ->

@@ -2,8 +2,6 @@ package com.scottparrillo.gamepulse
 
 import android.app.Activity.MODE_PRIVATE
 import android.content.Intent
-import android.hardware.biometrics.BiometricManager.Strings
-import android.os.AsyncTask
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
@@ -28,7 +26,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,7 +43,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,12 +52,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.room.Room.databaseBuilder
 import com.scottparrillo.gamepulse.ui.theme.CopperRose
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.Lime
 import com.scottparrillo.gamepulse.ui.theme.PrussainBlue
-import kotlinx.coroutines.flow.count
 import java.io.EOFException
 import java.io.File
 import java.io.IOException
@@ -71,7 +65,7 @@ import java.io.ObjectOutputStream
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState)
         //This builds our instance of the database
 
 
@@ -260,11 +254,11 @@ fun DefaultPreview() {
 fun LibraryScreen() {
     val context = LocalContext.current
     val gameFile = File(context.filesDir, "gameList")
-    var tempList = mutableListOf<Game>()
-    var sortListGame = remember { mutableStateListOf<Game>()}
+    val tempList = mutableListOf<Game>()
+    val sortListGame = remember { mutableStateListOf<Game>()}
 
 
-    //This functions returns a mutablelist of games from the saved gameList
+    //This functions returns a mutable list of games from the saved gameList
     fun getGameFile(): MutableList<Game>? {
         try {
 
@@ -284,7 +278,7 @@ fun LibraryScreen() {
 
     if(gameFile.exists())
     {
-        Game.gameList = getGameFile()!!;
+        Game.gameList = getGameFile()!!
         sortListGame.addAll(getGameFile()!!)
     }
 
@@ -521,7 +515,7 @@ fun GameInputScreen()
                 label = {Text("Game Platform")})}
         }  }
         //Buttons
-        item { LazyRow() {
+        item { LazyRow {
             item {
                 Button(onClick = { context.startActivity(Intent(context, LibraryActivity::class.java)) }) {
                     Text(text = "Back")
@@ -536,7 +530,7 @@ fun GameInputScreen()
             }) {
                 Text(text = "Confirm Inputs")
 
-                
+
             } }
         } }
 

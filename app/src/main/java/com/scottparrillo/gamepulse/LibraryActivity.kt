@@ -1,6 +1,6 @@
 package com.scottparrillo.gamepulse
 
-import android.content.Intent
+
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -12,7 +12,7 @@ class LibraryActivity : AppCompatActivity() {
         setContent {
             GamePulseTheme {
                 LibraryScreen(
-                    
+
                 )
 
             }
