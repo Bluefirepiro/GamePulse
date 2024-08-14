@@ -1,43 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_library"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".LibraryActivity">
 
-    <!-- Top row with back arrow and title -->
-    <LinearLayout
-        android:id="@+id/topRow"
+    <!-- Toolbar with back button and title -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:contentInsetStart="0dp"
+        android:contentInsetEnd="0dp"
         android:padding="8dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-        <ImageView
-            android:id="@+id/backArrow"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_back_arrow"
-            android:contentDescription="@string/back_arrow"
-            android:padding="8dp" />
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:text="@string/library_title"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-    </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
 
     <!-- Horizontal scroll view for game categories -->
     <HorizontalScrollView
         android:id="@+id/gameCategories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/topRow"
+        android:layout_below="@id/toolbar"
         android:padding="8dp">
 
         <LinearLayout
@@ -95,22 +84,12 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- Sort icon -->
-    <ImageView
-        android:id="@+id/sortIcon"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_below="@id/gameCategories"
-        android:layout_margin="8dp"
-        android:src="@drawable/ic_back_arrow"
-        android:contentDescription="@string/sort_icon" />
-
     <!-- Grid view for game covers -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/gameGrid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/sortIcon"
+        android:layout_below="@id/gameCategories"
         android:padding="8dp"
         tools:listitem="@layout/item_game_cover" />
 </RelativeLayout>

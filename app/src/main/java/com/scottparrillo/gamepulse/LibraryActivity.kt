@@ -1,21 +1,26 @@
 package com.scottparrillo.gamepulse
 
-
 import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import androidx.appcompat.widget.Toolbar
 
 class LibraryActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            GamePulseTheme {
-                LibraryScreen(
+        setContentView(R.layout.activity_library)
 
-                )
+        // Initialize Toolbar
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
-            }
+        // Enable the Up button (back button)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+
+        // Handle Toolbar's back button
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
         }
     }
 }
