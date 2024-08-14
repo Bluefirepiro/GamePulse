@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -221,10 +222,10 @@ class AchievementActivity : AppCompatActivity() {
         achievementAdapter.updateList(filteredList)
     }
 
-    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                finish() // Handle back button
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -371,6 +372,7 @@ class AchievementActivity : AppCompatActivity() {
         return try {
             val fis = openFileInput("achievements")
             val ois = ObjectInputStream(fis)
+            @Suppress("UNCHECKED_CAST") // Suppress unchecked cast warning
             val achievementList = ois.readObject() as? MutableList<Achievement>
             ois.close()
             achievementList
