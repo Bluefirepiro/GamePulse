@@ -2,10 +2,13 @@ package com.scottparrillo.gamepulse
 
 import android.app.Activity.MODE_PRIVATE
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,6 +55,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import com.scottparrillo.gamepulse.ui.theme.CopperRose
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.Lime
@@ -64,11 +68,26 @@ import java.io.ObjectOutputStream
 
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var requestNotificationPermissionLauncher: ActivityResultLauncher<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //This builds our instance of the database
 
+        // Initialize the permission request launcher
+        requestNotificationPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+                if (isGranted) {
+                    // Permission granted
+                } else {
+                    // Permission denied
+                }
+            }
 
+        // Request notification permission if needed
+        if (shouldRequestNotificationPermission()) {
+            requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         setContent {
             GamePulseTheme {
@@ -79,12 +98,17 @@ class MainActivity : ComponentActivity() {
                     onNavigateToLibrary = {
                         startActivity(Intent(this, LibraryActivity::class.java))
                     }
-
                 )
             }
         }
     }
 
+    private fun shouldRequestNotificationPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.POST_NOTIFICATIONS
+        ) != PackageManager.PERMISSION_GRANTED
+    }
 }
 
 @Composable
