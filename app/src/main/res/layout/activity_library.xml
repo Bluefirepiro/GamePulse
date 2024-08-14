@@ -10,7 +10,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/copper_rose"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:contentInsetStart="0dp"
         android:contentInsetEnd="0dp"
@@ -33,6 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
+        android:background="@color/copper_rose"
         android:padding="8dp">
 
         <LinearLayout
@@ -97,5 +98,6 @@
         android:layout_height="match_parent"
         android:layout_below="@id/gameCategories"
         android:padding="8dp"
+        android:background="@color/copper_rose"
         tools:listitem="@layout/item_game_cover" />
 </RelativeLayout>
