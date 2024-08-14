@@ -10,4 +10,14 @@
     <string name="new_category">New</string>
     <string name="sort_icon">Sort Icon</string>
     <string name="game_cover">Game Cover</string>
+    <string name="delete_achievement">Delete Achievement</string>
+
+
+    <!-- Sorting Options -->
+    <string-array name="sort_options">
+        <item>Alphabetically</item>
+        <item>Percentage Earned</item>
+        <item>Earned</item>
+        <item>Not Earned</item>
+    </string-array>
 </resources>

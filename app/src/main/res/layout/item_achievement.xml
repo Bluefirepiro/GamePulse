@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -37,5 +38,32 @@
             android:layout_height="wrap_content"
             android:text="Achievement Description"
             android:textAppearance="?attr/textAppearanceListItemSmall" />
+
+        <!-- Progress Display -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:progress="0"
+            android:max="100"
+            style="@android:style/Widget.ProgressBar.Horizontal" />
+
+        <TextView
+            android:id="@+id/progressText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Progress: 0/100"
+            android:textAppearance="?attr/textAppearanceListItemSmall" />
+
     </LinearLayout>
+
+    <!-- Delete Button -->
+    <ImageButton
+        android:id="@+id/deleteButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/delete_achievement"
+        android:src="@android:drawable/ic_menu_delete"
+        app:tint="@android:color/holo_red_dark" />
 </LinearLayout>

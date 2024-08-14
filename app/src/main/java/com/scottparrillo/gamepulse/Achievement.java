@@ -1,4 +1,4 @@
-package com.scottparrillo.gamepulse;
+//package com.scottparrillo.gamepulse;
 
 //public class Achievement {
     //boolean achievEarned = false;

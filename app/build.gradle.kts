@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    //alias(libs.plugins.kapt) // Ensure this is included for annotation processing
 }
 
 android {
@@ -60,9 +61,12 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.room.runtime)
+   // implementation(libs.androidx.room.KTX) // Room KTX dependency
+   // kapt(libs.androidx.room.compiler) // Ensure kapt is used for annotation processing
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.appcompat)
-    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.play.services.games)
+    implementation(libs.firebase.crashlytics.buildtools)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
