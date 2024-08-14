@@ -10,29 +10,33 @@
         android:id="@+id/editTextTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Achievement Title"
-        android:inputType="text"/>
+        android:hint="@string/achievement_title_hint"
+        android:inputType="text"
+        android:autofillHints="username"/>
 
     <EditText
         android:id="@+id/editTextDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Achievement Description"
-        android:inputType="text"/>
+        android:hint="@string/achievement_description_hint"
+        android:inputType="text"
+        android:autofillHints="username"/>
 
     <EditText
         android:id="@+id/editTextProgress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Current Progress"
-        android:inputType="number"/>
+        android:hint="@string/current_progress_hint"
+        android:inputType="number"
+        android:autofillHints="username"/>
 
     <EditText
         android:id="@+id/editTextTotal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Total Needed"
-        android:inputType="number"/>
+        android:hint="@string/total_needed_hint"
+        android:inputType="number"
+        android:autofillHints="username"/>
 
     <Spinner
         android:id="@+id/spinnerSound"
@@ -43,7 +47,7 @@
         android:id="@+id/buttonSave"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Save"
+        android:text="@string/save_button_text"
         android:layout_gravity="center_horizontal"/>
 
 </LinearLayout>

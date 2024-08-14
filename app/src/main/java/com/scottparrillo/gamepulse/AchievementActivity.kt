@@ -67,7 +67,7 @@ class AchievementActivity : AppCompatActivity() {
         recyclerView.adapter = achievementAdapter
 
         // Search functionality
-        val searchEditText: EditText = findViewById(R.id.searchEditText)
+        val searchEditText: EditText = findViewById(R.id.search)
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 filterAchievements(s.toString())
