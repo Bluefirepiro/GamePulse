@@ -113,7 +113,10 @@ class LibraryActivity : AppCompatActivity() {
                     modifier = Modifier
                         .size(65.dp)
                         .clickable {
-                            onBackPressedDispatcher?.onBackPressed()
+                            //If you go to the add game screen then back and click home it puts you
+                            // to the add game screen agian
+                            //onBackPressedDispatcher?.onBackPressed()
+                            context.startActivity(Intent(context, MainActivity::class.java))
                         }
                 )
 
@@ -206,7 +209,7 @@ class LibraryActivity : AppCompatActivity() {
                 .height(31.dp)
                 .clickable { /* Handle Category clicks */ }
                 .padding(2.dp)
-                .clip(RoundedCornerShape(10.dp))
+
                 .background(color = NeonLightGreen)
         ) {
             Text(text = text)
