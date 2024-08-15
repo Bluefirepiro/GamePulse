@@ -2,7 +2,6 @@ package com.scottparrillo.gamepulse
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,7 +22,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,11 +35,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.ui.theme.Charcoal
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.LightBlue
@@ -67,12 +68,17 @@ class LibraryActivity : AppCompatActivity() {
     @ExperimentalMaterial3Api
     @Composable
     fun LibraryScreen() {
+        //Setting may val and vars for future use
         val context = LocalContext.current
         val gameFile = File(context.filesDir, "gameList")
         val gameList = remember { mutableStateListOf<Game>() }
+        //This is for the search bar
         val searchText = remember { mutableStateOf("")} //Search bar text
         val searchFlag = remember { mutableStateOf(false)}
-        //var testList = Game.gameList
+        //Setting up my fonts
+        val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
+        //val joseFin = FontFamily(Font(R.font.josefin_slab_variablefont_wght))
+        //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
 
         fun getGameFile(): List<Game>? {
             return try {
@@ -93,8 +99,8 @@ class LibraryActivity : AppCompatActivity() {
             gameList.addAll(getGameFile() ?: emptyList())
         }
 
-        val onBackPressedDispatcher =
-            LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+        /*val onBackPressedDispatcher =
+           LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher */
 
         Column(
             modifier = Modifier
@@ -112,20 +118,15 @@ class LibraryActivity : AppCompatActivity() {
                     contentScale = ContentScale.Inside,
                     modifier = Modifier
                         .size(65.dp)
-                        .clickable {
-                            //If you go to the add game screen then back and click home it puts you
-                            // to the add game screen agian
-                            //onBackPressedDispatcher?.onBackPressed()
-                            context.startActivity(Intent(context, MainActivity::class.java))
-                        }
+                        .clickable{context.startActivity(Intent(context, MainActivity::class.java))}
                 )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
                 Text(
                     text = "Library Screen",
                     style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier.padding(vertical = 16.dp)
+                    modifier = Modifier
+                        .padding(vertical = 16.dp, horizontal = 20.dp),
+                    fontFamily = jockeyOne,
+                    fontSize = 40.sp
                 )
             }
             Row(){
@@ -134,7 +135,14 @@ class LibraryActivity : AppCompatActivity() {
                     onQueryChange = {searchText.value = it},
                     onSearch = {searchFlag.value = false},
                     active = searchFlag.value,
-                    onActiveChange = {searchFlag.value = it}
+                    onActiveChange = {searchFlag.value = it},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(height = 30.dp)
+                        .padding(horizontal = 4.dp),
+                    shape = RectangleShape
+
+
                 ) {
 
                 }
@@ -217,5 +225,6 @@ class LibraryActivity : AppCompatActivity() {
 
 
     }
+
 
 }
