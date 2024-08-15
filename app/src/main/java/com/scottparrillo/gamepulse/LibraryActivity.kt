@@ -27,10 +27,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,12 +43,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.MaterialTheme.colors
 import com.scottparrillo.gamepulse.ui.theme.Charcoal
-import com.scottparrillo.gamepulse.ui.theme.CopperRose
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.LightBlue
-import com.scottparrillo.gamepulse.ui.theme.Lime
 import com.scottparrillo.gamepulse.ui.theme.NeonLightGreen
 import java.io.EOFException
 import java.io.File
@@ -53,6 +53,7 @@ import java.io.ObjectInputStream
 
 class LibraryActivity : AppCompatActivity() {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -63,11 +64,15 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     @Preview(showBackground = true)
+    @ExperimentalMaterial3Api
     @Composable
     fun LibraryScreen() {
         val context = LocalContext.current
         val gameFile = File(context.filesDir, "gameList")
         val gameList = remember { mutableStateListOf<Game>() }
+        val searchText = remember { mutableStateOf("")} //Search bar text
+        val searchFlag = remember { mutableStateOf(false)}
+        //var testList = Game.gameList
 
         fun getGameFile(): List<Game>? {
             return try {
@@ -96,6 +101,7 @@ class LibraryActivity : AppCompatActivity() {
                 .fillMaxSize()
                 .background(color = Charcoal)
         ) {
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(8.dp)
@@ -118,6 +124,17 @@ class LibraryActivity : AppCompatActivity() {
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
+            }
+            Row(){
+                SearchBar(
+                    query = searchText.value,
+                    onQueryChange = {searchText.value = it},
+                    onSearch = {searchFlag.value = false},
+                    active = searchFlag.value,
+                    onActiveChange = {searchFlag.value = it}
+                ) {
+
+                }
             }
 
             LazyRow(
@@ -180,7 +197,7 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
 
-    @Composable
+        @Composable
     fun CategoryButton(text: String) {
         Box(
             contentAlignment = Alignment.Center,
@@ -197,4 +214,5 @@ class LibraryActivity : AppCompatActivity() {
 
 
     }
+
 }

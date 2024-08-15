@@ -25,7 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.PrussainBlue
+import java.io.EOFException
+import java.io.File
 import java.io.IOException
+import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
 class GameInputActivity: AppCompatActivity() {
@@ -42,8 +45,8 @@ class GameInputActivity: AppCompatActivity() {
     @Composable
     fun GameInputScreen()
     {
-
         val context = LocalContext.current
+        val gameFile = File(context.filesDir, "gameList")
         //These are the variables for the text inputs
         var gameName by remember { mutableStateOf("") }
         var gameDesc by remember { mutableStateOf("") }
@@ -51,7 +54,24 @@ class GameInputActivity: AppCompatActivity() {
         var gameDate by remember { mutableStateOf("") }
         var gamePlatform by remember { mutableStateOf("") }
         //Going to use this to input user data into the database
-//This function saves games to a file named gameList
+
+        //This function saves games to a file named gameList
+        fun getGameFile(): List<Game>? {
+            return try {
+                val fis = context.openFileInput("gameList")
+                val ois = ObjectInputStream(fis)
+                @Suppress("UNCHECKED_CAST")
+                ois.readObject() as? List<Game>
+            } catch (e: EOFException) {
+                e.printStackTrace()
+                null
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+
+
         fun saveGameFile(mutableGameList: MutableList<Game>): Boolean{
             try {
                 val fos = context.openFileOutput("gameList", MODE_PRIVATE)
@@ -64,6 +84,10 @@ class GameInputActivity: AppCompatActivity() {
                 return false
             }
             return true
+        }
+        if (gameFile.exists()) {
+            Game.gameList.clear()
+            Game.gameList.addAll(getGameFile() ?: emptyList())
         }
         LazyColumn(
             modifier = Modifier
