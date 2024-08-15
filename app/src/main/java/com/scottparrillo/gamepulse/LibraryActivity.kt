@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,7 +26,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,13 +39,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.scottparrillo.gamepulse.ui.theme.Charcoal
 import com.scottparrillo.gamepulse.ui.theme.CopperRose
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
-import com.scottparrillo.gamepulse.ui.theme.LightBlue
 import com.scottparrillo.gamepulse.ui.theme.Lime
-import com.scottparrillo.gamepulse.ui.theme.NeonLightGreen
-import com.scottparrillo.gamepulse.ui.theme.White
 import java.io.EOFException
 import java.io.File
 import java.io.ObjectInputStream
@@ -62,61 +57,56 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
 
-    // This is the Start of the Library Screen
     @Preview(showBackground = true)
     @Composable
     fun LibraryScreen() {
         val context = LocalContext.current
         val gameFile = File(context.filesDir, "gameList")
-        val tempList = mutableListOf<Game>()
-        val sortListGame = remember { mutableStateListOf<Game>() }
+        val gameList = remember { mutableStateListOf<Game>() }
 
-
-        //This functions returns a mutable list of games from the saved gameList
-        fun getGameFile(): MutableList<Game>? {
-            try {
-
+        fun getGameFile(): List<Game>? {
+            return try {
                 val fis = context.openFileInput("gameList")
                 val ois = ObjectInputStream(fis)
-                val gameList = ois.readObject()
-                ois.close()
-                if (gameList != null) {
-                    @Suppress("UNCHECKED_CAST")
-                    return gameList as MutableList<Game>
-                }
+                @Suppress("UNCHECKED_CAST")
+                ois.readObject() as? List<Game>
             } catch (e: EOFException) {
                 e.printStackTrace()
+                null
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
             }
-            return null
         }
 
         if (gameFile.exists()) {
-            Game.gameList = getGameFile()!!
-            sortListGame.addAll(getGameFile()!!)
+            gameList.addAll(getGameFile() ?: emptyList())
         }
 
         val onBackPressedDispatcher =
             LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
-        //When the screen activity starts extract needed info and throw it in a list
-
-
-        // Main column
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = Charcoal)
+                .background(color = CopperRose)
         ) {
-            // Title text with a clickable back arrow
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly) {
-                Button(onClick = {context.startActivity(Intent(context, MainActivity::class.java))
-                    }, modifier = Modifier
-                        .padding(horizontal = 2.dp)
-                        .size(49.dp)
-                        .clip(shape = CircleShape)) {
-                    Text(text = "M")
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.arrow),
+                    contentDescription = "Back arrow",
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier
+                        .size(65.dp)
+                        .clickable {
+                            onBackPressedDispatcher?.onBackPressed()
+                        }
+                )
 
-                }
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
                     text = "Library Screen",
@@ -125,149 +115,95 @@ class LibraryActivity : AppCompatActivity() {
                 )
             }
 
-            // This contains the game categories
             LazyRow(
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
                 item {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .width(120.dp)
-                            .height(31.dp)
-                            .clickable { /* TODO: Handle Category clicks */ }
-                            .padding(2.dp)
-                            .background(color = NeonLightGreen)
-                    ) {
-                        Text(text = "Recent")
-                    }
+                    CategoryButton("Recent")
                 }
                 item {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .width(120.dp)
-                            .height(31.dp)
-                            .clickable { /* TODO: Handle Category clicks */ }
-                            .padding(2.dp)
-                            .background(color = NeonLightGreen)
-                    ) {
-                        Text(text = "Current")
-                    }
+                    CategoryButton("Current")
                 }
                 item {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .width(120.dp)
-                            .height(31.dp)
-                            .clickable { }
-                            .padding(2.dp)
-                            .background(color = NeonLightGreen)
-                    ) {
-                        Text(text = "Beaten")
-                    }
+                    CategoryButton("Beaten")
                 }
                 item {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .width(120.dp)
-                            .height(31.dp)
-                            .clickable { /* TODO: Handle Category clicks */ }
-                            .padding(2.dp)
-                            .background(color = NeonLightGreen)
-                    ) {
-                        Text(text = "New")
-                    }
+                    CategoryButton("New")
                 }
             }
 
-            // This row should contain the sort icon
             Row(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(onClick = {
-                    tempList.addAll(sortListGame)
-                    Game.gameList.sortedBy { it.gameName }
-                    sortListGame.clear()
-                    sortListGame.addAll(tempList)
-
-
-                }, modifier = Modifier
-
-
-                    .clip(shape = RoundedCornerShape(20.dp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = LightBlue)
-                )
-                {
+                    val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
+                    gameList.clear()
+                    gameList.addAll(sortedList)
+                }) {
                     Text(text = "Sort")
                 }
 
-
-                /* Image(
-                painter = painterResource(id = R.drawable.sort),
-                contentDescription = "Sorting Arrow",
-                modifier = Modifier
-                    .size(35.dp)
-                    .clickable { sortListGame.sortedBy { it.gameName } }
-
-
-            )*/
-                Spacer(modifier = Modifier.width(180.dp))
                 Button(onClick = {
-                    context.startActivity(
-                        Intent(
-                            context,
-                            GameInputActivity::class.java
-                        )
-                    )
-                }, modifier = Modifier
-
-
-                    .clip(shape = RoundedCornerShape(20.dp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = LightBlue)) {
+                    context.startActivity(Intent(context, GameInputActivity::class.java))
+                }) {
                     Text(text = "Add Game")
                 }
             }
 
-
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp)) {
-                items(sortListGame) { game ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                items(gameList) { game ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
                         Image(
                             painter = painterResource(id = R.drawable.plus),
-                            contentDescription = "A plus",
+                            contentDescription = "Game icon",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(135.dp)
                                 .clip(CircleShape)
-                                .padding(20.dp)
                         )
                         Text(text = game.gameName)
-                        Text(text = "Update fill")
                     }
                 }
-
-
-                /*item {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(
-                        painter = painterResource(id = R.drawable.cyberpunk_2077_cover),
-                        contentDescription = "A cover of the game Cyberpunk 2022",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(135.dp)
-                            .clip(CircleShape)
-                    )
-                    Text(text = "Cyber Punk 2022")
-                    Text(text = "Update fill")
-                }
-            }
-            item { Text(text = "test") }
-            item { Text(text = "test") } */
             }
         }
+    }
+
+    @Composable
+    fun CategoryButton(text: String) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .width(120.dp)
+                .height(31.dp)
+                .clickable { /* Handle Category clicks */ }
+                .padding(2.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(color = Lime)
+        ) {
+            Text(text = text)
+        }
+
+        /*item {
+               Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                   Image(
+                       painter = painterResource(id = R.drawable.cyberpunk_2077_cover),
+                       contentDescription = "A cover of the game Cyberpunk 2022",
+                       contentScale = ContentScale.Crop,
+                       modifier = Modifier
+                           .size(135.dp)
+                           .clip(CircleShape)
+                   )
+                   Text(text = "Cyber Punk 2022")
+                   Text(text = "Update fill")
+               }
+           }
+           item { Text(text = "test") }
+           item { Text(text = "test") } */
     }
 }

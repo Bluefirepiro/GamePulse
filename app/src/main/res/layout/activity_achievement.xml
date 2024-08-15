@@ -5,6 +5,7 @@
     android:id="@+id/activity_achievement"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/copper_rose"
     tools:context=".AchievementActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -18,51 +19,50 @@
         app:navigationIcon="@drawable/ic_back_arrow"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-
-
-    <!-- Add Achievement Button -->
-
+    <!-- Search EditText -->
     <EditText
-        android:id="@+id/searchEditText"
-        android:layout_width="412dp"
-        android:layout_height="47dp"
+        android:id="@+id/search"
+        android:layout_width="375dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
-        android:layout_margin="12dp"
-        android:layout_marginTop="-2dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:autofillHints="searchTerm"
         android:background="@color/copper_rose"
-        android:hint="Search Achievements"
-        android:padding="8dp" />
+        android:hint="@string/search_achievements_hint"
+        android:inputType="text"
+        android:minHeight="48dp"
+        android:padding="8dp"
+        android:textColorHint="#FAFAFA" />
 
     <!-- Sorting Spinner -->
-
     <Spinner
         android:id="@+id/spinnerSortOptions"
-        android:layout_width="412dp"
-        android:layout_height="47dp"
-        android:layout_below="@id/toolbar"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="-1dp"
-        android:layout_marginTop="58dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search"
         android:background="@color/copper_rose"
         android:entries="@array/sort_options"
+        android:minHeight="48dp"
         android:visibility="visible" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewAchievements"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"
-        android:layout_marginTop="104dp"
+        android:layout_height="0dp"
+        android:layout_below="@id/spinnerSortOptions"
+        android:layout_above="@id/buttonAddAchievement"
+        android:layout_marginTop="16dp"
         android:background="@color/copper_rose"
         android:padding="16dp"
         tools:listitem="@layout/item_achievement" />
 
+    <!-- Add Achievement Button -->
     <Button
         android:id="@+id/buttonAddAchievement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Achievement"
+        android:text="@string/add_achievement_button_text"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp" />
