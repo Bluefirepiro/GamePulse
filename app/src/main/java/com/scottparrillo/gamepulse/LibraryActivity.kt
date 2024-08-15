@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,9 +40,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.MaterialTheme.colors
+import com.scottparrillo.gamepulse.ui.theme.Charcoal
 import com.scottparrillo.gamepulse.ui.theme.CopperRose
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import com.scottparrillo.gamepulse.ui.theme.LightBlue
 import com.scottparrillo.gamepulse.ui.theme.Lime
+import com.scottparrillo.gamepulse.ui.theme.NeonLightGreen
 import java.io.EOFException
 import java.io.File
 import java.io.ObjectInputStream
@@ -89,14 +94,14 @@ class LibraryActivity : AppCompatActivity() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = CopperRose)
+                .background(color = Charcoal)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(8.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.arrow),
+                    painter = painterResource(id = R.drawable.homeicon),
                     contentDescription = "Back arrow",
                     contentScale = ContentScale.Inside,
                     modifier = Modifier
@@ -142,13 +147,14 @@ class LibraryActivity : AppCompatActivity() {
                     val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
                     gameList.clear()
                     gameList.addAll(sortedList)
-                }) {
+
+                },colors = ButtonDefaults.buttonColors(containerColor = LightBlue)) {
                     Text(text = "Sort")
                 }
 
                 Button(onClick = {
                     context.startActivity(Intent(context, GameInputActivity::class.java))
-                }) {
+                },colors = ButtonDefaults.buttonColors(containerColor = LightBlue)) {
                     Text(text = "Add Game")
                 }
             }
@@ -184,26 +190,11 @@ class LibraryActivity : AppCompatActivity() {
                 .clickable { /* Handle Category clicks */ }
                 .padding(2.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(color = Lime)
+                .background(color = NeonLightGreen)
         ) {
             Text(text = text)
         }
 
-        /*item {
-               Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                   Image(
-                       painter = painterResource(id = R.drawable.cyberpunk_2077_cover),
-                       contentDescription = "A cover of the game Cyberpunk 2022",
-                       contentScale = ContentScale.Crop,
-                       modifier = Modifier
-                           .size(135.dp)
-                           .clip(CircleShape)
-                   )
-                   Text(text = "Cyber Punk 2022")
-                   Text(text = "Update fill")
-               }
-           }
-           item { Text(text = "test") }
-           item { Text(text = "test") } */
+
     }
 }
