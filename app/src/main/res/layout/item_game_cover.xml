@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -10,15 +11,21 @@
         android:id="@+id/gameCover"
         android:layout_width="120dp"
         android:layout_height="120dp"
+        android:contentDescription="@string/game_cover"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_game_cover_placeholder"
-        android:contentDescription="@string/game_cover" />
+        tools:ignore="ImageContrastCheck" />
+
+    <View
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:background="#80000000" />
 
     <TextView
         android:id="@+id/gameTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="4dp"
-        android:text="Game Title"
+        android:text="@string/game_title"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 </LinearLayout>

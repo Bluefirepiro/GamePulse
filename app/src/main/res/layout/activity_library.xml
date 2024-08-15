@@ -43,8 +43,8 @@
 
             <TextView
                 android:id="@+id/categoryRecent"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
                 android:padding="8dp"
                 android:background="@color/lime"
                 android:gravity="center"
@@ -55,8 +55,8 @@
 
             <TextView
                 android:id="@+id/categoryCurrent"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
                 android:padding="8dp"
                 android:background="@color/lime"
                 android:gravity="center"
@@ -67,8 +67,8 @@
 
             <TextView
                 android:id="@+id/categoryBeaten"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
                 android:padding="8dp"
                 android:background="@color/lime"
                 android:gravity="center"
@@ -79,8 +79,8 @@
 
             <TextView
                 android:id="@+id/categoryNew"
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
                 android:padding="8dp"
                 android:background="@color/lime"
                 android:gravity="center"
