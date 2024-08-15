@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,9 +40,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.scottparrillo.gamepulse.ui.theme.Charcoal
 import com.scottparrillo.gamepulse.ui.theme.CopperRose
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import com.scottparrillo.gamepulse.ui.theme.LightBlue
 import com.scottparrillo.gamepulse.ui.theme.Lime
+import com.scottparrillo.gamepulse.ui.theme.NeonLightGreen
+import com.scottparrillo.gamepulse.ui.theme.White
 import java.io.EOFException
 import java.io.File
 import java.io.ObjectInputStream
@@ -100,23 +105,18 @@ class LibraryActivity : AppCompatActivity() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = CopperRose)
+                .background(color = Charcoal)
         ) {
             // Title text with a clickable back arrow
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(id = R.drawable.arrow),
-                    contentDescription = "A back arrow",
-                    contentScale = ContentScale.Inside,
-                    modifier = Modifier
-                        .size(65.dp)
-                        .padding(8.dp)
-                        .clickable {
-                            //onBackPressedDispatcher?.onBackPressed() // Handle the back press
-                            context.startActivity(Intent(context, MainActivity::class.java))
-                        }
-                )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly) {
+                Button(onClick = {context.startActivity(Intent(context, MainActivity::class.java))
+                    }, modifier = Modifier
+                        .padding(horizontal = 2.dp)
+                        .size(49.dp)
+                        .clip(shape = CircleShape)) {
+                    Text(text = "M")
 
+                }
 
                 Text(
                     text = "Library Screen",
@@ -137,8 +137,7 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { /* TODO: Handle Category clicks */ }
                             .padding(2.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(color = Lime)
+                            .background(color = NeonLightGreen)
                     ) {
                         Text(text = "Recent")
                     }
@@ -151,8 +150,7 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { /* TODO: Handle Category clicks */ }
                             .padding(2.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(color = Lime)
+                            .background(color = NeonLightGreen)
                     ) {
                         Text(text = "Current")
                     }
@@ -165,8 +163,7 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { }
                             .padding(2.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(color = Lime)
+                            .background(color = NeonLightGreen)
                     ) {
                         Text(text = "Beaten")
                     }
@@ -179,8 +176,7 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { /* TODO: Handle Category clicks */ }
                             .padding(2.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(color = Lime)
+                            .background(color = NeonLightGreen)
                     ) {
                         Text(text = "New")
                     }
@@ -199,7 +195,13 @@ class LibraryActivity : AppCompatActivity() {
                     sortListGame.addAll(tempList)
 
 
-                }) {
+                }, modifier = Modifier
+
+
+                    .clip(shape = RoundedCornerShape(20.dp)),
+                    colors = ButtonDefaults.buttonColors(containerColor = LightBlue)
+                )
+                {
                     Text(text = "Sort")
                 }
 
@@ -221,7 +223,11 @@ class LibraryActivity : AppCompatActivity() {
                             GameInputActivity::class.java
                         )
                     )
-                }) {
+                }, modifier = Modifier
+
+
+                    .clip(shape = RoundedCornerShape(20.dp)),
+                    colors = ButtonDefaults.buttonColors(containerColor = LightBlue)) {
                     Text(text = "Add Game")
                 }
             }
@@ -237,6 +243,7 @@ class LibraryActivity : AppCompatActivity() {
                             modifier = Modifier
                                 .size(135.dp)
                                 .clip(CircleShape)
+                                .padding(20.dp)
                         )
                         Text(text = game.gameName)
                         Text(text = "Update fill")
