@@ -8,6 +8,7 @@
     <TextView
         android:id="@+id/friend_name"
         android:layout_width="0dp"
+        android:fontFamily="@font/jockey_one_regular"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textSize="16sp" />
@@ -15,6 +16,7 @@
     <Button
         android:id="@+id/delete_button"
         android:layout_width="wrap_content"
+        android:fontFamily="@font/jockey_one_regular"
         android:layout_height="wrap_content"
         android:text="@string/delete" />
 </LinearLayout>

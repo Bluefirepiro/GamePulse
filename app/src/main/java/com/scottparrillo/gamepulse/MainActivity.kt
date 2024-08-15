@@ -2,11 +2,13 @@ package com.scottparrillo.gamepulse
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var requestNotificationPermissionLauncher: ActivityResultLauncher<String>
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -87,6 +92,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun shouldRequestNotificationPermission(): Boolean {
         return ActivityCompat.checkSelfPermission(
             this,
@@ -99,6 +105,7 @@ class MainActivity : ComponentActivity() {
         startActivity(intent)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun openNotificationSettings() {
         val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
             putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
@@ -113,8 +120,10 @@ fun HomeScreen(
     onNavigateToLibrary: () -> Unit,
     onNavigateToFriends: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenNotifications: () -> Unit
-) {
+    onOpenNotifications: () -> Unit)
+
+{
+    val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -162,7 +171,9 @@ fun HomeScreen(
         Text(
             text = "GamePulse",
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(vertical = 16.dp)
+            modifier = Modifier.padding(vertical = 16.dp),
+                fontFamily = jockeyOne,
+            fontSize = 40.sp
         )
 
         // Recently Played games

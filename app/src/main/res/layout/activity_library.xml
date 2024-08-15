@@ -10,6 +10,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:fontFamily="@font/jockey_one_regular"
         android:background="@color/copper_rose"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:contentInsetStart="0dp"
@@ -22,6 +23,7 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/jockey_one_regular"
             android:text="@string/library_title"
             android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
             android:layout_gravity="center" />
@@ -32,6 +34,7 @@
         android:id="@+id/gameCategories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/jockey_one_regular"
         android:layout_below="@id/toolbar"
         android:background="@color/copper_rose"
         android:padding="8dp">
@@ -39,12 +42,14 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/jockey_one_regular"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/categoryRecent"
                 android:layout_width="100dp"
                 android:layout_height="50dp"
+                android:fontFamily="@font/jockey_one_regular"
                 android:padding="8dp"
                 android:background="@color/lime"
                 android:gravity="center"
@@ -57,6 +62,7 @@
                 android:id="@+id/categoryCurrent"
                 android:layout_width="100dp"
                 android:layout_height="50dp"
+                android:fontFamily="@font/jockey_one_regular"
                 android:padding="8dp"
                 android:background="@color/lime"
                 android:gravity="center"
@@ -69,6 +75,7 @@
                 android:id="@+id/categoryBeaten"
                 android:layout_width="100dp"
                 android:layout_height="50dp"
+                android:fontFamily="@font/jockey_one_regular"
                 android:padding="8dp"
                 android:background="@color/lime"
                 android:gravity="center"
@@ -81,6 +88,7 @@
                 android:id="@+id/categoryNew"
                 android:layout_width="100dp"
                 android:layout_height="50dp"
+                android:fontFamily="@font/jockey_one_regular"
                 android:padding="8dp"
                 android:background="@color/lime"
                 android:gravity="center"
@@ -96,6 +104,7 @@
         android:id="@+id/gameGrid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fontFamily="@font/jockey_one_regular"
         android:layout_below="@id/gameCategories"
         android:padding="8dp"
         android:background="@color/copper_rose"
