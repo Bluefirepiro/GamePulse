@@ -11,5 +11,5 @@
         android:fontFamily="@font/jockey_one_regular"
         android:layout_height="wrap_content"
         android:textAppearance="?attr/textAppearanceListItem"
-        android:textColor="@color/black"/>
+        android:titleTextColor="@color/black"/>
 </LinearLayout>

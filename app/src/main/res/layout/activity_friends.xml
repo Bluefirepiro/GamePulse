@@ -12,7 +12,7 @@
         android:background="@color/curious_blue"
         android:fontFamily="@font/jockey_one_regular"
         android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        android:textColor="@color/black"
+        android:titleTextColor="@color/black" 
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <LinearLayout
@@ -52,7 +52,6 @@
             android:layout_weight="1"
             android:background="@color/curious_blue"
             android:fontFamily="@font/jockey_one_regular" />
-
 
     </LinearLayout>
 </RelativeLayout>

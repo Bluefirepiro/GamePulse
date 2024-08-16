@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -39,7 +40,14 @@ class FriendsActivity : AppCompatActivity() {
         // Setup toolbar
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
+
+        // Set the toolbar title color to black
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.black))
+
+        // Ensure the back button is black
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.navigationIcon?.setTint(ContextCompat.getColor(this, R.color.black))
+
         toolbar.setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()  // Handle back press using OnBackPressedDispatcher
         }
