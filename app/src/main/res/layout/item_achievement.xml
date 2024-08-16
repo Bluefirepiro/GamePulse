@@ -44,12 +44,13 @@
         <!-- Progress Display -->
         <ProgressBar
             android:id="@+id/progressBar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/jockey_one_regular"
-            android:progress="0"
             android:max="100"
-            style="@android:style/Widget.ProgressBar.Horizontal" />
+            android:progress="0"
+            android:progressTint="@android:color/holo_orange_light" />
 
         <TextView
             android:id="@+id/progressText"
@@ -69,5 +70,5 @@
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/delete_achievement"
         android:src="@android:drawable/ic_menu_delete"
-        app:tint="@android:color/holo_red_dark" />
+        app:tint="@color/red" />
 </LinearLayout>

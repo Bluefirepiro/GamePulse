@@ -10,23 +10,23 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:fontFamily="@font/jockey_one_regular"
-        android:background="@color/copper_rose"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:background="@color/curious_blue"
         android:contentInsetStart="0dp"
         android:contentInsetEnd="0dp"
-        android:padding="8dp"
+        android:fontFamily="@font/jockey_one_regular"
         android:gravity="center_vertical"
-        android:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+        android:padding="8dp"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:fontFamily="@font/jockey_one_regular"
             android:text="@string/library_title"
-            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-            android:layout_gravity="center" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title" />
     </androidx.appcompat.widget.Toolbar>
 
     <!-- Horizontal scroll view for game categories -->
@@ -34,9 +34,9 @@
         android:id="@+id/gameCategories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/jockey_one_regular"
         android:layout_below="@id/toolbar"
-        android:background="@color/copper_rose"
+        android:background="@color/curious_blue"
+        android:fontFamily="@font/jockey_one_regular"
         android:padding="8dp">
 
         <LinearLayout
@@ -49,53 +49,53 @@
                 android:id="@+id/categoryRecent"
                 android:layout_width="100dp"
                 android:layout_height="50dp"
-                android:fontFamily="@font/jockey_one_regular"
-                android:padding="8dp"
-                android:background="@color/lime"
-                android:gravity="center"
-                android:text="@string/recent"
-                android:textColor="@color/black"
+                android:background="@color/spring_green"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:fontFamily="@font/jockey_one_regular"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/recent"
+                android:textColor="@color/black" />
 
             <TextView
                 android:id="@+id/categoryCurrent"
                 android:layout_width="100dp"
                 android:layout_height="50dp"
-                android:fontFamily="@font/jockey_one_regular"
-                android:padding="8dp"
-                android:background="@color/lime"
-                android:gravity="center"
-                android:text="@string/current"
-                android:textColor="@color/black"
+                android:background="@color/spring_green"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:fontFamily="@font/jockey_one_regular"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/current"
+                android:textColor="@color/black" />
 
             <TextView
                 android:id="@+id/categoryBeaten"
                 android:layout_width="100dp"
                 android:layout_height="50dp"
-                android:fontFamily="@font/jockey_one_regular"
-                android:padding="8dp"
-                android:background="@color/lime"
-                android:gravity="center"
-                android:text="@string/beaten"
-                android:textColor="@color/black"
+                android:background="@color/spring_green"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:fontFamily="@font/jockey_one_regular"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/beaten"
+                android:textColor="@color/black" />
 
             <TextView
                 android:id="@+id/categoryNew"
                 android:layout_width="100dp"
                 android:layout_height="50dp"
-                android:fontFamily="@font/jockey_one_regular"
-                android:padding="8dp"
-                android:background="@color/lime"
-                android:gravity="center"
-                android:text="@string/new_category"
-                android:textColor="@color/black"
+                android:background="@color/spring_green"
                 android:clickable="true"
-                android:focusable="true" />
+                android:focusable="true"
+                android:fontFamily="@font/jockey_one_regular"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/new_category"
+                android:textColor="@color/black" />
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -104,9 +104,9 @@
         android:id="@+id/gameGrid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fontFamily="@font/jockey_one_regular"
         android:layout_below="@id/gameCategories"
+        android:background="@color/curious_blue"
+        android:fontFamily="@font/jockey_one_regular"
         android:padding="8dp"
-        android:background="@color/copper_rose"
         tools:listitem="@layout/item_game_cover" />
 </RelativeLayout>

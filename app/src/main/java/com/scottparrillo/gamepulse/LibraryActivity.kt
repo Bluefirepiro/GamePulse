@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -44,10 +45,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.scottparrillo.gamepulse.ui.theme.Charcoal
+import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
-import com.scottparrillo.gamepulse.ui.theme.LightBlue
-import com.scottparrillo.gamepulse.ui.theme.NeonLightGreen
+import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import java.io.EOFException
 import java.io.File
 import java.io.ObjectInputStream
@@ -105,7 +105,7 @@ class LibraryActivity : AppCompatActivity() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = Charcoal)
+                .background(color = CuriousBlue)
         ) {
 
             Row(
@@ -176,14 +176,14 @@ class LibraryActivity : AppCompatActivity() {
                     gameList.clear()
                     gameList.addAll(sortedList)
 
-                },colors = ButtonDefaults.buttonColors(containerColor = LightBlue)) {
-                    Text(text = "Sort")
+                },colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                    Text(text = "Sort",color = Color.Black)
                 }
 
                 Button(onClick = {
                     context.startActivity(Intent(context, GameInputActivity::class.java))
-                },colors = ButtonDefaults.buttonColors(containerColor = LightBlue)) {
-                    Text(text = "Add Game")
+                },colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                    Text(text = "Add Game",color = Color.Black)
                 }
             }
 
@@ -218,7 +218,7 @@ class LibraryActivity : AppCompatActivity() {
                 .clickable { /* Handle Category clicks */ }
                 .padding(2.dp)
 
-                .background(color = NeonLightGreen)
+                .background(color = SpringGreen)
         ) {
             Text(text = text)
         }

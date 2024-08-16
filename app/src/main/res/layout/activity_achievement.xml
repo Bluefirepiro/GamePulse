@@ -1,19 +1,18 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_achievement"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/copper_rose"
+    android:background="@color/curious_blue"
     tools:context=".AchievementActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/curious_blue"
         android:fontFamily="@font/jockey_one_regular"
-        android:background="@color/copper_rose"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         android:title="@string/achievement_title"
         android:titleTextColor="@android:color/white"
@@ -29,47 +28,50 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:autofillHints="searchTerm"
-        android:background="@color/copper_rose"
+        android:background="@color/curious_blue"
         android:fontFamily="@font/jockey_one_regular"
         android:hint="@string/search_achievements_hint"
         android:inputType="text"
         android:minHeight="48dp"
         android:padding="8dp"
-        android:textColorHint="#FAFAFA" />
+        android:textColorHint="@color/black" />
 
     <!-- Sorting Spinner -->
     <Spinner
         android:id="@+id/spinnerSortOptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/jockey_one_regular"
         android:layout_below="@id/search"
-        android:background="@color/copper_rose"
+        android:background="@color/curious_blue"
         android:entries="@array/sort_options"
+        android:fontFamily="@font/jockey_one_regular"
         android:minHeight="48dp"
         android:visibility="visible" />
+
+    <!-- Add Achievement Button -->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewAchievements"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_below="@id/spinnerSortOptions"
         android:layout_above="@id/buttonAddAchievement"
+        android:layout_below="@id/spinnerSortOptions"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="2dp"
+        android:background="@color/curious_blue"
         android:fontFamily="@font/jockey_one_regular"
-        android:layout_marginTop="16dp"
-        android:background="@color/copper_rose"
         android:padding="16dp"
         tools:listitem="@layout/item_achievement" />
 
-    <!-- Add Achievement Button -->
     <Button
         android:id="@+id/buttonAddAchievement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/jockey_one_regular"
-        android:text="@string/add_achievement_button_text"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/spring_green"
+        android:fontFamily="@font/jockey_one_regular"
+        android:text="@string/add_achievement_button_text" />
 
 </RelativeLayout>

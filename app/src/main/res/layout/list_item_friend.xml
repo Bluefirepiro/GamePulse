@@ -11,12 +11,14 @@
         android:fontFamily="@font/jockey_one_regular"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textColor="@color/black"/>
 
     <Button
         android:id="@+id/delete_button"
         android:layout_width="wrap_content"
-        android:fontFamily="@font/jockey_one_regular"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/spring_green"
+        android:fontFamily="@font/jockey_one_regular"
         android:text="@string/delete" />
 </LinearLayout>

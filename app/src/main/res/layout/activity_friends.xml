@@ -9,17 +9,18 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:background="@color/curious_blue"
         android:fontFamily="@font/jockey_one_regular"
-        android:background="@color/copper_rose"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        android:textColor="@color/black"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fontFamily="@font/jockey_one_regular"
         android:layout_below="@id/toolbar"
-        android:background="@color/copper_rose"
+        android:background="@color/curious_blue"
+        android:fontFamily="@font/jockey_one_regular"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -27,34 +28,31 @@
             android:id="@+id/search_bar"
             android:layout_width="375dp"
             android:layout_height="73dp"
-            android:hint="@string/search_hint"
+            android:autofillHints="username"
+            android:backgroundTint="@color/curious_blue"
             android:fontFamily="@font/jockey_one_regular"
+            android:hint="@string/search_hint"
             android:inputType="text"
-            android:textColorHint="#FAFAFA"
-            android:autofillHints="username"/>
+            android:textColorHint="@color/black" />
 
         <Button
             android:id="@+id/add_friend_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/spring_green"
             android:fontFamily="@font/jockey_one_regular"
-            android:text="@string/add_friend"
-            android:layout_marginTop="8dp"/>
+            android:text="@string/add_friend" />
 
         <ListView
             android:id="@+id/friends_list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:fontFamily="@font/jockey_one_regular"
+            android:layout_marginTop="16dp"
             android:layout_weight="1"
-            android:background="@color/copper_rose"
-            android:layout_marginTop="16dp"/>
+            android:background="@color/curious_blue"
+            android:fontFamily="@font/jockey_one_regular" />
 
-        <Button
-            android:id="@+id/delete_button"
-            android:layout_width="wrap_content"
-            android:fontFamily="@font/jockey_one_regular"
-            android:layout_height="wrap_content"
-            android:text="@string/delete" />
+
     </LinearLayout>
 </RelativeLayout>

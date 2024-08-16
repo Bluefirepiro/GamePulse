@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -43,7 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
-import com.scottparrillo.gamepulse.ui.theme.CopperRose
+import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 
 class MainActivity : ComponentActivity() {
@@ -120,14 +122,12 @@ fun HomeScreen(
     onNavigateToLibrary: () -> Unit,
     onNavigateToFriends: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenNotifications: () -> Unit)
-
-{
+    onOpenNotifications: () -> Unit) {
     val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CopperRose) // Set background color to CopperRose
+            .background(CuriousBlue) // Set background color to CuriousBlue
             .padding(16.dp)
     ) {
 
@@ -172,15 +172,17 @@ fun HomeScreen(
             text = "GamePulse",
             style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier.padding(vertical = 16.dp),
-                fontFamily = jockeyOne,
+            fontFamily = jockeyOne,
             fontSize = 40.sp
         )
-
+        val SpringGreen = Color(0xFF16F2A1)
+        val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
         // Recently Played games
         Text(
             text = "Recently Played",
             fontSize = 20.sp,
             style = MaterialTheme.typography.titleMedium,
+            fontFamily = jockeyOne,
             modifier = Modifier.padding(vertical = 8.dp)
         )
         Row(
@@ -193,21 +195,22 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .size(100.dp)
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(SpringGreen)
                         .clickable { /* TODO: Handle Recently Played game click */ }
                         .padding(8.dp)
                 ) {
-                    Text("Game $index")
+                    Text("Game $index", fontFamily = jockeyOne)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
 
-        // Recent Achievements
+// Recent Achievements
         Text(
             text = "Recent Achievements",
             fontSize = 20.sp,
             style = MaterialTheme.typography.titleMedium,
+            fontFamily = jockeyOne,
             modifier = Modifier.padding(vertical = 8.dp)
         )
         Row(
@@ -220,21 +223,22 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .size(100.dp)
-                        .background(MaterialTheme.colorScheme.secondary)
+                        .background(SpringGreen)
                         .clickable { /* TODO: Handle Recent Achievement click */ }
                         .padding(8.dp)
                 ) {
-                    Text("Achievement $index")
+                    Text("Achievement $index", fontFamily = jockeyOne)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
 
-        // Recent Friends/Played with
+// Recent Friends/Played with
         Text(
             text = "Recent Friends/Played With",
             fontSize = 20.sp,
             style = MaterialTheme.typography.titleMedium,
+            fontFamily = jockeyOne,
             modifier = Modifier.padding(vertical = 8.dp)
         )
         Row(
@@ -247,35 +251,42 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .size(100.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .background(SpringGreen)
                         .clickable { /* TODO: Handle Recent Friend click */ }
                         .padding(8.dp)
                 ) {
-                    Text("Friend $index")
+                    Text("Friend $index", fontFamily = jockeyOne)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        // Navigation Buttons
+// Navigation Buttons
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Button(onClick = onNavigateToAchievements) {
-                Text(text = "Achievements")
+            Button(
+                onClick = onNavigateToAchievements,
+                colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+            ) {
+                Text(text = "Achievements", fontFamily = jockeyOne, color = Color.Black)
             }
 
-            Button(onClick = onNavigateToLibrary) {
-                Text(text = "Library")
+            Button(
+                onClick = onNavigateToLibrary,
+                colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+            ) {
+                Text(text = "Library", fontFamily = jockeyOne, color = Color.Black)
             }
 
-            Button(onClick = onNavigateToFriends) {
-                Text(text = "Friends")
+            Button(
+                onClick = onNavigateToFriends,
+                colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+            ) {
+                Text(text = "Friends", fontFamily = jockeyOne, color = Color.Black)
             }
         }
     }

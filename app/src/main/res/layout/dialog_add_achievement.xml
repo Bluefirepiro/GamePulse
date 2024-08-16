@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/curious_blue"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/copper_rose">
+    android:padding="16dp">
 
     <EditText
         android:id="@+id/editTextTitle"
         android:layout_width="380dp"
         android:layout_height="48dp"
         android:layout_marginTop="8dp"
-        android:fontFamily="@font/jockey_one_regular"
         android:autofillHints="username"
+        android:fontFamily="@font/jockey_one_regular"
         android:hint="@string/achievement_title_hint"
         android:inputType="text"
         android:paddingStart="16dp"
@@ -25,9 +24,9 @@
         android:id="@+id/editTextDescription"
         android:layout_width="380dp"
         android:layout_height="48dp"
-        android:fontFamily="@font/jockey_one_regular"
         android:layout_marginTop="8dp"
         android:autofillHints="username"
+        android:fontFamily="@font/jockey_one_regular"
         android:hint="@string/achievement_description_hint"
         android:inputType="text"
         android:paddingStart="16dp"
@@ -39,9 +38,9 @@
         android:id="@+id/editTextProgress"
         android:layout_width="380dp"
         android:layout_height="48dp"
-        android:fontFamily="@font/jockey_one_regular"
         android:layout_marginTop="8dp"
         android:autofillHints="username"
+        android:fontFamily="@font/jockey_one_regular"
         android:hint="@string/current_progress_hint"
         android:inputType="number"
         android:paddingStart="16dp"
@@ -53,9 +52,9 @@
         android:id="@+id/editTextTotal"
         android:layout_width="380dp"
         android:layout_height="48dp"
-        android:fontFamily="@font/jockey_one_regular"
         android:layout_marginTop="8dp"
         android:autofillHints="username"
+        android:fontFamily="@font/jockey_one_regular"
         android:hint="@string/total_needed_hint"
         android:inputType="number"
         android:paddingStart="16dp"
@@ -67,17 +66,18 @@
         android:id="@+id/spinnerSound"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:fontFamily="@font/jockey_one_regular"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"
-        android:layout_gravity="center_horizontal" />
+        android:fontFamily="@font/jockey_one_regular" />
 
     <Button
         android:id="@+id/buttonSave"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:fontFamily="@font/jockey_one_regular"
-        android:text="@string/save_button_text"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="16dp"
+        android:backgroundTint="@color/spring_green"
+        android:fontFamily="@font/jockey_one_regular"
+        android:text="@string/save_button_text"
         android:textColor="@color/black" /> <!-- Set a contrasting text color -->
 </LinearLayout>
