@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -24,14 +25,20 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,7 +70,13 @@ class LibraryActivity : AppCompatActivity() {
             }
         }
     }
-
+    /*
+    Green Background with white text
+    Pull color scheme from logo using adobe color
+    Important for everything to be readable and have contrast
+    Check for color blindness
+    Even with mono make sure you still have the important stuff pop
+     */
     @Preview(showBackground = true)
     @ExperimentalMaterial3Api
     @Composable
@@ -73,12 +86,14 @@ class LibraryActivity : AppCompatActivity() {
         val gameFile = File(context.filesDir, "gameList")
         val gameList = remember { mutableStateListOf<Game>() }
         //This is for the search bar
-        val searchText = remember { mutableStateOf("")} //Search bar text
-        val searchFlag = remember { mutableStateOf(false)}
+        val searchText = rememberSaveable { mutableStateOf("")} //Search bar text
+        val searchFlag = rememberSaveable { mutableStateOf(false)}
         //Setting up my fonts
         val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
         //val joseFin = FontFamily(Font(R.font.josefin_slab_variablefont_wght))
         //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
+        //Setting up drop down menu
+        var expandedDrop by remember { mutableStateOf(false) }
 
         fun getGameFile(): List<Game>? {
             return try {
@@ -96,7 +111,10 @@ class LibraryActivity : AppCompatActivity() {
         }
 
         if (gameFile.exists()) {
-            gameList.addAll(getGameFile() ?: emptyList())
+            if(gameList.size != getGameFile()?.size){
+                gameList.addAll(getGameFile() ?: emptyList())
+            }
+
         }
 
         /*val onBackPressedDispatcher =
@@ -118,7 +136,14 @@ class LibraryActivity : AppCompatActivity() {
                     contentScale = ContentScale.Inside,
                     modifier = Modifier
                         .size(65.dp)
-                        .clickable{context.startActivity(Intent(context, MainActivity::class.java))}
+                        .clickable {
+                            context.startActivity(
+                                Intent(
+                                    context,
+                                    MainActivity::class.java
+                                )
+                            )
+                        }
                 )
                 Text(
                     text = "Library Screen",
@@ -141,8 +166,6 @@ class LibraryActivity : AppCompatActivity() {
                         .height(height = 30.dp)
                         .padding(horizontal = 4.dp),
                     shape = RectangleShape
-
-
                 ) {
 
                 }
@@ -169,16 +192,38 @@ class LibraryActivity : AppCompatActivity() {
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+
             ) {
-                Button(onClick = {
+
+                    Button(onClick = { expandedDrop = true }) {
+                        Text(text = "Sort")
+                    }
+                    DropdownMenu(expanded = expandedDrop, onDismissRequest = { expandedDrop = false }) {
+                        DropdownMenuItem(text = { Text(text = "Recent") }, onClick = {
+                            gameList.clear()
+                            gameList.addAll(Game.gameList)
+                        })
+                        DropdownMenuItem(text = { Text(text = "Alphabetically") }, onClick = {
+                            val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
+                            gameList.clear()
+                            gameList.addAll(sortedList)
+                        })
+                        DropdownMenuItem(text = { Text(text = "Time Spent") }, onClick = {
+                            val sortedList = gameList.sortedBy { it.gameTime.toInt() }.toMutableList()
+                            gameList.clear()
+                            gameList.addAll(sortedList)
+                        })
+                    }
+
+                /*Button(onClick = {
                     val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
                     gameList.clear()
                     gameList.addAll(sortedList)
 
                 },colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
                     Text(text = "Sort",color = Color.Black)
-                }
+                } */
 
                 Button(onClick = {
                     context.startActivity(Intent(context, GameInputActivity::class.java))
