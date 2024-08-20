@@ -4,9 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,7 +59,9 @@ import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import java.io.EOFException
 import java.io.File
+import java.io.IOException
 import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 
 class LibraryActivity : AppCompatActivity() {
 
@@ -77,6 +81,7 @@ class LibraryActivity : AppCompatActivity() {
     Check for color blindness
     Even with mono make sure you still have the important stuff pop
      */
+    @OptIn(ExperimentalFoundationApi::class)
     @Preview(showBackground = true)
     @ExperimentalMaterial3Api
     @Composable
@@ -108,6 +113,19 @@ class LibraryActivity : AppCompatActivity() {
                 e.printStackTrace()
                 null
             }
+        }
+        fun saveGameFile(mutableGameList: MutableList<Game>): Boolean{
+            try {
+                val fos = context.openFileOutput("gameList", MODE_PRIVATE)
+                val oos = ObjectOutputStream(fos)
+                oos.writeObject(mutableGameList)
+                oos.close()
+            }
+            catch(e: IOException){
+                e.printStackTrace()
+                return false
+            }
+            return true
         }
 
         if (gameFile.exists()) {
@@ -196,8 +214,8 @@ class LibraryActivity : AppCompatActivity() {
 
             ) {
 
-                    Button(onClick = { expandedDrop = true }) {
-                        Text(text = "Sort")
+                    Button(onClick = { expandedDrop = true }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                        Text(text = "Sort",color = Color.Black)
                     }
                     DropdownMenu(expanded = expandedDrop, onDismissRequest = { expandedDrop = false }) {
                         DropdownMenuItem(text = { Text(text = "Recent") }, onClick = {
@@ -238,6 +256,7 @@ class LibraryActivity : AppCompatActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(8.dp)
                     ) {
+
                         Image(
                             painter = painterResource(id = R.drawable.plus),
                             contentDescription = "Game icon",
@@ -245,6 +264,16 @@ class LibraryActivity : AppCompatActivity() {
                             modifier = Modifier
                                 .size(135.dp)
                                 .clip(CircleShape)
+                                .combinedClickable(enabled = true, onLongClick = {gameList.remove(game)
+                                    Game.gameList.clear()
+                                    Game.gameList.addAll(gameList)
+                                    saveGameFile(Game.gameList)},
+                                    onClick = {})
+
+
+
+
+
                         )
                         Text(text = game.gameName)
                     }
