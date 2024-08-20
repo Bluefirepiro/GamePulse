@@ -34,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -54,6 +56,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.scottparrillo.gamepulse.ui.theme.Charcoal
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
@@ -91,7 +94,7 @@ class LibraryActivity : AppCompatActivity() {
         val gameFile = File(context.filesDir, "gameList")
         val gameList = remember { mutableStateListOf<Game>() }
         //This is for the search bar
-        val searchText = rememberSaveable { mutableStateOf("")} //Search bar text
+        var searchText by rememberSaveable { mutableStateOf("")} //Search bar text
         val searchFlag = rememberSaveable { mutableStateOf(false)}
         //Setting up my fonts
         val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
@@ -128,8 +131,9 @@ class LibraryActivity : AppCompatActivity() {
             return true
         }
 
-        if (gameFile.exists()) {
+        if (gameFile.exists() && !searchFlag.value) {
             if(gameList.size != getGameFile()?.size){
+                gameList.clear()
                 gameList.addAll(getGameFile() ?: emptyList())
             }
 
@@ -172,7 +176,36 @@ class LibraryActivity : AppCompatActivity() {
                     fontSize = 40.sp
                 )
             }
+
             Row(){
+                    TextField(value = searchText, onValueChange = {searchText = it},
+                        label = { Text("Search Game")})
+                Button(onClick = {
+                    val tempMutableList = mutableListOf<Game>()
+                    var findMark = false
+                    for (game in gameList) {
+                        if(game.gameName == searchText)
+                        {
+                            tempMutableList.add(game)
+                            findMark = true
+                            searchFlag.value = true
+                        }
+                    }
+                    if (findMark)
+                    {
+                        gameList.clear()
+                        gameList.addAll(tempMutableList)
+                    }
+
+
+
+
+                }) {
+                    Text("Search")
+
+
+                }
+                /*
                 SearchBar(
                     query = searchText.value,
                     onQueryChange = {searchText.value = it},
@@ -187,6 +220,7 @@ class LibraryActivity : AppCompatActivity() {
                 ) {
 
                 }
+                 */
             }
 
             LazyRow(
@@ -214,9 +248,19 @@ class LibraryActivity : AppCompatActivity() {
 
             ) {
 
-                    Button(onClick = { expandedDrop = true }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                    Button(onClick = { expandedDrop = true },
+                        colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
                         Text(text = "Sort",color = Color.Black)
                     }
+                Button(onClick = {
+                    gameList.clear()
+                    Game.gameList.clear()
+                    Game.gameList.addAll(gameList)
+                    saveGameFile(Game.gameList)
+                }
+                    ,colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                    Text(text = "Clear All",color = Color.Black)
+                }
                     DropdownMenu(expanded = expandedDrop, onDismissRequest = { expandedDrop = false }) {
                         DropdownMenuItem(text = { Text(text = "Recent") }, onClick = {
                             gameList.clear()
@@ -264,10 +308,12 @@ class LibraryActivity : AppCompatActivity() {
                             modifier = Modifier
                                 .size(135.dp)
                                 .clip(CircleShape)
-                                .combinedClickable(enabled = true, onLongClick = {gameList.remove(game)
+                                .combinedClickable(enabled = true, onLongClick = {
+                                    gameList.remove(game)
                                     Game.gameList.clear()
                                     Game.gameList.addAll(gameList)
-                                    saveGameFile(Game.gameList)},
+                                    saveGameFile(Game.gameList)
+                                },
                                     onClick = {})
 
 
