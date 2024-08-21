@@ -2,6 +2,7 @@ package com.scottparrillo.gamepulse
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -31,11 +31,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -47,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -56,7 +52,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.scottparrillo.gamepulse.ui.theme.Charcoal
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
@@ -102,6 +97,8 @@ class LibraryActivity : AppCompatActivity() {
         //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
         //Setting up drop down menu
         var expandedDrop by remember { mutableStateOf(false) }
+
+
 
         fun getGameFile(): List<Game>? {
             return try {
@@ -176,32 +173,44 @@ class LibraryActivity : AppCompatActivity() {
                     fontSize = 40.sp
                 )
             }
-
+            //This row holds the search bar and button
             Row(){
                     TextField(value = searchText, onValueChange = {searchText = it},
-                        label = { Text("Search Game")})
+                        label = { Text("Search Game")},
+                        modifier = Modifier
+                            .size(width = 280.dp, height = 38.dp),
+                        )
                 Button(onClick = {
                     val tempMutableList = mutableListOf<Game>()
                     var findMark = false
                     for (game in gameList) {
-                        if(game.gameName == searchText)
-                        {
+                        if(game.gameName.contains(searchText)) {
                             tempMutableList.add(game)
                             findMark = true
                             searchFlag.value = true
                         }
+                        else if(searchText == "") {
+                            gameList.clear()
+                            gameList.addAll(Game.gameList)
+                        }
+
                     }
-                    if (findMark)
-                    {
+                    if (findMark) {
                         gameList.clear()
                         gameList.addAll(tempMutableList)
                     }
+                    else {
+                        val toast = Toast.makeText(
+                            context, "Name not found", Toast.LENGTH_SHORT)
+                        toast.show()
+                    }
 
 
 
 
-                }) {
-                    Text("Search")
+                }, modifier = Modifier.padding(horizontal = 8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                    Text("Search",color = Color.Black)
 
 
                 }
@@ -262,9 +271,10 @@ class LibraryActivity : AppCompatActivity() {
                     Text(text = "Clear All",color = Color.Black)
                 }
                     DropdownMenu(expanded = expandedDrop, onDismissRequest = { expandedDrop = false }) {
-                        DropdownMenuItem(text = { Text(text = "Recent") }, onClick = {
+                        DropdownMenuItem(text = { Text(text = "Console") }, onClick = {
+                            val sortedList = gameList.sortedBy { it.gamePlatform }.toMutableList()
                             gameList.clear()
-                            gameList.addAll(Game.gameList)
+                            gameList.addAll(sortedList)
                         })
                         DropdownMenuItem(text = { Text(text = "Alphabetically") }, onClick = {
                             val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
