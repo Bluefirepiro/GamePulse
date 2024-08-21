@@ -236,16 +236,76 @@ class LibraryActivity : AppCompatActivity() {
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
                 item {
-                    CategoryButton("Recent")
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(31.dp)
+                            .clickable { /* Handle Category clicks */
+                                val sortedList = gameList.sortedBy { it.recentlyPlayed}.toMutableList()
+                                gameList.clear()
+                                gameList.addAll(sortedList)
+                            }
+                            .padding(2.dp)
+
+                            .background(color = SpringGreen)
+                    ) {
+                        Text(text = "Recent")
+                    }
                 }
                 item {
-                    CategoryButton("Current")
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(31.dp)
+                            .clickable { /* Handle Category clicks */
+                                val sortedList = gameList.sortedBy { it.currentlyPlaying}.toMutableList()
+                                gameList.clear()
+                                gameList.addAll(sortedList)
+                            }
+                            .padding(2.dp)
+
+                            .background(color = SpringGreen)
+                    ) {
+                        Text(text = "Current")
+                    }
                 }
                 item {
-                    CategoryButton("Beaten")
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(31.dp)
+                            .clickable { /* Handle Category clicks */
+                                val sortedList = gameList.sortedBy { it.completed}.toMutableList()
+                                gameList.clear()
+                                gameList.addAll(sortedList)
+                            }
+                            .padding(2.dp)
+
+                            .background(color = SpringGreen)
+                    ) {
+                        Text(text = "Beaten")
+                    }
                 }
                 item {
-                    CategoryButton("New")
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(31.dp)
+                            .clickable { /* Handle Category clicks */
+                                val sortedList = gameList.sortedBy { it.newlyAdded}.toMutableList()
+                                gameList.clear()
+                                gameList.addAll(sortedList)
+                            }
+                            .padding(2.dp)
+
+                            .background(color = SpringGreen)
+                    ) {
+                        Text(text = "New")
+                    }
                 }
             }
 

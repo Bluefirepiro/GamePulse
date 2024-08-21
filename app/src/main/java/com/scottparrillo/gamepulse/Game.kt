@@ -1,9 +1,7 @@
 package com.scottparrillo.gamepulse
 
 
-import java.io.EOFException
-import java.io.File
-import java.io.ObjectInputStream
+
 import java.io.Serializable
 
 class Game: Serializable {
@@ -17,6 +15,9 @@ class Game: Serializable {
     var gameName: String = ""
     var gameDescription: String = ""
     var gameGenre: String = ""
+    var recentlyPlayed: Boolean = false
+    var currentlyPlaying: Boolean = false
+    var newlyAdded: Boolean = false
     var gameReleaseDate: String = ""
     //Games have multiple achievements so just adding a list so we can iter through them
     var achievements: ArrayList<Achievement>? = null
