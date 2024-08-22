@@ -1,4 +1,8 @@
 package com.scottparrillo.gamepulse;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 //This class is going to contain helper methods for converting game inputs and outputs
 public final class GameUtil {
 
@@ -13,10 +17,26 @@ public final class GameUtil {
         toReturn.setGameName(name);
         toReturn.setGameDescription(gameDesc);
         //Quick conversion from string to float
-        float conv = Float.valueOf(time);
+        float conv = Float.parseFloat(time);
         toReturn.setGameTime(conv);
         toReturn.setGamePlatform(platform);
 
         return toReturn;
+    }
+    private static float parseTimeString(String time) {
+        // Regex to find the first sequence of digits, optionally followed by a decimal point and more digits
+        Pattern pattern = Pattern.compile("\\d+(\\.\\d+)?");
+        Matcher matcher = pattern.matcher(time);
+
+        if (matcher.find()) {
+            try {
+                return Float.parseFloat(matcher.group());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                return 0f; // Default value if the number cannot be parsed
+            }
+        } else {
+            return 0f; // Default value if no numeric part is found
+        }
     }
 }

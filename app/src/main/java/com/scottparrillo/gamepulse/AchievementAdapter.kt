@@ -13,7 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class AchievementAdapter(
     private var achievements: MutableList<Achievement>,
-    private val onDelete: (Int) -> Unit
+    private val onDelete: (Int) -> Unit,
+    private val onFavorite: (Int) -> Unit
 ) : RecyclerView.Adapter<AchievementAdapter.AchievementViewHolder>() {
 
     class AchievementViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -23,6 +24,7 @@ class AchievementAdapter(
         val progressBar: ProgressBar = view.findViewById(R.id.progressBar)
         val progressText: TextView = view.findViewById(R.id.progressText)
         val deleteButton: ImageButton = view.findViewById(R.id.deleteButton)
+        val favoriteButton: ImageButton = view.findViewById(R.id.favoriteButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AchievementViewHolder {
@@ -43,6 +45,16 @@ class AchievementAdapter(
             achievement.progress,
             achievement.total
         )
+
+        // Set favorite icon based on isFavorite field
+        holder.favoriteButton.setImageResource(
+            if (achievement.isFavorite) R.drawable.ic_favorite
+            else R.drawable.ic_favorite_border
+        )
+
+        holder.favoriteButton.setOnClickListener {
+            onFavorite(position)
+        }
 
         holder.itemView.setOnClickListener {
             achievement.soundResId?.let { soundId ->

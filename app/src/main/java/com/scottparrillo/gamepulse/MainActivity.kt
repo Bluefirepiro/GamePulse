@@ -1,6 +1,13 @@
 package com.scottparrillo.gamepulse
 
+import android.Manifest
+import android.app.AlertDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -34,6 +41,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,16 +49,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
+import com.google.gson.Gson
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
 
+    private val NOTIFICATION_PERMISSION_REQUEST_CODE = 1
     private lateinit var requestNotificationPermissionLauncher: ActivityResultLauncher<String>
+
+    // Define a list to hold recently played games
+    private val recentlyPlayedGamesList = mutableStateListOf<Game>()
+
+    // Define a List to hold recently achieved achievements
+    private val recentlyAchievedAchievementsList = mutableStateListOf<Achievement>()
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,20 +79,36 @@ class MainActivity : ComponentActivity() {
         requestNotificationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
-                    // Permission granted
+                    // Permission granted, attempt to send notification
+                    sendNotificationIfAllowed()
                 } else {
                     // Permission denied
+                    println("Notification permission denied.")
                 }
             }
 
         // Request notification permission if needed
         if (shouldRequestNotificationPermission()) {
-            requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
         setContent {
             GamePulseTheme {
                 HomeScreen(
+                    recentlyPlayedGames = recentlyPlayedGamesList,
+                    recentlyAchievedAchievements = recentlyAchievedAchievementsList,
+                    onGamePlayed = { game ->
+                        // Handle the game that was played, e.g., navigate to details
+                        startActivity(Intent(this, GameDetailActivity::class.java).apply {
+                            putExtra("GAME_ID", game.gameId)
+                        })
+                        updateRecentlyPlayed(game)
+                        loadRecentlyPlayedGames()
+                    },
+                    onAchievementUnlocked = { achievement ->
+                        updateRecentlyAchieved(achievement)
+                        loadRecentlyAchievedAchievements()
+                    },
                     onNavigateToAchievements = {
                         startActivity(Intent(this, AchievementActivity::class.java))
                     },
@@ -92,13 +127,16 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+
+        // Load recently played games from SharedPreferences when the activity starts
+        loadRecentlyPlayedGames()
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun shouldRequestNotificationPermission(): Boolean {
         return ActivityCompat.checkSelfPermission(
             this,
-            android.Manifest.permission.POST_NOTIFICATIONS
+            Manifest.permission.POST_NOTIFICATIONS
         ) != PackageManager.PERMISSION_GRANTED
     }
 
@@ -109,20 +147,186 @@ class MainActivity : ComponentActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun openNotificationSettings() {
-        val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-            putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+        showNotificationSleepOptions()
+    }
+
+    private fun showNotificationSleepOptions() {
+        val options = arrayOf("15 minutes", "1 hour", "8 hours", "1 day")
+        val durations = arrayOf(
+            TimeUnit.MINUTES.toMillis(15),
+            TimeUnit.HOURS.toMillis(1),
+            TimeUnit.HOURS.toMillis(8),
+            TimeUnit.DAYS.toMillis(1)
+        )
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Notification Sleep Settings")
+            .setItems(options) { dialog, which ->
+                setNotificationSleepDuration(durations[which])
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+        builder.create().show()
+    }
+
+    private fun setNotificationSleepDuration(durationMillis: Long) {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putLong("notification_sleep_end_time", System.currentTimeMillis() + durationMillis)
+        editor.apply()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun sendNotificationIfAllowed() {
+        if (shouldSendNotification()) {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                displayNotification()
+            } else {
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            println("Notifications are currently in sleep mode.")
         }
-        startActivity(intent)
+    }
+
+    private fun shouldSendNotification(): Boolean {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
+        val sleepEndTime = sharedPreferences.getLong("notification_sleep_end_time", 0)
+        return System.currentTimeMillis() >= sleepEndTime
+    }
+
+    private fun displayNotification() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = "your_channel_id"
+            val channelName = "Your Channel Name"
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notificationBuilder = NotificationCompat.Builder(this, "your_channel_id")
+            .setSmallIcon(R.drawable.notification_icon_background) // Make sure this drawable exists
+            .setContentTitle("Your Notification Title")
+            .setContentText("Your notification content.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(createPendingIntent())
+            .setAutoCancel(true)
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        NotificationManagerCompat.from(this).notify(12345, notificationBuilder.build())
+    }
+
+    private fun createPendingIntent(): PendingIntent {
+        val intent = Intent(this, MainActivity::class.java)
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    private fun updateRecentlyPlayed(game: Game) {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        // Retrieve the current list
+        val recentlyPlayedList = loadRecentlyPlayedGamesFromSharedPreferences().toMutableList()
+
+        // Add the new game to the top of the list
+        recentlyPlayedList.add(0, game)
+
+        // Limit the list to a certain size (e.g., 10 games)
+        if (recentlyPlayedList.size > 10) {
+            recentlyPlayedList.removeAt(recentlyPlayedList.size - 1)
+        }
+
+        // Save the updated list back to SharedPreferences
+        val updatedJson = Gson().toJson(recentlyPlayedList)
+        editor.putString("recently_played", updatedJson)
+        editor.apply()
+
+        // Update the UI list
+        recentlyPlayedGamesList.clear()
+        recentlyPlayedGamesList.addAll(recentlyPlayedList)
+    }
+
+    private fun updateRecentlyAchieved(achievement: Achievement) {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        // Retrieve the current list
+        val recentlyAchievedList = loadRecentlyAchievedAchievementsFromSharedPreferences().toMutableList()
+
+        // Add the new achievement to the top of the list
+        recentlyAchievedList.add(0, achievement)
+
+        // Limit the list to a certain size (e.g., 10 achievements)
+        if (recentlyAchievedList.size > 10) {
+            recentlyAchievedList.removeAt(recentlyAchievedList.size - 1)
+        }
+
+        // Save the updated list back to SharedPreferences
+        val updatedJson = Gson().toJson(recentlyAchievedList)
+        editor.putString("recently_achieved", updatedJson)
+        editor.apply()
+
+        // Update the UI list
+        recentlyAchievedAchievementsList.clear()
+        recentlyAchievedAchievementsList.addAll(recentlyAchievedList)
+    }
+
+    private fun loadRecentlyPlayedGames() {
+        recentlyPlayedGamesList.clear()
+        recentlyPlayedGamesList.addAll(loadRecentlyPlayedGamesFromSharedPreferences())
+    }
+
+    private fun loadRecentlyAchievedAchievements() {
+        recentlyAchievedAchievementsList.clear()
+        recentlyAchievedAchievementsList.addAll(loadRecentlyAchievedAchievementsFromSharedPreferences())
+    }
+
+    private fun loadRecentlyPlayedGamesFromSharedPreferences(): List<Game> {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
+        val recentlyPlayedJson = sharedPreferences.getString("recently_played", "[]")
+        val recentlyPlayedListType = object : TypeToken<List<Game>>() {}.type
+        return Gson().fromJson(recentlyPlayedJson, recentlyPlayedListType) ?: emptyList()
+    }
+
+    private fun loadRecentlyAchievedAchievementsFromSharedPreferences(): List<Achievement> {
+        val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
+        val recentlyAchievedJson = sharedPreferences.getString("recently_achieved", "[]")
+        val recentlyAchievedListType = object : TypeToken<List<Achievement>>() {}.type
+        return Gson().fromJson(recentlyAchievedJson, recentlyAchievedListType) ?: emptyList()
     }
 }
 
 @Composable
 fun HomeScreen(
+
+    recentlyPlayedGames: List<Game>,
+    recentlyAchievedAchievements: List<Achievement>,
+    onGamePlayed: (Game) -> Unit,
+    onAchievementUnlocked: (Achievement) -> Unit,
     onNavigateToAchievements: () -> Unit,
     onNavigateToLibrary: () -> Unit,
     onNavigateToFriends: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenNotifications: () -> Unit) {
+    onOpenNotifications: () -> Unit
+) {
     val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
     Column(
         modifier = Modifier
@@ -130,7 +334,6 @@ fun HomeScreen(
             .background(CuriousBlue) // Set background color to CuriousBlue
             .padding(16.dp)
     ) {
-
         // Top row with profile picture, notifications, and settings
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -175,8 +378,9 @@ fun HomeScreen(
             fontFamily = jockeyOne,
             fontSize = 40.sp
         )
+
         val SpringGreen = Color(0xFF16F2A1)
-        val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
+
         // Recently Played games
         Text(
             text = "Recently Played",
@@ -185,27 +389,28 @@ fun HomeScreen(
             fontFamily = jockeyOne,
             modifier = Modifier.padding(vertical = 8.dp)
         )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
                 .padding(vertical = 8.dp)
         ) {
-            repeat(10) { index ->
+            recentlyPlayedGames.forEach { game ->
                 Box(
                     modifier = Modifier
                         .size(100.dp)
                         .background(SpringGreen)
-                        .clickable { /* TODO: Handle Recently Played game click */ }
+                        .clickable { onGamePlayed(game) }
                         .padding(8.dp)
                 ) {
-                    Text("Game $index", fontFamily = jockeyOne)
+                    Text(game.gameName, fontFamily = jockeyOne)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
 
-// Recent Achievements
+        // Recent Achievements
         Text(
             text = "Recent Achievements",
             fontSize = 20.sp,
@@ -219,21 +424,21 @@ fun HomeScreen(
                 .horizontalScroll(rememberScrollState())
                 .padding(vertical = 8.dp)
         ) {
-            repeat(10) { index ->
+            recentlyAchievedAchievements.forEach { achievement ->
                 Box(
                     modifier = Modifier
                         .size(100.dp)
                         .background(SpringGreen)
-                        .clickable { /* TODO: Handle Recent Achievement click */ }
+                        .clickable { onAchievementUnlocked(achievement) }
                         .padding(8.dp)
                 ) {
-                    Text("Achievement $index", fontFamily = jockeyOne)
+                    Text(achievement.title, fontFamily = jockeyOne)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
 
-// Recent Friends/Played with
+        // Recent Friends/Played with
         Text(
             text = "Recent Friends/Played With",
             fontSize = 20.sp,
@@ -261,7 +466,7 @@ fun HomeScreen(
             }
         }
 
-// Navigation Buttons
+        // Navigation Buttons
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -289,19 +494,5 @@ fun HomeScreen(
                 Text(text = "Friends", fontFamily = jockeyOne, color = Color.Black)
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    GamePulseTheme {
-        HomeScreen(
-            onNavigateToAchievements = {},
-            onNavigateToLibrary = {},
-            onNavigateToFriends = {},
-            onOpenSettings = {},
-            onOpenNotifications = {}
-        )
     }
 }

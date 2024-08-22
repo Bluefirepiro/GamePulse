@@ -6,7 +6,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
@@ -41,7 +40,8 @@ data class Achievement(
     val isEarned: Boolean,
     var progress: Int,
     val total: Int,
-    val soundResId: Int?
+    val soundResId: Int?,
+    var isFavorite: Boolean = false  // Add this line
 ) : Serializable
 
 class AchievementActivity : AppCompatActivity() {
@@ -61,11 +61,17 @@ class AchievementActivity : AppCompatActivity() {
         // Set up the RecyclerView
         val recyclerView: RecyclerView = findViewById(R.id.recyclerViewAchievements)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        achievementAdapter = AchievementAdapter(achievements) { position ->
-            showConfirmDeleteDialog(position)
-        }
+        achievementAdapter = AchievementAdapter(achievements,
+            { position ->
+                showConfirmDeleteDialog(position)
+            },
+            { position ->
+                val achievement = achievements[position]
+                achievement.isFavorite = !achievement.isFavorite
+                achievementAdapter.notifyItemChanged(position)
+            }
+        )
         recyclerView.adapter = achievementAdapter
-
         // Search functionality
         val searchEditText: EditText = findViewById(R.id.search)
         searchEditText.addTextChangedListener(object : TextWatcher {
@@ -107,19 +113,13 @@ class AchievementActivity : AppCompatActivity() {
 
     private fun loadAchievements() {
         val savedAchievements = getAchievementFile()
-        val newAchievements = if (savedAchievements != null) {
-            savedAchievements
-        } else {
-            listOf(
-                Achievement(R.drawable.ic_achievement, "Achievement 1", "Description 1", 50.0, true, 500, 1000, R.raw.sound1),
-                Achievement(R.drawable.ic_achievement, "Achievement 2", "Description 2", 30.0, false, 200, 500, R.raw.sound2),
-                Achievement(R.drawable.ic_achievement, "Achievement 3", "Description 3", 75.0, true, 1000, 1000, null)
-            )
-        }
-
+        val newAchievements = savedAchievements ?: listOf(
+            Achievement(R.drawable.ic_achievement, "Achievement 1", "Description 1", 50.0, true, 500, 1000, R.raw.sound1),
+            Achievement(R.drawable.ic_achievement, "Achievement 2", "Description 2", 30.0, false, 200, 500, R.raw.sound2),
+            Achievement(R.drawable.ic_achievement, "Achievement 3", "Description 3", 75.0, true, 1000, 1000, null)
+        )
         achievementAdapter.updateList(newAchievements)
     }
-
 
     private fun showAddAchievementDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_achievement, null)
@@ -160,13 +160,7 @@ class AchievementActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun addAchievement(
-        title: String,
-        description: String,
-        progress: Int,
-        total: Int,
-        soundResId: Int?
-    ) {
+    private fun addAchievement(title: String, description: String, progress: Int, total: Int, soundResId: Int?) {
         val percentageEarned = if (total > 0) (progress.toDouble() / total) * 100 else 0.0
         val isEarned = progress >= total
 
@@ -185,7 +179,6 @@ class AchievementActivity : AppCompatActivity() {
         achievementAdapter.notifyItemInserted(achievements.size - 1)
         saveAchievementFile(achievements)
 
-        // Play custom sound and send notification if achievement is completed
         if (isEarned) {
             playSound(this, soundResId ?: R.raw.achievement_completed)
             sendAchievementNotification(this, title, "Congratulations! You've completed an achievement.", soundResId)
@@ -228,20 +221,6 @@ class AchievementActivity : AppCompatActivity() {
         diffResult.dispatchUpdatesTo(achievementAdapter)
     }
 
-    // DiffUtil Callback class remains the same
-    class AchievementDiffCallback(
-        private val oldList: List<Achievement>,
-        private val newList: List<Achievement>
-    ) : DiffUtil.Callback() {
-        override fun getOldListSize() = oldList.size
-        override fun getNewListSize() = newList.size
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-            oldList[oldItemPosition].title == newList[newItemPosition].title
-        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-            oldList[oldItemPosition] == newList[newItemPosition]
-    }
-
-
     private fun filterAchievements(query: String) {
         val filteredList = achievements.filter { it.title.contains(query, ignoreCase = true) }
         achievementAdapter.updateList(filteredList)
@@ -250,7 +229,7 @@ class AchievementActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                finish() // Handle back button
+                finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -281,102 +260,23 @@ class AchievementActivity : AppCompatActivity() {
         val notificationId = 1
         val channelId = "achievement_channel"
 
-        // Creating the notification channel
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelName = "Achievement Notifications"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val notificationChannel = NotificationChannel(channelId, channelName, importance)
-
-            // Set custom sound for the channel if available
-            soundResId?.let {
-                val soundUri = Uri.parse("android.resource://${context.packageName}/$it")
-                val audioAttributes = AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .build()
-                notificationChannel.setSound(soundUri, audioAttributes)
-            }
-
-            // Get the NotificationManager from context
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(notificationChannel)
-        }
-
-        // Create the notification
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_achievement) // Replace with your actual icon
+            .setSmallIcon(R.drawable.ic_achievement)
             .setContentTitle(title)
             .setContentText(message)
             .setAutoCancel(true)
 
-        // Set custom sound for the notification if available
         soundResId?.let {
             val soundUri = Uri.parse("android.resource://${context.packageName}/$it")
             notificationBuilder.setSound(soundUri)
         }
 
-        // Use NotificationManagerCompat to show the notification
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return
         }
         NotificationManagerCompat.from(context).notify(notificationId, notificationBuilder.build())
     }
 
-
-    private fun showAchievementNotification(context: Context, title: String, message: String, soundUri: Uri) {
-        val notificationId = 1
-        val channelId = "achievement_channel"
-
-        // Creating the notification channel
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelName = "Achievement Notifications"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val notificationChannel = NotificationChannel(channelId, channelName, importance).apply {
-                setSound(soundUri, null) // Set custom sound here
-            }
-
-            // Use context to get the NotificationManager
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(notificationChannel)
-        }
-
-        // Create the notification
-        val notificationBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_achievement) // Replace with your icon
-            .setContentTitle(title)
-            .setContentText(message)
-            .setSound(soundUri)
-            .setAutoCancel(true)
-
-        // Use NotificationManagerCompat to show the notification
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-        NotificationManagerCompat.from(context).notify(notificationId, notificationBuilder.build())
-    }
-
-
-    // Saving achievements to a file
     private fun saveAchievementFile(achievementList: MutableList<Achievement>): Boolean {
         return try {
             val fos = openFileOutput("achievements", MODE_PRIVATE)
@@ -390,12 +290,11 @@ class AchievementActivity : AppCompatActivity() {
         }
     }
 
-    // Loading achievements from a file
     private fun getAchievementFile(): MutableList<Achievement>? {
         return try {
             val fis = openFileInput("achievements")
             val ois = ObjectInputStream(fis)
-            @Suppress("UNCHECKED_CAST") // Suppress unchecked cast warning
+            @Suppress("UNCHECKED_CAST")
             val achievementList = ois.readObject() as? MutableList<Achievement>
             ois.close()
             achievementList
@@ -405,4 +304,5 @@ class AchievementActivity : AppCompatActivity() {
         }
     }
 }
+
 

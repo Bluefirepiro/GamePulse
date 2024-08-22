@@ -1,5 +1,6 @@
 package com.scottparrillo.gamepulse
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -42,7 +43,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
@@ -51,6 +51,7 @@ import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import java.io.EOFException
 import java.io.File
 import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 
 class LibraryActivity : AppCompatActivity() {
 
@@ -64,21 +65,15 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
 
-    @Preview(showBackground = true)
     @ExperimentalMaterial3Api
     @Composable
     fun LibraryScreen() {
-        //Setting may val and vars for future use
         val context = LocalContext.current
         val gameFile = File(context.filesDir, "gameList")
         val gameList = remember { mutableStateListOf<Game>() }
-        //This is for the search bar
-        val searchText = remember { mutableStateOf("")} //Search bar text
-        val searchFlag = remember { mutableStateOf(false)}
-        //Setting up my fonts
+        val searchText = remember { mutableStateOf("") }
+        val searchFlag = remember { mutableStateOf(false) }
         val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
-        //val joseFin = FontFamily(Font(R.font.josefin_slab_variablefont_wght))
-        //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
 
         fun getGameFile(): List<Game>? {
             return try {
@@ -95,12 +90,17 @@ class LibraryActivity : AppCompatActivity() {
             }
         }
 
+        fun saveGameList(gameList: List<Game>) {
+            val fos = context.openFileOutput("gameList", Context.MODE_PRIVATE)
+            val oos = ObjectOutputStream(fos)
+            oos.writeObject(gameList)
+            oos.close()
+            fos.close()
+        }
+
         if (gameFile.exists()) {
             gameList.addAll(getGameFile() ?: emptyList())
         }
-
-        /*val onBackPressedDispatcher =
-           LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher */
 
         Column(
             modifier = Modifier
@@ -108,6 +108,7 @@ class LibraryActivity : AppCompatActivity() {
                 .background(color = CuriousBlue)
         ) {
 
+            // Header Row
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(8.dp)
@@ -118,7 +119,7 @@ class LibraryActivity : AppCompatActivity() {
                     contentScale = ContentScale.Inside,
                     modifier = Modifier
                         .size(65.dp)
-                        .clickable{context.startActivity(Intent(context, MainActivity::class.java))}
+                        .clickable { context.startActivity(Intent(context, MainActivity::class.java)) }
                 )
                 Text(
                     text = "Library Screen",
@@ -129,25 +130,22 @@ class LibraryActivity : AppCompatActivity() {
                     fontSize = 40.sp
                 )
             }
-            Row(){
-                SearchBar(
-                    query = searchText.value,
-                    onQueryChange = {searchText.value = it},
-                    onSearch = {searchFlag.value = false},
-                    active = searchFlag.value,
-                    onActiveChange = {searchFlag.value = it},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(height = 30.dp)
-                        .padding(horizontal = 4.dp),
-                    shape = RectangleShape
 
+            // Search Bar
+            SearchBar(
+                query = searchText.value,
+                onQueryChange = { searchText.value = it },
+                onSearch = { searchFlag.value = false },
+                active = searchFlag.value,
+                onActiveChange = { searchFlag.value = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(30.dp)
+                    .padding(horizontal = 4.dp),
+                shape = RectangleShape
+            ) {}
 
-                ) {
-
-                }
-            }
-
+            // Category Buttons Row
             LazyRow(
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
@@ -165,50 +163,106 @@ class LibraryActivity : AppCompatActivity() {
                 }
             }
 
+            // Sort and Add Game Buttons
             Row(
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = {
-                    val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
-                    gameList.clear()
-                    gameList.addAll(sortedList)
-
-                },colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
-                    Text(text = "Sort",color = Color.Black)
+                Button(
+                    onClick = {
+                        val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
+                        gameList.clear()
+                        gameList.addAll(sortedList)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                ) {
+                    Text(text = "Sort", color = Color.Black)
                 }
 
-                Button(onClick = {
-                    context.startActivity(Intent(context, GameInputActivity::class.java))
-                },colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
-                    Text(text = "Add Game",color = Color.Black)
+                Button(
+                    onClick = {
+                        context.startActivity(Intent(context, GameInputActivity::class.java))
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                ) {
+                    Text(text = "Add Game", color = Color.Black)
                 }
             }
 
+            // Favorite and Regular Games Section
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp)) {
-                items(gameList) { game ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.plus),
-                            contentDescription = "Game icon",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(135.dp)
-                                .clip(CircleShape)
+                // Favorites Section
+                val favoriteGames = gameList.filter { it.isFavorite }
+                if (favoriteGames.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Favorites",
+                            style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.padding(8.dp)
                         )
-                        Text(text = game.gameName)
+                    }
+                    items(favoriteGames) { game ->
+                        GameItem(game, gameList, context)
+                    }
+                }
+
+                // Regular Games Section
+                val nonFavoriteGames = gameList.filter { !it.isFavorite }
+                if (nonFavoriteGames.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "All Games",
+                            style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                    items(nonFavoriteGames) { game ->
+                        GameItem(game, gameList, context)
                     }
                 }
             }
         }
     }
 
-        @Composable
+    @Composable
+    fun GameItem(game: Game, gameList: MutableList<Game>, context: Context) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.plus),
+                contentDescription = "Game icon",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(135.dp)
+                    .clip(CircleShape)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = game.gameName, modifier = Modifier.weight(1f))
+
+                // Favorite button
+                val favoriteIcon = if (game.isFavorite) R.drawable.ic_favorite else R.drawable.ic_favorite_border
+                Image(
+                    painter = painterResource(id = favoriteIcon),
+                    contentDescription = "Favorite Icon",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable {
+                            game.isFavorite = !game.isFavorite
+                            saveGameList(gameList)
+                        }
+                )
+            }
+        }
+    }
+
+    @Composable
     fun CategoryButton(text: String) {
         Box(
             contentAlignment = Alignment.Center,
@@ -217,14 +271,26 @@ class LibraryActivity : AppCompatActivity() {
                 .height(31.dp)
                 .clickable { /* Handle Category clicks */ }
                 .padding(2.dp)
-
                 .background(color = SpringGreen)
         ) {
             Text(text = text)
         }
-
-
+    }
+    private fun toggleFavorite(game: Game) {
+        game.isFavorite = !game.isFavorite
+        saveGameList(Game.gameList) // Save the updated game list
     }
 
-
+    private fun saveGameList(gameList: List<Game>) {
+        val context = this
+        try {
+            val fos = context.openFileOutput("gameList", MODE_PRIVATE)
+            val oos = ObjectOutputStream(fos)
+            oos.writeObject(gameList)
+            oos.close()
+            fos.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }

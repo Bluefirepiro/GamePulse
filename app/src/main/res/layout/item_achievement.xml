@@ -62,6 +62,16 @@
 
     </LinearLayout>
 
+    <!-- Favorite Button -->
+    <ImageButton
+        android:id="@+id/favoriteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/favorite_achievement"
+        android:src="@drawable/ic_favorite_border" />
+
     <!-- Delete Button -->
     <ImageButton
         android:id="@+id/deleteButton"
