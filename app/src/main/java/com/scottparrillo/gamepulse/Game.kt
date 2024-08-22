@@ -6,6 +6,7 @@ import java.io.Serializable
 class Game: Serializable {
     var completed: Boolean = false
     var allAchiev: Boolean = false
+    var isFavorite: Boolean = false // Add this property
     var gameTime: Float = 0f
     var timeToBeat: Float = 0f
     var gameId: Int = 0

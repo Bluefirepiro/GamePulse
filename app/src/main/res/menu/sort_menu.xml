@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/sort_alphabetically"
+        android:title="Sort Alphabetically" />
+    <item
+        android:id="@+id/sort_percentage_earned"
+        android:title="Sort by Percentage Earned" />
+    <item
+        android:id="@+id/sort_earned_true"
+        android:title="Sort by Earned Status (Earned)" />
+    <item
+        android:id="@+id/sort_earned_false"
+        android:title="Sort by Earned Status (Not Earned)" />
+    <item
+        android:id="@+id/sort_favorites"
+        android:title="Sort by Favorites" />
+</menu>

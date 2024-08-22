@@ -12,15 +12,16 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.PopupMenu
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -41,7 +42,7 @@ data class Achievement(
     var progress: Int,
     val total: Int,
     val soundResId: Int?,
-    var isFavorite: Boolean = false  // Add this line
+    var isFavorite: Boolean = false
 ) : Serializable
 
 class AchievementActivity : AppCompatActivity() {
@@ -54,7 +55,7 @@ class AchievementActivity : AppCompatActivity() {
         setContentView(R.layout.activity_achievement)
 
         // Set up the toolbar
-        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -72,6 +73,7 @@ class AchievementActivity : AppCompatActivity() {
             }
         )
         recyclerView.adapter = achievementAdapter
+
         // Search functionality
         val searchEditText: EditText = findViewById(R.id.search)
         searchEditText.addTextChangedListener(object : TextWatcher {
@@ -92,19 +94,10 @@ class AchievementActivity : AppCompatActivity() {
             showAddAchievementDialog()
         }
 
-        // Set up the spinner for sorting options
-        val spinnerSortOptions: Spinner = findViewById(R.id.spinnerSortOptions)
-        spinnerSortOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                when (position) {
-                    0 -> sortAchievementsAlphabetically()
-                    1 -> sortAchievementsByPercentageEarned()
-                    2 -> sortAchievementsByEarnedStatus(true)
-                    3 -> sortAchievementsByEarnedStatus(false)
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {}
+        // Set up the sorting dropdown menu
+        val sortButton: Button = findViewById(R.id.buttonSortOptions)
+        sortButton.setOnClickListener { view ->
+            showSortMenu(view)
         }
 
         // Create the notification channel
@@ -122,7 +115,7 @@ class AchievementActivity : AppCompatActivity() {
     }
 
     private fun showAddAchievementDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_achievement, null)
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_achievement, null)
         val editTextTitle = dialogView.findViewById<EditText>(R.id.editTextTitle)
         val editTextDescription = dialogView.findViewById<EditText>(R.id.editTextDescription)
         val editTextProgress = dialogView.findViewById<EditText>(R.id.editTextProgress)
@@ -197,6 +190,23 @@ class AchievementActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun showSortMenu(view: View) {
+        val popupMenu = PopupMenu(this, view)
+        val menuInflater: MenuInflater = popupMenu.menuInflater
+        menuInflater.inflate(R.menu.sort_menu, popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.sort_alphabetically -> sortAchievementsAlphabetically()
+                R.id.sort_percentage_earned -> sortAchievementsByPercentageEarned()
+                R.id.sort_earned_true -> sortAchievementsByEarnedStatus(true)
+                R.id.sort_earned_false -> sortAchievementsByEarnedStatus(false)
+                R.id.sort_favorites -> sortAchievementsByFavorites()
+            }
+            true
+        }
+        popupMenu.show()
+    }
+
     private fun sortAchievementsAlphabetically() {
         val sortedList = achievements.sortedBy { it.title }
         updateAchievementsList(sortedList)
@@ -209,6 +219,11 @@ class AchievementActivity : AppCompatActivity() {
 
     private fun sortAchievementsByEarnedStatus(earned: Boolean) {
         val sortedList = achievements.sortedByDescending { it.isEarned == earned }
+        updateAchievementsList(sortedList)
+    }
+
+    private fun sortAchievementsByFavorites() {
+        val sortedList = achievements.sortedByDescending { it.isFavorite }
         updateAchievementsList(sortedList)
     }
 
@@ -304,5 +319,3 @@ class AchievementActivity : AppCompatActivity() {
         }
     }
 }
-
-
