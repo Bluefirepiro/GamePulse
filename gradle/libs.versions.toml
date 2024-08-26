@@ -17,6 +17,7 @@ appcompat = "1.7.0"
 playServicesGames = "23.2.0"
 playServicesGamesV2 = "20.1.2"
 firebaseCrashlyticsBuildtools = "3.0.2"
+retrofit = "2.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,6 +44,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 play-services-games = { group = "com.google.android.gms", name = "play-services-games", version.ref = "playServicesGames" }
 play-services-games-v2 = { group = "com.google.android.gms", name = "play-services-games-v2", version.ref = "playServicesGamesV2" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -73,6 +73,9 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
     /*
+    Center Search button on Add Game Button
+    Pad search button to start of home icon
+    Round top two corners on square buttons
     Green Background with white text
     Pull color scheme from logo using adobe color
     Important for everything to be readable and have contrast
