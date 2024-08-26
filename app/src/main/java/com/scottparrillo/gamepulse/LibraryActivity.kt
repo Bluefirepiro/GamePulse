@@ -55,6 +55,8 @@ import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
+import retrofit2.Call
+import retrofit2.Retrofit
 import java.io.EOFException
 import java.io.File
 import java.io.IOException
@@ -100,6 +102,10 @@ class LibraryActivity : AppCompatActivity() {
         //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
         //Setting up drop down menu
         var expandedDrop by remember { mutableStateOf(false) }
+        //Setting up Retrofit to pull steam API data
+         val retrofit = Retrofit.Builder()
+             .baseUrl(" http://api.steampowered.com")
+             .build()
 
 
         fun getGameFile(): List<Game>? {

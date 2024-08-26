@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.play.services.games)
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.retrofit)
+    implementation(libs.converter.jackson)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
