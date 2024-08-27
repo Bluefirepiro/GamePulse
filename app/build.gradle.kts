@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.retrofit)
     implementation(libs.converter.jackson)
+    implementation(libs.converter.gson)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

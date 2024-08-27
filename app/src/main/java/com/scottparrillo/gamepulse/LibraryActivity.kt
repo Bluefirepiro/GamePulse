@@ -55,8 +55,9 @@ import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
-import retrofit2.Call
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.EOFException
 import java.io.File
 import java.io.IOException
@@ -102,10 +103,16 @@ class LibraryActivity : AppCompatActivity() {
         //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
         //Setting up drop down menu
         var expandedDrop by remember { mutableStateOf(false) }
+        val httpclient: OkHttpClient.Builder = OkHttpClient.Builder()
         //Setting up Retrofit to pull steam API data
-         val retrofit = Retrofit.Builder()
-             .baseUrl(" http://api.steampowered.com")
-             .build()
+        val retrofit:Retrofit = Retrofit.Builder()
+            .baseUrl("https://api.steampowered.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(httpclient.build())
+            .build()
+
+        val service: SteamWebAPIClient by lazy { retrofit.create(SteamWebAPIClient::class.java) }
+
 
 
         fun getGameFile(): List<Game>? {
