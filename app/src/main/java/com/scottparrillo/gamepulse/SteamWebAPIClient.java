@@ -7,7 +7,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 public interface SteamWebAPIClient {
-    @GET("/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002/?gameid={gameId}&format=json")
-    Call<List<SteamAchievementPercentages>> getAchievementPercentages(@Path("gameId")
-                                                                      int gameId);
+    @GET("/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002/?gameid=870780&format=json")
+    Call<List<SteamAchievementPercentages>> getAchievementPercentages()
+                                                                      ;
 }

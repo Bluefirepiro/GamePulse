@@ -56,6 +56,8 @@ import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import okhttp3.OkHttpClient
+import retrofit2.Call
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.EOFException
@@ -110,9 +112,17 @@ class LibraryActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create())
             .client(httpclient.build())
             .build()
-
+//this is just being used for testing to see if it works
         val service: SteamWebAPIClient by lazy { retrofit.create(SteamWebAPIClient::class.java) }
-
+        val callSync: Call<MutableList<SteamAchievementPercentages>> = service.getAchievementPercentages()
+        try {
+            val response: Response<MutableList<SteamAchievementPercentages>> = callSync.execute()
+            val apiRes: MutableList<SteamAchievementPercentages>? = response.body()
+         //   val test:String = apiRes!![0].getName()
+        }
+        catch (ex:Exception){
+            ex.printStackTrace()
+        }
 
 
         fun getGameFile(): List<Game>? {

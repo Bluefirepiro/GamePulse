@@ -9,6 +9,8 @@ public class SteamAchievementPercentages {
         return percent;
     }
 
-    private String name = "";
-    private Float percent = 0f;
+    public String name = "";
+    public Float percent = 0f;
+
+
 }
