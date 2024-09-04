@@ -1,13 +1,9 @@
-package com.scottparrillo.gamepulse;
+package com.scottparrillo.gamepulse
 
-import java.util.List;
+import retrofit2.Call
+import retrofit2.http.GET
 
-import retrofit2.Call;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-
-public interface SteamWebAPIClient {
-    @GET("/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002/?gameid=870780&format=json")
-    Call<List<SteamAchievementPercentages>> getAchievementPercentages()
-                                                                      ;
+interface SteamWebAPIClient {
+@GET("/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=870780&format=json")
+fun getAllAchievementPercentages(): Call<SteamAchievementPercentages>
 }

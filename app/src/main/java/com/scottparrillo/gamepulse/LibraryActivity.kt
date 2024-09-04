@@ -2,6 +2,7 @@ package com.scottparrillo.gamepulse
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -52,14 +53,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.gson.Gson
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
-import okhttp3.OkHttpClient
+import retrofit2.Callback
 import retrofit2.Call
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.io.EOFException
 import java.io.File
 import java.io.IOException
@@ -105,24 +105,30 @@ class LibraryActivity : AppCompatActivity() {
         //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
         //Setting up drop down menu
         var expandedDrop by remember { mutableStateOf(false) }
-        val httpclient: OkHttpClient.Builder = OkHttpClient.Builder()
-        //Setting up Retrofit to pull steam API data
-        val retrofit:Retrofit = Retrofit.Builder()
-            .baseUrl("https://api.steampowered.com/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(httpclient.build())
-            .build()
-//this is just being used for testing to see if it works
-        val service: SteamWebAPIClient by lazy { retrofit.create(SteamWebAPIClient::class.java) }
-        val callSync: Call<MutableList<SteamAchievementPercentages>> = service.getAchievementPercentages()
-        try {
-            val response: Response<MutableList<SteamAchievementPercentages>> = callSync.execute()
-            val apiRes: MutableList<SteamAchievementPercentages>? = response.body()
-         //   val test:String = apiRes!![0].getName()
-        }
-        catch (ex:Exception){
-            ex.printStackTrace()
-        }
+        var test = ""
+
+       val call = SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages()
+        call.enqueue(object: Callback<SteamAchievementPercentages>{
+            override fun onResponse(
+                call: Call<SteamAchievementPercentages>,
+                response: Response<SteamAchievementPercentages>
+            ) {
+                if(response.isSuccessful)
+                {
+                   val post = response.body()!!
+
+
+                    Log.v("api", post.toString())
+                   // Log.v("api", post.achievementpercentages[0].achievements[0].name)
+                }
+            }
+
+            override fun onFailure(p0: Call<SteamAchievementPercentages>, p1: Throwable) {
+                p1.printStackTrace()
+            }
+
+        })
+
 
 
         fun getGameFile(): List<Game>? {
@@ -164,7 +170,7 @@ class LibraryActivity : AppCompatActivity() {
 
         /*val onBackPressedDispatcher =
            LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher */
-
+        //val tests:String = apilisttest[0].name
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -173,7 +179,8 @@ class LibraryActivity : AppCompatActivity() {
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.homeicon),
