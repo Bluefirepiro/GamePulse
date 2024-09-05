@@ -6,6 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 interface SteamRetrofit {
 
     object retrofitSteam{
+        //https://api.steampowered.com/
+        //https://partner.steam-api.com/
         private const val BASE_URL = "https://api.steampowered.com/"
       val retrofit: Retrofit by lazy {
             Retrofit.Builder()

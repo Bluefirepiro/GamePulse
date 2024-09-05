@@ -106,8 +106,12 @@ class LibraryActivity : AppCompatActivity() {
         //Setting up drop down menu
         var expandedDrop by remember { mutableStateOf(false) }
         var test = ""
+        /*I have this below to show an example of how to make a call
+        this can be commented away when not used for testing
+         */
 
-       val call = SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages()
+        /*
+       val call = SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages("4A7BFC2A3443A093EA9953FD5529C795", 1158310, "json" )
         call.enqueue(object: Callback<SteamAchievementPercentages>{
             override fun onResponse(
                 call: Call<SteamAchievementPercentages>,
@@ -129,6 +133,28 @@ class LibraryActivity : AppCompatActivity() {
 
         })
 
+         */
+        val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, 76561198064427137, "json" )
+        call.enqueue(object: Callback<SteamOwnedGames>{
+            override fun onResponse(
+                call: Call<SteamOwnedGames>,
+                response: Response<SteamOwnedGames>
+            ) {
+                if(response.isSuccessful)
+                {
+                    val post = response.body()!!
+
+
+                    Log.v("api", post.toString())
+                    // Log.v("api", post.achievementpercentages[0].achievements[0].name)
+                }
+            }
+
+            override fun onFailure(p0: Call<SteamOwnedGames>, p1: Throwable) {
+                p1.printStackTrace()
+            }
+
+        })
 
 
         fun getGameFile(): List<Game>? {
