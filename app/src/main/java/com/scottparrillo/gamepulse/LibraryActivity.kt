@@ -231,8 +231,11 @@ class LibraryActivity : AppCompatActivity() {
                     fontFamily = jockeyOne,
                     fontSize = 40.sp
                 )
+
                 Button(
                     onClick = {
+                        context.startActivity(Intent(context, GameImportActivity::class.java))
+                        /*
                         //Upon clicking import get the steam user id then load in the games
                         val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, 76561198064427137, "json" )
                         call.enqueue(object: Callback<SteamOwnedGames>{
@@ -269,6 +272,8 @@ class LibraryActivity : AppCompatActivity() {
 
                         })
 
+                         */
+
                     }, modifier = Modifier.padding(horizontal = 0.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
                 ) {
@@ -276,6 +281,9 @@ class LibraryActivity : AppCompatActivity() {
 
 
                 }
+
+
+
             }
             //This row holds the search bar and button
             Row() {
@@ -347,7 +355,9 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
                                 val sortedList =
-                                    gameList.sortedBy { it.recentlyPlayed }.toMutableList()
+                                    gameList
+                                        .sortedBy { it.recentlyPlayed }
+                                        .toMutableList()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -366,7 +376,9 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
                                 val sortedList =
-                                    gameList.sortedBy { it.currentlyPlaying }.toMutableList()
+                                    gameList
+                                        .sortedBy { it.currentlyPlaying }
+                                        .toMutableList()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -384,7 +396,9 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                val sortedList = gameList.sortedBy { it.completed }.toMutableList()
+                                val sortedList = gameList
+                                    .sortedBy { it.completed }
+                                    .toMutableList()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -402,7 +416,9 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                val sortedList = gameList.sortedBy { it.newlyAdded }.toMutableList()
+                                val sortedList = gameList
+                                    .sortedBy { it.newlyAdded }
+                                    .toMutableList()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -521,6 +537,13 @@ class LibraryActivity : AppCompatActivity() {
                     }
                 }
             }
+            LazyRow {
+                item {
+
+                }
+            }
         }
+        //Gonna put the imports down here for now
+
     }
 }

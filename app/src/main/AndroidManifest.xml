@@ -41,6 +41,10 @@
             android:name=".FriendsActivity"
             android:label="Friends"
             android:theme="@style/Theme.GamePulse"/>
+        <activity
+            android:name=".GameImportActivity"
+            android:label="Import"
+            android:theme="@style/Theme.GamePulse" />
 
     </application>
 
