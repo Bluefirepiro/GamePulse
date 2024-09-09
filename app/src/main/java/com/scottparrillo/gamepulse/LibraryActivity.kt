@@ -105,7 +105,6 @@ class LibraryActivity : AppCompatActivity() {
         //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
         //Setting up drop down menu
         var expandedDrop by remember { mutableStateOf(false) }
-        var test = ""
         /*I have this below to show an example of how to make a call
         this can be commented away when not used for testing
          */
@@ -134,6 +133,7 @@ class LibraryActivity : AppCompatActivity() {
         })
 
          */
+        /*
         val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, 76561198064427137, "json" )
         call.enqueue(object: Callback<SteamOwnedGames>{
             override fun onResponse(
@@ -155,7 +155,7 @@ class LibraryActivity : AppCompatActivity() {
             }
 
         })
-
+*/
 
         fun getGameFile(): List<Game>? {
             return try {
@@ -231,6 +231,51 @@ class LibraryActivity : AppCompatActivity() {
                     fontFamily = jockeyOne,
                     fontSize = 40.sp
                 )
+                Button(
+                    onClick = {
+                        //Upon clicking import get the steam user id then load in the games
+                        val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, 76561198064427137, "json" )
+                        call.enqueue(object: Callback<SteamOwnedGames>{
+                            override fun onResponse(
+                                call: Call<SteamOwnedGames>,
+                                response: Response<SteamOwnedGames>
+                            ) {
+                                if(response.isSuccessful)
+                                {
+                                    val post = response.body()!!
+                                    val res = post.response!!
+                                    val games:List<SteamOwnedGames.Response.SteamGames> = post.response.games
+                                    for(game in games) {
+                                        //make a game object and add it to games list
+                                        var gameconvert = Game()
+                                        gameconvert.gameName = game.name
+                                        gameconvert.gameId = game.appid.toInt()
+                                        gameconvert.gamePlatform = "Steam"
+                                        gameconvert.gameTime = game.playtime_forever.toFloat()
+                                        Game.gameList.add(gameconvert)
+                                    }
+                                    gameList.clear()
+                                    gameList.addAll(Game.gameList)
+                                    saveGameFile(Game.gameList)
+
+
+                                    // Log.v("api", post.achievementpercentages[0].achievements[0].name)
+                                }
+                            }
+
+                            override fun onFailure(p0: Call<SteamOwnedGames>, p1: Throwable) {
+                                p1.printStackTrace()
+                            }
+
+                        })
+
+                    }, modifier = Modifier.padding(horizontal = 0.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                ) {
+                    Text("Import", color = Color.Black)
+
+
+                }
             }
             //This row holds the search bar and button
             Row() {

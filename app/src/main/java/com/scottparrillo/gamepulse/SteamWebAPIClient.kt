@@ -10,7 +10,7 @@ interface SteamWebAPIClient {
 @GET("/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/")
 fun getAllAchievementPercentages(@Query("key") key: String, @Query("gameid") gameid:Int, @Query("format") format:String): Call<SteamAchievementPercentages>
 //This function returns all owned games in an array given that the user's steam profile is public and you have their steam id
-    @GET("/IPlayerService/GetOwnedGames/v0001/")
-    fun getAllOwnedGames(@Query("key") key: String,@Query("include_appinfo") include_appinfo:Boolean, @Query("steamid") steamid:Long,
-                         @Query("format") format:String): Call<SteamOwnedGames>
+@GET("/IPlayerService/GetOwnedGames/v0001/")
+fun getAllOwnedGames(@Query("key") key: String,@Query("include_appinfo") include_appinfo:Boolean, @Query("steamid") steamid:Long,
+                     @Query("format") format:String): Call<SteamOwnedGames>
 }
