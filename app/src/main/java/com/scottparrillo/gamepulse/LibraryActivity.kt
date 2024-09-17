@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.google.gson.Gson
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
@@ -290,29 +291,28 @@ class LibraryActivity : AppCompatActivity() {
                             .padding(horizontal = 8.dp, vertical = 10.dp)
                             .clickable {
 
-                                    val tempMutableList = mutableListOf<Game>()
-                                    var findMark = false
-                                    for (game in gameList) {
-                                        if (game.gameName.contains(searchText)) {
-                                            tempMutableList.add(game)
-                                            findMark = true
-                                            searchFlag.value = true
-                                        } else if (searchText == "") {
-                                            gameList.clear()
-                                            gameList.addAll(Game.gameList)
-                                        }
-
-                                    }
-                                    if (findMark) {
+                                val tempMutableList = mutableListOf<Game>()
+                                var findMark = false
+                                for (game in gameList) {
+                                    if (game.gameName.contains(searchText)) {
+                                        tempMutableList.add(game)
+                                        findMark = true
+                                        searchFlag.value = true
+                                    } else if (searchText == "") {
                                         gameList.clear()
-                                        gameList.addAll(tempMutableList)
-                                    } else {
-                                        val toast = Toast.makeText(
-                                            context, "Name not found", Toast.LENGTH_SHORT
-                                        )
-                                        toast.show()
+                                        gameList.addAll(Game.gameList)
                                     }
 
+                                }
+                                if (findMark) {
+                                    gameList.clear()
+                                    gameList.addAll(tempMutableList)
+                                } else {
+                                    val toast = Toast.makeText(
+                                        context, "Name not found", Toast.LENGTH_SHORT
+                                    )
+                                    toast.show()
+                                }
 
 
                             }
@@ -503,29 +503,48 @@ class LibraryActivity : AppCompatActivity() {
                                     gameList[gameList.indexOf(game)] = game
                                     saveGameFile(gameList)
                                 }
-                        )
+                            )
 
                         // Game Icon
-                        Image(
-                            painter = painterResource(id = R.drawable.plus),
-                            contentDescription = "Game icon",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(135.dp)
-                                .clip(CircleShape)
-                                .combinedClickable(
-                                    enabled = true,
-                                    onLongClick = {
-                                        gameList.remove(game)
-                                        Game.gameList.clear()
-                                        Game.gameList.addAll(gameList)
-                                        saveGameFile(Game.gameList)
-                                    },
-                                    onClick = {
-                                        // Handle single click if needed
-                                    }
+                        if(game.coverURL == "") {
+                            Image(
+                                painter = painterResource(id = R.drawable.plus),
+                                contentDescription = "Game icon",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(135.dp)
+                                    .clip(CircleShape)
+                                    .combinedClickable(
+                                        enabled = true,
+                                        onLongClick = {
+                                            gameList.remove(game)
+                                            Game.gameList.clear()
+                                            Game.gameList.addAll(gameList)
+                                            saveGameFile(Game.gameList)
+                                        },
+                                        onClick = {
+                                            // Handle single click if needed
+                                        }
+                                    )
                                 )
-                        )
+                        }
+                        else{
+                                AsyncImage(model = game.coverURL, contentDescription = "The cover of a game",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(135.dp)
+                                        .clip(CircleShape)
+                                        .combinedClickable(
+                                            enabled = true,
+                                            onLongClick = {
+                                                gameList.remove(game)
+                                                Game.gameList.clear()
+                                                Game.gameList.addAll(gameList)
+                                                saveGameFile(Game.gameList)
+                                            },
+                                            onClick ={} ))
+                        }
+
 
                         Text(text = game.gameName)
                     }

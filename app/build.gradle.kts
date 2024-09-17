@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui)
     // define a BOM and its version
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
+    implementation(libs.coil.compose)
 
     // define any required OkHttp artifacts without version
     implementation("com.squareup.okhttp3:okhttp")
