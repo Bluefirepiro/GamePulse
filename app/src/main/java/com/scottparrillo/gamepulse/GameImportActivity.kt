@@ -84,6 +84,7 @@ class GameImportActivity: AppCompatActivity() {
                             modifier = Modifier
                                 .size(65.dp)
                                 .clickable {
+                                    saveGameFile(Game.gameList)
                                     context.startActivity(
                                         Intent(
                                             context,
