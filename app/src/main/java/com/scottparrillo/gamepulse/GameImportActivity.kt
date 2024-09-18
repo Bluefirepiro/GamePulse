@@ -8,9 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -24,12 +28,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,37 +82,42 @@ class GameImportActivity: AppCompatActivity() {
                 .background(color = CuriousBlue)
         ){
             item {
-                    LazyRow {
+                    LazyRow(verticalAlignment = Alignment.CenterVertically) {
                         item { Image(
                             painter = painterResource(id = R.drawable.homeicon),
                             contentDescription = "Back arrow",
                             contentScale = ContentScale.Inside,
                             modifier = Modifier
                                 .size(65.dp)
+                                .padding(horizontal = 8.dp)
                                 .clickable {
                                     saveGameFile(Game.gameList)
-                                    context.startActivity(
-                                        Intent(
-                                            context,
-                                            MainActivity::class.java
-                                        )
-                                    )
+                                    context.startActivity(Intent(context, MainActivity::class.java))
                                 }
                         ) }
                         item {Text(text = "Game Import", fontSize = 40.sp,
-                            modifier = Modifier.padding(vertical = 20.dp)) }
+                            modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp)) }
 
                     }
 
                     }
+            item { Row (){
+                Text(text = "Steam Import", fontSize = 35.sp,
+                     textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp))
+            } }
 
             item { LazyRow {
                 item {TextField(
                     value = steamIdText, onValueChange = { steamIdText = it },
                     label = { Text("Enter Steam Id") },
                     modifier = Modifier
-                        .size(width = 280.dp, height = 46.dp),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        .size(width = 280.dp, height = 50.dp)
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
+                        .requiredHeight(height = 50.dp),
+
                 )  }
                 item {
                     Button(
@@ -140,6 +151,7 @@ class GameImportActivity: AppCompatActivity() {
                                             Game.gameList.add(gameconvert)
                                         }
                                         saveGameFile(Game.gameList)
+                                        steamIdText = "Done now click import achievements"
 
                                         //context.startActivity(Intent(context, LibraryActivity::class.java))
 
@@ -150,104 +162,78 @@ class GameImportActivity: AppCompatActivity() {
                                 }
 
                             })
-                            /*
-                            Note thread joining is causing the achievement import to run before the games are imported
-                            Move the achievement to another button or add an explicit call to the thread for order of run
-                             */
-
-
-                            //Iterate through the Game.gamelist and add the achievemnts
-                            /*
-                            for(game in Game.gameList) {
-                                val achievementCall = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(game.gameId,"4A7BFC2A3443A093EA9953FD5529C795", steamIdText.toLong())
-                                achievementCall.enqueue(object: Callback<SteamPlayerAchievements>{
-                                    override fun onResponse(
-                                        achievementCall: Call<SteamPlayerAchievements>,
-                                        achievementResponse: Response<SteamPlayerAchievements>
-                                    ) {
-                                        if(achievementResponse.isSuccessful){
-                                            val achievementPost = achievementResponse.body()!!
-                                            val playerStats = achievementPost.playerstats!!
-                                            val gameAchievements = playerStats.achievements
-                                            for(ach in gameAchievements)
-                                            {
-                                                val earnedFlag = if(ach.achieved == 1)true else false
-                                                val toConvert:Achievement = Achievement(0,ach.apiname,"",0.0,earnedFlag,0,0,0)
-                                                game.achievements.add(toConvert)
-                                            }
-                                        }
-                                    }
-
-                                    override fun onFailure(
-                                        achievementCall: Call<SteamPlayerAchievements>,
-                                        achievementThrow: Throwable
-                                    ) {
-                                        achievementThrow.printStackTrace()
-                                    }
-
-                                })
-                            }
-
-                             */
-                            //Put test code here
-
-
-
                         }, modifier = Modifier.padding(horizontal = 0.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
                     ) {
                         Text("Import", color = Color.Black)
-
-
                     }
-                    //I want to just test this call and nothing else
 
                 }
-
-
-                //Get Id import steam games and add them to the list
             } }
+
             item {
-                Row {
-                    Button(onClick = {
-                        //Loop through Game.game list and grab achievements
-                        for(game in Game.gameList)
-                        {
-                            val achievementCall = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(game.gameId,"4A7BFC2A3443A093EA9953FD5529C795", steamIdText.toLong())
-                            achievementCall.enqueue(object: Callback<SteamPlayerAchievements>{
-                                override fun onResponse(
-                                    call: Call<SteamPlayerAchievements>,
-                                    response: Response<SteamPlayerAchievements>
-                                ) {
-                                    if(response.isSuccessful){
-                                        val achievementPost = response.body()!!
-                                        val playerStats = achievementPost.playerstats!!
-                                        val gameAchievements = playerStats.achievements
-                                        for(ach in gameAchievements)
-                                        {
-                                            val earnedFlag = if(ach.achieved == 1)true else false
-                                            val toConvert:Achievement = Achievement(0,ach.apiname,"",0.0,earnedFlag,0,0,0)
-                                            game.achievements.add(toConvert)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
 
+
+                        Button(
+                            onClick = {
+                                //Loop through Game.game list and grab achievements
+                                for (game in Game.gameList) {
+                                    val achievementCall =
+                                        SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
+                                            game.gameId,
+                                            "4A7BFC2A3443A093EA9953FD5529C795",
+                                            steamIdText.toLong()
+                                        )
+                                    achievementCall.enqueue(object :
+                                        Callback<SteamPlayerAchievements> {
+                                        override fun onResponse(
+                                            call: Call<SteamPlayerAchievements>,
+                                            response: Response<SteamPlayerAchievements>
+                                        ) {
+                                            if (response.isSuccessful) {
+                                                val achievementPost = response.body()!!
+                                                val playerStats = achievementPost.playerstats!!
+                                                val gameAchievements = playerStats.achievements
+                                                for (ach in gameAchievements) {
+                                                    val earnedFlag =
+                                                        if (ach.achieved == 1) true else false
+                                                    val toConvert: Achievement = Achievement(
+                                                        0,
+                                                        ach.apiname,
+                                                        "",
+                                                        0.0,
+                                                        earnedFlag,
+                                                        0,
+                                                        0,
+                                                        0
+                                                    )
+                                                    game.achievements.add(toConvert)
+
+                                                }
+                                            }
                                         }
-                                    }
-                                }
 
-                                override fun onFailure(
-                                    p0: Call<SteamPlayerAchievements>,
-                                    p1: Throwable
-                                ) {
-                                    p1.printStackTrace()
+                                        override fun onFailure(
+                                            p0: Call<SteamPlayerAchievements>,
+                                            p1: Throwable
+                                        ) {
+                                            p1.printStackTrace()
+                                        }
+                                    })
                                 }
-                            })
+                                saveGameFile(Game.gameList)
+
+
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(horizontal = 40.dp, vertical = 8.dp)
+                        ) {
+                            Text("Import Achievements", color = Color.Black)
                         }
-                        saveGameFile(Game.gameList)
-
-
-                    }) {
-                        Text("Achievement Test", color = Color.Black)
                     }
-                }
+
             }
         }
 

@@ -4,12 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -19,12 +24,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.PrussainBlue
+import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import java.io.EOFException
 import java.io.File
 import java.io.IOException
@@ -93,12 +103,26 @@ class GameInputActivity: AppCompatActivity() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(0.dp)
-                .background(color = PrussainBlue),
+                .background(color = CuriousBlue),
             horizontalAlignment = Alignment.CenterHorizontally
         )
         {
             //Title text
-            item { Text(text = "Game Input", fontSize = 40.sp, modifier = Modifier.padding(vertical = 20.dp))  }
+            item { Row (verticalAlignment = Alignment.CenterVertically){
+                Image(
+                    painter = painterResource(id = R.drawable.homeicon),
+                    contentDescription = "Back arrow",
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier
+                        .size(65.dp)
+                        .padding(horizontal = 8.dp)
+                        .clickable {
+                            saveGameFile(Game.gameList)
+                            context.startActivity(Intent(context, MainActivity::class.java))
+                        }
+                )
+                Text(text = "Game Input", fontSize = 40.sp, modifier = Modifier.padding(vertical = 20.dp))
+            }   }
             item {
                 //Text inputs below
                 LazyRow (modifier = Modifier.padding(vertical = 20.dp))
@@ -138,8 +162,9 @@ class GameInputActivity: AppCompatActivity() {
             //Buttons
             item { LazyRow {
                 item {
-                    Button(onClick = { context.startActivity(Intent(context, LibraryActivity::class.java)) }) {
-                        Text(text = "Back")
+                    Button(onClick = { context.startActivity(Intent(context, LibraryActivity::class.java)) },
+                        colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                        Text(text = "Back",color = Color.Black)
 
                     } }
                 //On click we used the method I made to convert the string inputs to a gameDB object
@@ -148,8 +173,9 @@ class GameInputActivity: AppCompatActivity() {
                     Game.gameList.add(gameInput)
                     saveGameFile(Game.gameList)
                     context.startActivity(Intent(context, LibraryActivity::class.java))
-                }) {
-                    Text(text = "Confirm Inputs")
+                },
+                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                    Text(text = "Confirm Inputs",color = Color.Black)
 
 
                 } }

@@ -459,7 +459,8 @@ class LibraryActivity : AppCompatActivity() {
                         gameList.addAll(sortedList)
                     })
                     DropdownMenuItem(text = { Text(text = "Time Spent") }, onClick = {
-                        val sortedList = gameList.sortedBy { it.gameTime.toInt() }.toMutableList()
+                        val sortedList = gameList.sortedBy { it.gameTime }.toMutableList()
+                        sortedList.reverse()
                         gameList.clear()
                         gameList.addAll(sortedList)
                     })
