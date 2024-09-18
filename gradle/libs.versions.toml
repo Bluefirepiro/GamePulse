@@ -1,6 +1,6 @@
 [versions]
 agp = "8.5.1"
-converterGson = "2.9.0"
+coilCompose = "2.7.0"
 gson = "2.10.1"
 gsonVersion = "2.8.8"
 kotlin = "1.9.0"
@@ -21,12 +21,16 @@ appcompat = "1.7.0"
 playServicesGames = "23.2.0"
 playServicesGamesV2 = "20.1.2"
 firebaseCrashlyticsBuildtools = "3.0.2"
+retrofit = "2.11.0"
+converterJackson = "2.11.0"
+converterGson = "2.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 gson-v288 = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -50,7 +54,10 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 play-services-games = { group = "com.google.android.gms", name = "play-services-games", version.ref = "playServicesGames" }
 play-services-games-v2 = { group = "com.google.android.gms", name = "play-services-games-v2", version.ref = "playServicesGamesV2" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+converter-jackson = { group = "com.squareup.retrofit2", name = "converter-jackson", version.ref = "converterJackson" }
+converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "converterGson" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
