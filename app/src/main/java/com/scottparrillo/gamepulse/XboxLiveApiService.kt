@@ -8,7 +8,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
-
+/*
 interface XboxLiveApiService {
     @GET("profile/{xuid}")
     suspend fun getUserProfile(
@@ -24,3 +24,5 @@ interface XboxLiveApiService {
 
     // Add other API endpoints as needed
 }
+
+ */

@@ -11,7 +11,7 @@ object XboxLiveApiClient {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val service: XboxLiveApiService = retrofit.create(XboxLiveApiService::class.java)
+   // val service: XboxLiveApiService = retrofit.create(XboxLiveApiService::class.java)
 }
 
 

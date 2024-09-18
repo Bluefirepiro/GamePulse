@@ -89,7 +89,7 @@ class AchievementActivity : AppCompatActivity() {
         })
 
         // Load initial achievements from file
-        loadAchievementsFromApi()
+     //   loadAchievementsFromApi()
 
         // Set up the "Add Achievement" button
         val buttonAddAchievement: Button = findViewById(R.id.buttonAddAchievement)
@@ -106,7 +106,7 @@ class AchievementActivity : AppCompatActivity() {
         // Create the notification channel
         createNotificationChannel()
     }
-
+/*
     private fun loadAchievementsFromApi() {
         lifecycleScope.launch {
             try {
@@ -134,6 +134,8 @@ class AchievementActivity : AppCompatActivity() {
             }
         }
     }
+
+ */
 
 
     private fun showAddAchievementDialog() {

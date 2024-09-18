@@ -2,7 +2,7 @@ package com.scottparrillo.gamepulse.api
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-
+/*
 object ApiClient {
     private const val BASE_URL = "https://xboxliveapi.example.com/" // Replace with actual base URL
 
@@ -14,3 +14,5 @@ object ApiClient {
             .create(XboxLiveApiService::class.java)
     }
 }
+
+ */
