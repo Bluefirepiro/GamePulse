@@ -1,14 +1,25 @@
 package com.scottparrillo.gamepulse
 
+import java.io.Serializable
+
+data class AchievementResponse(
+    val title: String,
+    val description: String,
+    val percentageEarned: Double,
+    val isEarned: Boolean,
+    val progress: Int,
+    val total: Int
+) : Serializable
+
 data class GameDetailsResponse(
-    val id: String,                // The unique ID of the game
-    val name: String,              // The name of the game
-    val description: String?,      // A brief description of the game
-    val releaseDate: String?,      // The release date of the game
-    val platform: String?,         // The platform the game is available on
-    val developer: String?,        // The developer of the game
-    val publisher: String?,        // The publisher of the game
-    val genre: List<String>?,      // A list of genres the game belongs to
-    val coverImageUrl: String?,    // URL to the cover image of the game
-    val achievements: List<Achievement>? // A list of achievements for the game (if available)
-)
+    val gameId: String,
+    val gameName: String,
+    val gameDescription: String,
+    val platform: String,
+    val releaseDate: String,
+    val developer: String,
+    val publisher: String,
+    val genres: List<String>,
+    val coverImageUrl: String,
+    val achievements: List<AchievementResponse> // Add this to include achievements
+) : Serializable
