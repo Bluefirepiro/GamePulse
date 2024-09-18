@@ -1,4 +1,4 @@
-/*
+
 package com.scottparrillo.gamepulse
 
 data class User(
@@ -22,18 +22,5 @@ data class User(
     }
 }
 
-data class Game(
-    val id: Int,
-    val title: String,
-    val coverImageUrl: String,
-    val genre: String,
-    val isCompleted: Boolean = false
-)
 
-data class Achievement(
-    val id: Int,
-    val title: String,
-    val description: String,
-    val dateEarned: String
-)
-*/
+

@@ -2,6 +2,7 @@ package com.scottparrillo.gamepulse
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -52,9 +53,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.google.gson.Gson
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
+import retrofit2.Callback
+import retrofit2.Call
+import retrofit2.Response
 import java.io.EOFException
 import java.io.File
 import java.io.IOException
@@ -73,6 +79,9 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
     /*
+    Center Search button on Add Game Button
+    Pad search button to start of home icon
+    Round top two corners on square buttons
     Green Background with white text
     Pull color scheme from logo using adobe color
     Important for everything to be readable and have contrast
@@ -97,8 +106,34 @@ class LibraryActivity : AppCompatActivity() {
         //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
         //Setting up drop down menu
         var expandedDrop by remember { mutableStateOf(false) }
+        /*I have this below to show an example of how to make a call
+        this can be commented away when not used for testing
+         */
+
+        /*
+       val call = SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages("4A7BFC2A3443A093EA9953FD5529C795", 1158310, "json" )
+        call.enqueue(object: Callback<SteamAchievementPercentages>{
+            override fun onResponse(
+                call: Call<SteamAchievementPercentages>,
+                response: Response<SteamAchievementPercentages>
+            ) {
+                if(response.isSuccessful)
+                {
+                   val post = response.body()!!
 
 
+                    Log.v("api", post.toString())
+                   // Log.v("api", post.achievementpercentages[0].achievements[0].name)
+                }
+            }
+
+            override fun onFailure(p0: Call<SteamAchievementPercentages>, p1: Throwable) {
+                p1.printStackTrace()
+            }
+
+        })
+
+         */
         fun getGameFile(): List<Game>? {
             return try {
                 val fis = context.openFileInput("gameList")
@@ -138,7 +173,7 @@ class LibraryActivity : AppCompatActivity() {
 
         /*val onBackPressedDispatcher =
            LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher */
-
+        //val tests:String = apilisttest[0].name
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -147,7 +182,8 @@ class LibraryActivity : AppCompatActivity() {
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.homeicon),
@@ -172,6 +208,17 @@ class LibraryActivity : AppCompatActivity() {
                     fontFamily = jockeyOne,
                     fontSize = 40.sp
                 )
+                Image(
+                    painter = painterResource(id = R.drawable.gameimport),
+                    contentDescription = "Magnifying Glass",
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier
+                        .size(98.dp)
+                        .padding(horizontal = 2.dp)
+                        .clickable {
+                            context.startActivity(Intent(context, GameImportActivity::class.java))
+                        }
+                )
             }
             //This row holds the search bar and button
             Row() {
@@ -179,9 +226,10 @@ class LibraryActivity : AppCompatActivity() {
                     value = searchText, onValueChange = { searchText = it },
                     label = { Text("Search Game") },
                     modifier = Modifier
-                        .size(width = 280.dp, height = 46.dp),
+                        .size(width = 280.dp, height = 46.dp)
+                        .padding(horizontal = 8.dp),
                 )
-                Button(
+                /*Button(
                     onClick = {
                         val tempMutableList = mutableListOf<Game>()
                         var findMark = false
@@ -208,12 +256,46 @@ class LibraryActivity : AppCompatActivity() {
 
 
                     }, modifier = Modifier.padding(horizontal = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                ) {
-                    Text("Search", color = Color.Black)
+
+                )*/
+                    Image(
+                        painter = painterResource(id = R.drawable.searchicon),
+                        contentDescription = "Magnifying Glass",
+                        contentScale = ContentScale.Inside,
+                        modifier = Modifier
+                            .size(60.dp)
+                            .padding(horizontal = 8.dp, vertical = 10.dp)
+                            .clickable {
+
+                                val tempMutableList = mutableListOf<Game>()
+                                var findMark = false
+                                for (game in gameList) {
+                                    if (game.gameName.contains(searchText)) {
+                                        tempMutableList.add(game)
+                                        findMark = true
+                                        searchFlag.value = true
+                                    } else if (searchText == "") {
+                                        gameList.clear()
+                                        gameList.addAll(Game.gameList)
+                                    }
+
+                                }
+                                if (findMark) {
+                                    gameList.clear()
+                                    gameList.addAll(tempMutableList)
+                                } else {
+                                    val toast = Toast.makeText(
+                                        context, "Name not found", Toast.LENGTH_SHORT
+                                    )
+                                    toast.show()
+                                }
 
 
-                }
+                            }
+                    )
+
+
+
                 /*
                 SearchBar(
                     query = searchText.value,
@@ -243,7 +325,9 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
                                 val sortedList =
-                                    gameList.sortedBy { it.recentlyPlayed }.toMutableList()
+                                    gameList
+                                        .sortedBy { it.recentlyPlayed }
+                                        .toMutableList()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -262,7 +346,9 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
                                 val sortedList =
-                                    gameList.sortedBy { it.currentlyPlaying }.toMutableList()
+                                    gameList
+                                        .sortedBy { it.currentlyPlaying }
+                                        .toMutableList()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -280,7 +366,9 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                val sortedList = gameList.sortedBy { it.completed }.toMutableList()
+                                val sortedList = gameList
+                                    .sortedBy { it.completed }
+                                    .toMutableList()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -298,7 +386,9 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                val sortedList = gameList.sortedBy { it.newlyAdded }.toMutableList()
+                                val sortedList = gameList
+                                    .sortedBy { it.newlyAdded }
+                                    .toMutableList()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -345,7 +435,8 @@ class LibraryActivity : AppCompatActivity() {
                         gameList.addAll(sortedList)
                     })
                     DropdownMenuItem(text = { Text(text = "Time Spent") }, onClick = {
-                        val sortedList = gameList.sortedBy { it.gameTime.toInt() }.toMutableList()
+                        val sortedList = gameList.sortedBy { it.gameTime }.toMutableList()
+                        sortedList.reverse()
                         gameList.clear()
                         gameList.addAll(sortedList)
                     })
@@ -389,34 +480,60 @@ class LibraryActivity : AppCompatActivity() {
                                     gameList[gameList.indexOf(game)] = game
                                     saveGameFile(gameList)
                                 }
-                        )
+                            )
 
                         // Game Icon
-                        Image(
-                            painter = painterResource(id = R.drawable.plus),
-                            contentDescription = "Game icon",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(135.dp)
-                                .clip(CircleShape)
-                                .combinedClickable(
-                                    enabled = true,
-                                    onLongClick = {
-                                        gameList.remove(game)
-                                        Game.gameList.clear()
-                                        Game.gameList.addAll(gameList)
-                                        saveGameFile(Game.gameList)
-                                    },
-                                    onClick = {
-                                        // Handle single click if needed
-                                    }
+                        if(game.coverURL == "") {
+                            Image(
+                                painter = painterResource(id = R.drawable.plus),
+                                contentDescription = "Game icon",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(135.dp)
+                                    .clip(CircleShape)
+                                    .combinedClickable(
+                                        enabled = true,
+                                        onLongClick = {
+                                            gameList.remove(game)
+                                            Game.gameList.clear()
+                                            Game.gameList.addAll(gameList)
+                                            saveGameFile(Game.gameList)
+                                        },
+                                        onClick = {
+                                            // Handle single click if needed
+                                        }
+                                    )
                                 )
-                        )
+                        }
+                        else{
+                                AsyncImage(model = game.coverURL, contentDescription = "The cover of a game",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(135.dp)
+                                        .clip(CircleShape)
+                                        .combinedClickable(
+                                            enabled = true,
+                                            onLongClick = {
+                                                gameList.remove(game)
+                                                Game.gameList.clear()
+                                                Game.gameList.addAll(gameList)
+                                                saveGameFile(Game.gameList)
+                                            },
+                                            onClick ={} ))
+                        }
+
 
                         Text(text = game.gameName)
                     }
                 }
             }
+            LazyRow {
+                item {
+
+                }
+            }
         }
+        //Gonna put the imports down here for now
+
     }
 }

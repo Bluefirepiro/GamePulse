@@ -25,9 +25,12 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.scottparrillo.gamepulse.api.XboxLiveApiClient
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -86,7 +89,7 @@ class AchievementActivity : AppCompatActivity() {
         })
 
         // Load initial achievements from file
-        loadAchievements()
+     //   loadAchievementsFromApi()
 
         // Set up the "Add Achievement" button
         val buttonAddAchievement: Button = findViewById(R.id.buttonAddAchievement)
@@ -103,16 +106,37 @@ class AchievementActivity : AppCompatActivity() {
         // Create the notification channel
         createNotificationChannel()
     }
+/*
+    private fun loadAchievementsFromApi() {
+        lifecycleScope.launch {
+            try {
+                val gameId = "someGameId" // Replace with actual game ID
+                val response = XboxLiveApiClient.apiService.getGameDetails(gameId)
 
-    private fun loadAchievements() {
-        val savedAchievements = getAchievementFile()
-        val newAchievements = savedAchievements ?: listOf(
-            Achievement(R.drawable.ic_achievement, "Achievement 1", "Description 1", 50.0, true, 500, 1000, R.raw.sound1),
-            Achievement(R.drawable.ic_achievement, "Achievement 2", "Description 2", 30.0, false, 200, 500, R.raw.sound2),
-            Achievement(R.drawable.ic_achievement, "Achievement 3", "Description 3", 75.0, true, 1000, 1000, null)
-        )
-        achievementAdapter.updateList(newAchievements)
+                // Assuming the response contains achievement details
+                val fetchedAchievements = response.achievements.map { achievement ->
+                    Achievement(
+                        iconResId = R.drawable.ic_achievement, // Replace with appropriate icon logic
+                        title = achievement.title,
+                        description = achievement.description,
+                        percentageEarned = achievement.percentageEarned,
+                        isEarned = achievement.isEarned,
+                        progress = achievement.progress,
+                        total = achievement.total,
+                        soundResId = null // Customize sound if needed
+                    )
+                }
+
+                updateAchievementsList(fetchedAchievements)
+            } catch (e: Exception) {
+                // Handle exceptions, e.g., network issues
+                e.printStackTrace()
+            }
+        }
     }
+
+ */
+
 
     private fun showAddAchievementDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_achievement, null)
@@ -235,6 +259,7 @@ class AchievementActivity : AppCompatActivity() {
         achievements.addAll(newList)
         diffResult.dispatchUpdatesTo(achievementAdapter)
     }
+
 
     private fun filterAchievements(query: String) {
         val filteredList = achievements.filter { it.title.contains(query, ignoreCase = true) }

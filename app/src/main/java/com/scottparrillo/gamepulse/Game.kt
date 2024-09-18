@@ -9,7 +9,7 @@ class Game: Serializable {
     var isFavorite: Boolean = false // Add this property
     var gameTime: Float = 0f
     var timeToBeat: Float = 0f
-    var gameId: Int = 0
+    var gameId: Long = 0
     var gamePlatform: String = ""
     var coverURL: String = ""
     var gameName: String = ""
@@ -20,7 +20,7 @@ class Game: Serializable {
     var newlyAdded: Boolean = false
     var gameReleaseDate: String = ""
     //Games have multiple achievements so just adding a list so we can iter through them
-    var achievements: ArrayList<Achievement>? = null
+    var achievements = mutableListOf<Achievement>()
     //Global list object
     companion object{
         var gameList = mutableListOf<Game>()
