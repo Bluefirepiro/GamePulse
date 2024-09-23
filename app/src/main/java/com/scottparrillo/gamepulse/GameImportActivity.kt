@@ -2,8 +2,10 @@ package com.scottparrillo.gamepulse
 
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -44,6 +46,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
 import java.io.ObjectOutputStream
+import java.time.Instant
+import java.time.ZoneId
 
 class GameImportActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,6 +127,7 @@ class GameImportActivity: AppCompatActivity() {
                             //Upon clicking import get the steam user id then load in the games
                             val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, steamIdText.toLong(), "json" )
                             call.enqueue(object: Callback<SteamOwnedGames> {
+                                @RequiresApi(Build.VERSION_CODES.O)
                                 override fun onResponse(
                                     call: Call<SteamOwnedGames>,
                                     response: Response<SteamOwnedGames>
@@ -138,13 +143,17 @@ class GameImportActivity: AppCompatActivity() {
                                             val gameconvert = Game()
                                             gameconvert.gameName = game.name
                                             gameconvert.gameId = game.appid
+                                            val gameTimeHours = game.playtime_forever / 60
+                                            gameconvert.gameTime = gameTimeHours.toFloat()
                                             var convertToUrl = "https://steamcdn-a.akamaihd.net/steam/apps/"
                                             convertToUrl = convertToUrl.plus(game.appid.toString())
                                             //convertToUrl = convertToUrl.plus("/)"
                                             convertToUrl = convertToUrl.plus("/header.jpg")
                                             gameconvert.coverURL = convertToUrl
+                                            val timeLastPlayed = Instant.ofEpochSecond(game.rtime_last_played).atZone(
+                                                ZoneId.systemDefault()).toLocalDateTime()
+                                            gameconvert.dateTimeLastPlayed = timeLastPlayed
                                             gameconvert.gamePlatform = "Steam"
-                                            gameconvert.gameTime = game.playtime_forever.toFloat()
                                             Game.gameList.add(gameconvert)
                                         }
                                         saveGameFile(Game.gameList)

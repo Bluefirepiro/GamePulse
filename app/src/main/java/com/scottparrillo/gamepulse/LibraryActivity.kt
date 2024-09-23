@@ -165,11 +165,6 @@ class LibraryActivity : AppCompatActivity() {
             }
 
         }
-
-
-        /*val onBackPressedDispatcher =
-           LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher */
-        //val tests:String = apilisttest[0].name
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -225,35 +220,7 @@ class LibraryActivity : AppCompatActivity() {
                         .size(width = 280.dp, height = 46.dp)
                         .padding(horizontal = 8.dp),
                 )
-                /*Button(
-                    onClick = {
-                        val tempMutableList = mutableListOf<Game>()
-                        var findMark = false
-                        for (game in gameList) {
-                            if (game.gameName.contains(searchText)) {
-                                tempMutableList.add(game)
-                                findMark = true
-                                searchFlag.value = true
-                            } else if (searchText == "") {
-                                gameList.clear()
-                                gameList.addAll(Game.gameList)
-                            }
 
-                        }
-                        if (findMark) {
-                            gameList.clear()
-                            gameList.addAll(tempMutableList)
-                        } else {
-                            val toast = Toast.makeText(
-                                context, "Name not found", Toast.LENGTH_SHORT
-                            )
-                            toast.show()
-                        }
-
-
-                    }, modifier = Modifier.padding(horizontal = 8.dp),
-
-                )*/
                     Image(
                         painter = painterResource(id = R.drawable.searchicon),
                         contentDescription = "Magnifying Glass",
@@ -289,25 +256,6 @@ class LibraryActivity : AppCompatActivity() {
 
                             }
                     )
-
-
-
-                /*
-                SearchBar(
-                    query = searchText.value,
-                    onQueryChange = {searchText.value = it},
-                    onSearch = {searchFlag.value = false},
-                    active = searchFlag.value,
-                    onActiveChange = {searchFlag.value = it},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(height = 30.dp)
-                        .padding(horizontal = 4.dp),
-                    shape = RectangleShape
-                ) {
-
-                }
-                 */
             }
 
             LazyRow(
@@ -438,14 +386,6 @@ class LibraryActivity : AppCompatActivity() {
                     })
                 }
 
-                /*Button(onClick = {
-                    val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
-                    gameList.clear()
-                    gameList.addAll(sortedList)
-
-                },colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
-                    Text(text = "Sort",color = Color.Black)
-                } */
 
                 Button(onClick = {
                     context.startActivity(Intent(context, GameInputActivity::class.java))
@@ -454,7 +394,7 @@ class LibraryActivity : AppCompatActivity() {
                 }
             }
 
-            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp)) {
+            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 180.dp)) {
                 items(gameList) { game ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -505,7 +445,7 @@ class LibraryActivity : AppCompatActivity() {
                                 AsyncImage(model = game.coverURL, contentDescription = "The cover of a game",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
-                                        .size(135.dp)
+                                        .size(235.dp)
                                         .clip(RectangleShape)
                                         .combinedClickable(
                                             enabled = true,
