@@ -2,7 +2,6 @@ package com.scottparrillo.gamepulse
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -45,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -54,13 +54,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.google.gson.Gson
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
-import retrofit2.Callback
-import retrofit2.Call
-import retrofit2.Response
 import java.io.EOFException
 import java.io.File
 import java.io.IOException
@@ -510,10 +506,11 @@ class LibraryActivity : AppCompatActivity() {
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(135.dp)
-                                        .clip(CircleShape)
+                                        .clip(RectangleShape)
                                         .combinedClickable(
                                             enabled = true,
                                             onLongClick = {
+                                                //Rectangle two games per row
                                                 gameList.remove(game)
                                                 Game.gameList.clear()
                                                 Game.gameList.addAll(gameList)

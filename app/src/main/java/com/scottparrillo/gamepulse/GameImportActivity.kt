@@ -8,17 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -34,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,7 +58,8 @@ class GameImportActivity: AppCompatActivity() {
     @Composable
     fun GameImportScreen()
     {  var steamIdText by rememberSaveable { mutableStateOf("") }
-        val enterFlag = rememberSaveable { mutableStateOf(false) }
+        var steamId by rememberSaveable { mutableStateOf("") }
+       // val enterFlag = rememberSaveable { mutableStateOf(false) }
         val context = LocalContext.current
         fun saveGameFile(mutableGameList: MutableList<Game>): Boolean {
             try {
@@ -91,7 +88,7 @@ class GameImportActivity: AppCompatActivity() {
                                 .size(65.dp)
                                 .padding(horizontal = 8.dp)
                                 .clickable {
-                                    saveGameFile(Game.gameList)
+                                    //saveGameFile(Game.gameList)
                                     context.startActivity(Intent(context, MainActivity::class.java))
                                 }
                         ) }
@@ -111,7 +108,7 @@ class GameImportActivity: AppCompatActivity() {
 
             item { LazyRow {
                 item {TextField(
-                    value = steamIdText, onValueChange = { steamIdText = it },
+                    value = steamIdText, onValueChange = { steamIdText = it},
                     label = { Text("Enter Steam Id") },
                     modifier = Modifier
                         .size(width = 280.dp, height = 50.dp)
@@ -122,8 +119,7 @@ class GameImportActivity: AppCompatActivity() {
                 item {
                     Button(
                         onClick = {
-                            // This bool is used to indicate whether the game list is done importing
-                            var listDone = false
+
                             //Upon clicking import get the steam user id then load in the games
                             val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, steamIdText.toLong(), "json" )
                             call.enqueue(object: Callback<SteamOwnedGames> {
@@ -134,14 +130,15 @@ class GameImportActivity: AppCompatActivity() {
                                     if(response.isSuccessful)
                                     {
                                         val post = response.body()!!
+                                        //We need this and it is used
                                         val res = post.response!!
                                         val games:List<SteamOwnedGames.Response.SteamGames> = post.response.games
                                         for(game in games) {
                                             //make a game object and add it to games list
-                                            var gameconvert = Game()
+                                            val gameconvert = Game()
                                             gameconvert.gameName = game.name
                                             gameconvert.gameId = game.appid
-                                            var convertToUrl: String = "https://steamcdn-a.akamaihd.net/steam/apps/"
+                                            var convertToUrl = "https://steamcdn-a.akamaihd.net/steam/apps/"
                                             convertToUrl = convertToUrl.plus(game.appid.toString())
                                             //convertToUrl = convertToUrl.plus("/)"
                                             convertToUrl = convertToUrl.plus("/header.jpg")
@@ -151,7 +148,9 @@ class GameImportActivity: AppCompatActivity() {
                                             Game.gameList.add(gameconvert)
                                         }
                                         saveGameFile(Game.gameList)
-                                        steamIdText = "Done now click import achievements"
+                                        steamId = steamIdText
+                                        steamIdText = "Now click achievements"
+
 
                                         //context.startActivity(Intent(context, LibraryActivity::class.java))
 
@@ -183,7 +182,7 @@ class GameImportActivity: AppCompatActivity() {
                                         SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
                                             game.gameId,
                                             "4A7BFC2A3443A093EA9953FD5529C795",
-                                            steamIdText.toLong()
+                                            steamId.toLong()
                                         )
                                     achievementCall.enqueue(object :
                                         Callback<SteamPlayerAchievements> {
@@ -197,8 +196,9 @@ class GameImportActivity: AppCompatActivity() {
                                                 val gameAchievements = playerStats.achievements
                                                 for (ach in gameAchievements) {
                                                     val earnedFlag =
+                                                        //Ignore the warning
                                                         if (ach.achieved == 1) true else false
-                                                    val toConvert: Achievement = Achievement(
+                                                    val toConvert = Achievement(
                                                         0,
                                                         ach.apiname,
                                                         "",
