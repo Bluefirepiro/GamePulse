@@ -56,11 +56,16 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import com.scottparrillo.gamepulse.api.ApiClient
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import java.util.concurrent.TimeUnit
 
+
 class MainActivity : ComponentActivity() {
+
+    private val apiService = ApiClient.openXBLApiService
+
 
     private val NOTIFICATION_PERMISSION_REQUEST_CODE = 1
     private lateinit var requestNotificationPermissionLauncher: ActivityResultLauncher<String>
@@ -130,6 +135,7 @@ class MainActivity : ComponentActivity() {
 
         // Load recently played games from SharedPreferences when the activity starts
         loadRecentlyPlayedGames()
+        loadRecentlyAchievedAchievements()
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -289,28 +295,75 @@ class MainActivity : ComponentActivity() {
         recentlyAchievedAchievementsList.addAll(recentlyAchievedList)
     }
 
-    private fun loadRecentlyPlayedGames() {
-        recentlyPlayedGamesList.clear()
-        recentlyPlayedGamesList.addAll(loadRecentlyPlayedGamesFromSharedPreferences())
+      private fun loadRecentlyPlayedGames() {
+        /*CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Make the API call
+                val response = apiService.getRecentlyPlayedGames() // Adjust this to your actual API call
+
+                if (response.isSuccessful) {
+                    val gamesList = response.body() ?: emptyList()
+
+                    // Switch to the main thread to update the UI
+                    withContext(Dispatchers.Main) {
+                        recentlyPlayedGamesList.clear()
+                        recentlyPlayedGamesList.addAll(gamesList)
+                    }
+                } else {
+                    // Handle API error (optional)
+                    println("Error fetching recently played games: ${response.errorBody()}")
+                }
+            } catch (e: Exception) {
+                // Handle exception
+                e.printStackTrace()
+            }
+        }*/
     }
 
     private fun loadRecentlyAchievedAchievements() {
-        recentlyAchievedAchievementsList.clear()
-        recentlyAchievedAchievementsList.addAll(loadRecentlyAchievedAchievementsFromSharedPreferences())
-    }
+        /*CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Make the API call
+                val response = apiService.getRecentAchievements() // Adjust this to your actual API call
 
+                if (response.isSuccessful) {
+                    val achievementsList = response.body() ?: emptyList()
+
+                    // Switch to the main thread to update the UI
+                    withContext(Dispatchers.Main) {
+                        recentlyAchievedAchievementsList.clear()
+                        recentlyAchievedAchievementsList.addAll(achievementsList)
+                    }
+                } else {
+                    // Handle API error (optional)
+                    println("Error fetching recently achieved achievements: ${response.errorBody()}")
+                }
+            } catch (e: Exception) {
+                // Handle exception
+                e.printStackTrace()
+            }
+        }*/
+    }
     private fun loadRecentlyPlayedGamesFromSharedPreferences(): List<Game> {
         val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
-        val recentlyPlayedJson = sharedPreferences.getString("recently_played", "[]")
-        val recentlyPlayedListType = object : TypeToken<List<Game>>() {}.type
-        return Gson().fromJson(recentlyPlayedJson, recentlyPlayedListType) ?: emptyList()
+        val json = sharedPreferences.getString("recently_played", null)
+        return if (!json.isNullOrEmpty()) {
+            val type = object : TypeToken<List<Game>>() {}.type
+            Gson().fromJson(json, type)
+        } else {
+            emptyList()
+        }
     }
 
     private fun loadRecentlyAchievedAchievementsFromSharedPreferences(): List<Achievement> {
         val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
-        val recentlyAchievedJson = sharedPreferences.getString("recently_achieved", "[]")
-        val recentlyAchievedListType = object : TypeToken<List<Achievement>>() {}.type
-        return Gson().fromJson(recentlyAchievedJson, recentlyAchievedListType) ?: emptyList()
+        val json = sharedPreferences.getString("recently_achieved", null)
+        return if (!json.isNullOrEmpty()) {
+            val type = object : TypeToken<List<Achievement>>() {}.type
+            Gson().fromJson(json, type)
+        } else {
+            emptyList()
+        }
     }
 }
 

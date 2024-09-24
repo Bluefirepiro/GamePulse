@@ -29,7 +29,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.scottparrillo.gamepulse.api.XboxLiveApiClient
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.ObjectInputStream

@@ -1,17 +1,17 @@
 package com.scottparrillo.gamepulse.api
-
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object XboxLiveApiClient {
-    private const val BASE_URL = "https://xboxapi.com/v2/"
+object ApiClient {
 
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+    private val retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://xbl.io/api/v2/") // Base URL for OpenXBL
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
 
-   // val service: XboxLiveApiService = retrofit.create(XboxLiveApiService::class.java)
+    val openXBLApiService: OpenXBLApiService by lazy {
+        retrofit.create(OpenXBLApiService::class.java)
+    }
 }
-
-
