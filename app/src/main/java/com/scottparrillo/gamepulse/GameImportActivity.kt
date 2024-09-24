@@ -154,7 +154,12 @@ class GameImportActivity: AppCompatActivity() {
                                                 ZoneId.systemDefault()).toLocalDateTime()
                                             gameconvert.dateTimeLastPlayed = timeLastPlayed
                                             gameconvert.gamePlatform = "Steam"
+                                            if(gameconvert.gameTime < 2)
+                                            {
+                                                gameconvert.newlyAdded = true
+                                            }
                                             Game.gameList.add(gameconvert)
+
                                         }
                                         saveGameFile(Game.gameList)
                                         steamId = steamIdText

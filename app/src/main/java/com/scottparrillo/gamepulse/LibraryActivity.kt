@@ -1,9 +1,11 @@
 package com.scottparrillo.gamepulse
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -65,6 +67,7 @@ import java.io.ObjectOutputStream
 
 class LibraryActivity : AppCompatActivity() {
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +87,7 @@ class LibraryActivity : AppCompatActivity() {
     Check for color blindness
     Even with mono make sure you still have the important stuff pop
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalFoundationApi::class)
     @Preview(showBackground = true)
     @ExperimentalMaterial3Api
@@ -162,6 +166,8 @@ class LibraryActivity : AppCompatActivity() {
             if (gameList.size != getGameFile()?.size) {
                 gameList.clear()
                 gameList.addAll(getGameFile() ?: emptyList())
+                Game.gameList.clear()
+                Game.gameList.addAll(getGameFile() ?: emptyList())
             }
 
         }
@@ -232,8 +238,8 @@ class LibraryActivity : AppCompatActivity() {
 
                                 val tempMutableList = mutableListOf<Game>()
                                 var findMark = false
-                                for (game in gameList) {
-                                    if (game.gameName.contains(searchText)) {
+                                for (game in Game.gameList) {
+                                    if (game.gameName.contains(searchText, ignoreCase = true)) {
                                         tempMutableList.add(game)
                                         findMark = true
                                         searchFlag.value = true
@@ -246,7 +252,12 @@ class LibraryActivity : AppCompatActivity() {
                                 if (findMark) {
                                     gameList.clear()
                                     gameList.addAll(tempMutableList)
-                                } else {
+                                }
+                                else if(searchText == ""){
+                                    gameList.clear()
+                                    gameList.addAll(Game.gameList)
+                                }
+                                else {
                                     val toast = Toast.makeText(
                                         context, "Name not found", Toast.LENGTH_SHORT
                                     )
@@ -270,8 +281,9 @@ class LibraryActivity : AppCompatActivity() {
                             .clickable { /* Handle Category clicks */
                                 val sortedList =
                                     gameList
-                                        .sortedBy { it.recentlyPlayed }
+                                        .sortedBy { it.dateTimeLastPlayed }
                                         .toMutableList()
+                                sortedList.reverse()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -330,9 +342,14 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                val sortedList = gameList
-                                    .sortedBy { it.newlyAdded }
-                                    .toMutableList()
+                                var sortedList = mutableListOf<Game>()
+                                for(game in Game.gameList)
+                                {
+                                    if(game.newlyAdded)
+                                        sortedList.add(game)
+                                }
+
+
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
