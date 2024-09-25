@@ -40,7 +40,7 @@ data class Achievement(
     val iconResId: Int,
     val title: String,
     val description: String,
-    val percentageEarned: Double,
+    var percentageEarned: Double,
     val isEarned: Boolean,
     var progress: Int,
     val total: Int,

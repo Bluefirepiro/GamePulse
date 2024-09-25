@@ -92,7 +92,7 @@ class GameImportActivity: AppCompatActivity() {
                                 .size(65.dp)
                                 .padding(horizontal = 8.dp)
                                 .clickable {
-                                    //saveGameFile(Game.gameList)
+                                    saveGameFile(Game.gameList)
                                     context.startActivity(Intent(context, MainActivity::class.java))
                                 }
                         ) }
@@ -192,6 +192,7 @@ class GameImportActivity: AppCompatActivity() {
                             onClick = {
                                 //Loop through Game.game list and grab achievements
                                 for (game in Game.gameList) {
+                                    //First call being made for getting the achievement
                                     val achievementCall =
                                         SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
                                             game.gameId,
@@ -209,6 +210,9 @@ class GameImportActivity: AppCompatActivity() {
                                                 val playerStats = achievementPost.playerstats!!
                                                 val gameAchievements = playerStats.achievements
                                                 for (ach in gameAchievements) {
+
+
+
                                                     val earnedFlag =
                                                         //Ignore the warning
                                                         if (ach.achieved == 1) true else false
@@ -223,7 +227,6 @@ class GameImportActivity: AppCompatActivity() {
                                                         0
                                                     )
                                                     game.achievements.add(toConvert)
-
                                                 }
                                             }
                                         }
@@ -235,10 +238,10 @@ class GameImportActivity: AppCompatActivity() {
                                             p1.printStackTrace()
                                         }
                                     })
+
+
                                 }
                                 saveGameFile(Game.gameList)
-
-
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
                             modifier = Modifier.fillMaxWidth()
@@ -246,10 +249,68 @@ class GameImportActivity: AppCompatActivity() {
                         ) {
                             Text("Import Achievements", color = Color.Black)
                         }
+
                     }
 
+
             }
+            /*
+            item {
+                //button here
+                Button(
+                    onClick = {
+                        //Loop through Game.game list and grab achievements
+                        for (game in Game.gameList) {
+                            val achPercentageCall = SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages("4A7BFC2A3443A093EA9953FD5529C795",game.gameId,"json")
+                            achPercentageCall.enqueue(object: Callback<SteamAchievementPercentages>{
+                                override fun onResponse(
+                                    achPerCall: Call<SteamAchievementPercentages>,
+                                    achPerResponse: Response<SteamAchievementPercentages>
+                                ) {
+                                    if(achPerResponse.isSuccessful){
+                                        val acher = achPerResponse.body()!!
+                                        val achievementPercent = acher.achievementpercentages!!
+                                        val achPercentages = achievementPercent.achievements
+                                        //for each achievement loop through games achievements and find one with the correct name
+                                        for(ach in achPercentages){
+                                            for (ach2 in game.achievements){
+                                                if(ach.name == ach2.title){
+                                                    ach2.percentageEarned = ach.percent.toDouble()
+
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                                override fun onFailure(
+                                    achPerCall: Call<SteamAchievementPercentages>,
+                                    achPerThrow: Throwable
+                                ) {
+                                    achPerThrow.printStackTrace()
+                                }
+                            })
+                            //End of second api call
+
+                        }
+
+
+
+
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 40.dp, vertical = 8.dp)
+                ) {
+                    Text("Import Percentage", color = Color.Black)
+                }
+            }
+
+             */
         }
 
+
     }
+
 }
