@@ -78,6 +78,13 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
     /*
+    1. Rescale images for game covers
+    2. Use blocking threads for api calls
+    3. Work on single game screen
+    616 px x 353 px for capsule
+     */
+    /*
+    Use Exact Size then scale image
     Center Search button on Add Game Button
     Pad search button to start of home icon
     Round top two corners on square buttons
@@ -459,10 +466,11 @@ class LibraryActivity : AppCompatActivity() {
                                 )
                         }
                         else{
-                                AsyncImage(model = game.coverURL, contentDescription = "The cover of a game",
-                                    contentScale = ContentScale.Crop,
+                                AsyncImage(model = game.coverURL, contentScale = ContentScale.Fit,
+                                    contentDescription = "The cover of a game",
                                     modifier = Modifier
-                                        .size(235.dp)
+                                        //size(235.dp)
+                                        .size(height = 112.dp, width = 195.dp)
                                         .clip(RectangleShape)
                                         .combinedClickable(
                                             enabled = true,
@@ -473,21 +481,13 @@ class LibraryActivity : AppCompatActivity() {
                                                 Game.gameList.addAll(gameList)
                                                 saveGameFile(Game.gameList)
                                             },
-                                            onClick ={} ))
+                                            onClick ={} ),
+                                )
                         }
-
-
                         Text(text = game.gameName)
                     }
                 }
             }
-            LazyRow {
-                item {
-
-                }
-            }
         }
-        //Gonna put the imports down here for now
-
     }
 }
