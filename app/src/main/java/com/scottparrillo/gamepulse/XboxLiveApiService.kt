@@ -1,40 +1,28 @@
-package com.scottparrillo.gamepulse.api
+package com.scottparrillo.gamepulse
 
-import com.scottparrillo.gamepulse.AchievementResponse
-import com.scottparrillo.gamepulse.GameDetailsResponse
-import com.scottparrillo.gamepulse.util.Constants.OPENXBL_API_KEY
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Path
 import retrofit2.Call
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
 
-interface OpenXBLApiService {
+interface XboxWebAPIClient {
 
-    // Get Xbox Profile Information
-    @GET("profile")
-    fun getProfile(
-        @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY
-    ): Call<ProfileResponse>
-
-    // Get achievements for a specific game
-    @GET("achievements/{xuid}/{titleId}")
-    fun getAchievements(
-        @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
+    // Function to get achievements for a specific game and user
+    @GET("/xbox/users/{xuid}/achievements")
+    fun getUserAchievements(
         @Path("xuid") xuid: String,
+        @Query("titleId") titleId: String
+    ): Call<XboxPlayerAchievements>
+
+    // Function to get details of a game using titleId
+    @GET("/xbox/titles/{titleId}")
+    fun getGameDetails(
         @Path("titleId") titleId: String
-    ): Call<AchievementResponse>
+    ): Call<XboxGameDetails>
 
-    // Get recent achievements for a user
-    @GET("achievements/recent/{xuid}")
-    fun getRecentAchievements(
-        @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
-        @Path("xuid") xuid: String
-    ): Call<List<AchievementResponse>>
-
-    // Get recently played games for a user
-    @GET("recentlyplayed/{xuid}")
+    // Function to get recently played games by a user
+    @GET("/xbox/users/{xuid}/recentlyplayed")
     fun getRecentlyPlayedGames(
-        @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("xuid") xuid: String
-    ): Call<List<GameDetailsResponse>>
+    ): Call<XboxRecentlyPlayedGames>
 }

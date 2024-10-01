@@ -56,9 +56,14 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import com.scottparrillo.gamepulse.XboxPlayerAchievements.XboxAchievement
 import com.scottparrillo.gamepulse.api.ApiClient
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 
@@ -296,7 +301,7 @@ class MainActivity : ComponentActivity() {
     }
 
       private fun loadRecentlyPlayedGames() {
-        /*CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Make the API call
                 val response = apiService.getRecentlyPlayedGames() // Adjust this to your actual API call
@@ -317,11 +322,11 @@ class MainActivity : ComponentActivity() {
                 // Handle exception
                 e.printStackTrace()
             }
-        }*/
+        }
     }
 
     private fun loadRecentlyAchievedAchievements() {
-        /*CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Make the API call
                 val response = apiService.getRecentAchievements() // Adjust this to your actual API call
@@ -342,7 +347,7 @@ class MainActivity : ComponentActivity() {
                 // Handle exception
                 e.printStackTrace()
             }
-        }*/
+        }
     }
     private fun loadRecentlyPlayedGamesFromSharedPreferences(): List<Game> {
         val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)

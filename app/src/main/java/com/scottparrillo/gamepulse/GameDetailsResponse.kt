@@ -23,3 +23,9 @@ data class GameDetailsResponse(
     val coverImageUrl: String,
     val achievements: List<AchievementResponse> // Add this to include achievements
 ) : Serializable
+
+data class ProfileResponse(
+    val id: String,
+    val name: String,
+    val avatarUrl: String
+) : Serializable
