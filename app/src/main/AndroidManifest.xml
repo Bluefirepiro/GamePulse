@@ -48,6 +48,10 @@
             android:name=".GameImportActivity"
             android:label="Import"
             android:theme="@style/Theme.GamePulse" />
+        <activity
+            android:name=".SingleGameActivity"
+            android:label="SingleGame"
+            android:theme="@style/Theme.GamePulse" />
 
     </application>
 

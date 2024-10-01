@@ -1,9 +1,10 @@
 package com.scottparrillo.gamepulse
-
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -65,6 +66,7 @@ import java.io.ObjectOutputStream
 
 class LibraryActivity : AppCompatActivity() {
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,15 +77,14 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
     /*
+    1. Rescale images for game covers
+    2. Use blocking threads for api calls
+    3. Work on single game screen
+    616 px x 353 px for capsule
     Center Search button on Add Game Button
-    Pad search button to start of home icon
     Round top two corners on square buttons
-    Green Background with white text
-    Pull color scheme from logo using adobe color
-    Important for everything to be readable and have contrast
-    Check for color blindness
-    Even with mono make sure you still have the important stuff pop
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalFoundationApi::class)
     @Preview(showBackground = true)
     @ExperimentalMaterial3Api
@@ -162,14 +163,11 @@ class LibraryActivity : AppCompatActivity() {
             if (gameList.size != getGameFile()?.size) {
                 gameList.clear()
                 gameList.addAll(getGameFile() ?: emptyList())
+                Game.gameList.clear()
+                Game.gameList.addAll(getGameFile() ?: emptyList())
             }
 
         }
-
-
-        /*val onBackPressedDispatcher =
-           LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher */
-        //val tests:String = apilisttest[0].name
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -225,35 +223,7 @@ class LibraryActivity : AppCompatActivity() {
                         .size(width = 280.dp, height = 46.dp)
                         .padding(horizontal = 8.dp),
                 )
-                /*Button(
-                    onClick = {
-                        val tempMutableList = mutableListOf<Game>()
-                        var findMark = false
-                        for (game in gameList) {
-                            if (game.gameName.contains(searchText)) {
-                                tempMutableList.add(game)
-                                findMark = true
-                                searchFlag.value = true
-                            } else if (searchText == "") {
-                                gameList.clear()
-                                gameList.addAll(Game.gameList)
-                            }
 
-                        }
-                        if (findMark) {
-                            gameList.clear()
-                            gameList.addAll(tempMutableList)
-                        } else {
-                            val toast = Toast.makeText(
-                                context, "Name not found", Toast.LENGTH_SHORT
-                            )
-                            toast.show()
-                        }
-
-
-                    }, modifier = Modifier.padding(horizontal = 8.dp),
-
-                )*/
                     Image(
                         painter = painterResource(id = R.drawable.searchicon),
                         contentDescription = "Magnifying Glass",
@@ -265,8 +235,8 @@ class LibraryActivity : AppCompatActivity() {
 
                                 val tempMutableList = mutableListOf<Game>()
                                 var findMark = false
-                                for (game in gameList) {
-                                    if (game.gameName.contains(searchText)) {
+                                for (game in Game.gameList) {
+                                    if (game.gameName.contains(searchText, ignoreCase = true)) {
                                         tempMutableList.add(game)
                                         findMark = true
                                         searchFlag.value = true
@@ -279,7 +249,12 @@ class LibraryActivity : AppCompatActivity() {
                                 if (findMark) {
                                     gameList.clear()
                                     gameList.addAll(tempMutableList)
-                                } else {
+                                }
+                                else if(searchText == ""){
+                                    gameList.clear()
+                                    gameList.addAll(Game.gameList)
+                                }
+                                else {
                                     val toast = Toast.makeText(
                                         context, "Name not found", Toast.LENGTH_SHORT
                                     )
@@ -289,25 +264,6 @@ class LibraryActivity : AppCompatActivity() {
 
                             }
                     )
-
-
-
-                /*
-                SearchBar(
-                    query = searchText.value,
-                    onQueryChange = {searchText.value = it},
-                    onSearch = {searchFlag.value = false},
-                    active = searchFlag.value,
-                    onActiveChange = {searchFlag.value = it},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(height = 30.dp)
-                        .padding(horizontal = 4.dp),
-                    shape = RectangleShape
-                ) {
-
-                }
-                 */
             }
 
             LazyRow(
@@ -322,8 +278,9 @@ class LibraryActivity : AppCompatActivity() {
                             .clickable { /* Handle Category clicks */
                                 val sortedList =
                                     gameList
-                                        .sortedBy { it.recentlyPlayed }
+                                        .sortedBy { it.dateTimeLastPlayed }
                                         .toMutableList()
+                                sortedList.reverse()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -382,9 +339,14 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                val sortedList = gameList
-                                    .sortedBy { it.newlyAdded }
-                                    .toMutableList()
+                                var sortedList = mutableListOf<Game>()
+                                for(game in Game.gameList)
+                                {
+                                    if(game.newlyAdded)
+                                        sortedList.add(game)
+                                }
+
+
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
@@ -438,14 +400,6 @@ class LibraryActivity : AppCompatActivity() {
                     })
                 }
 
-                /*Button(onClick = {
-                    val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
-                    gameList.clear()
-                    gameList.addAll(sortedList)
-
-                },colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
-                    Text(text = "Sort",color = Color.Black)
-                } */
 
                 Button(onClick = {
                     context.startActivity(Intent(context, GameInputActivity::class.java))
@@ -454,7 +408,7 @@ class LibraryActivity : AppCompatActivity() {
                 }
             }
 
-            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp)) {
+            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 180.dp)) {
                 items(gameList) { game ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -502,10 +456,11 @@ class LibraryActivity : AppCompatActivity() {
                                 )
                         }
                         else{
-                                AsyncImage(model = game.coverURL, contentDescription = "The cover of a game",
-                                    contentScale = ContentScale.Crop,
+                                AsyncImage(model = game.coverURL, contentScale = ContentScale.Fit,
+                                    contentDescription = "The cover of a game",
                                     modifier = Modifier
-                                        .size(135.dp)
+                                        //size(235.dp)
+                                        .size(height = 112.dp, width = 195.dp)
                                         .clip(RectangleShape)
                                         .combinedClickable(
                                             enabled = true,
@@ -516,21 +471,22 @@ class LibraryActivity : AppCompatActivity() {
                                                 Game.gameList.addAll(gameList)
                                                 saveGameFile(Game.gameList)
                                             },
-                                            onClick ={} ))
+                                            onClick ={
+                                                Game.selectedGame = game
+                                                context.startActivity(
+                                                    Intent(
+                                                        context,
+                                                        SingleGameActivity::class.java
+                                                    )
+                                                )
+
+                                            } ),
+                                )
                         }
-
-
                         Text(text = game.gameName)
                     }
                 }
             }
-            LazyRow {
-                item {
-
-                }
-            }
         }
-        //Gonna put the imports down here for now
-
     }
 }
