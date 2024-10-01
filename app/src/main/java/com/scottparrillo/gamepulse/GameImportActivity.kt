@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -194,7 +193,6 @@ class GameImportActivity: AppCompatActivity() {
                                                 }
                                             }
                                         }
-
                                         override fun onFailure(
                                             p0: Call<SteamPlayerAchievements>,
                                             p1: Throwable
@@ -202,35 +200,8 @@ class GameImportActivity: AppCompatActivity() {
                                             p1.printStackTrace()
                                         }
                                     })
-                                    /*
-                                        //First call being made for getting the achievement
-                                        val achievementCall =
-                                            SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
-                                                game.gameId, "4A7BFC2A3443A093EA9953FD5529C795",
-                                                steamId.toLong())
-                                        val achResponse = achievementCall.execute()
-                                        if (achResponse.isSuccessful) {
-                                            val achievementPost = achResponse.body()!!
-                                            val playerStats = achievementPost.playerstats!!
-                                            val gameAchievements = playerStats.achievements
-                                            for (ach in gameAchievements) {
-                                                val earnedFlag =
-                                                    //Ignore the warning
-                                                    if (ach.achieved == 1) true else false
-                                                val toConvert = Achievement(0, ach.apiname,
-                                                    "", 0.0,
-                                                    earnedFlag, 0, 0, 0)
-                                                game.achievements.add(toConvert)
-                                            }
-                                        }
-
-                                    }
-
-                                     */
-
                                 }
                                 saveGameFile(Game.gameList)
-
                                 }
                             steamIdText = "Done Importing"
 
@@ -242,12 +213,6 @@ class GameImportActivity: AppCompatActivity() {
 
                 }
             } }
-
-
-
         }
-
-
     }
-
 }

@@ -82,17 +82,8 @@ class LibraryActivity : AppCompatActivity() {
     2. Use blocking threads for api calls
     3. Work on single game screen
     616 px x 353 px for capsule
-     */
-    /*
-    Use Exact Size then scale image
     Center Search button on Add Game Button
-    Pad search button to start of home icon
     Round top two corners on square buttons
-    Green Background with white text
-    Pull color scheme from logo using adobe color
-    Important for everything to be readable and have contrast
-    Check for color blindness
-    Even with mono make sure you still have the important stuff pop
      */
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalFoundationApi::class)
@@ -481,7 +472,16 @@ class LibraryActivity : AppCompatActivity() {
                                                 Game.gameList.addAll(gameList)
                                                 saveGameFile(Game.gameList)
                                             },
-                                            onClick ={} ),
+                                            onClick ={
+                                                Game.selectedGame = game
+                                                context.startActivity(
+                                                    Intent(
+                                                        context,
+                                                        SingleGameActivity::class.java
+                                                    )
+                                                )
+
+                                            } ),
                                 )
                         }
                         Text(text = game.gameName)

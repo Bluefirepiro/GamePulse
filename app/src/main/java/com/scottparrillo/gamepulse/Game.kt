@@ -30,6 +30,7 @@ class Game: Serializable {
     //Global list object
     companion object{
         var gameList = mutableListOf<Game>()
+        var selectedGame = Game()
 
     }
 
