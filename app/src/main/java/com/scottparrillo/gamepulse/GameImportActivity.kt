@@ -1,9 +1,12 @@
 package com.scottparrillo.gamepulse
 
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -44,8 +47,12 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
 import java.io.ObjectOutputStream
+import java.time.Instant
+import java.time.ZoneId
+import kotlin.concurrent.thread
 
 class GameImportActivity: AppCompatActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -54,6 +61,8 @@ class GameImportActivity: AppCompatActivity() {
             }
         }
     }
+    @SuppressLint("SuspiciousIndentation")
+    @RequiresApi(Build.VERSION_CODES.O)
     @Preview(showBackground = true)
     @Composable
     fun GameImportScreen()
@@ -88,7 +97,7 @@ class GameImportActivity: AppCompatActivity() {
                                 .size(65.dp)
                                 .padding(horizontal = 8.dp)
                                 .clickable {
-                                    //saveGameFile(Game.gameList)
+                                    saveGameFile(Game.gameList)
                                     context.startActivity(Intent(context, MainActivity::class.java))
                                 }
                         ) }
@@ -119,101 +128,71 @@ class GameImportActivity: AppCompatActivity() {
                 item {
                     Button(
                         onClick = {
+                            steamId = steamIdText
+                            steamIdText = "Importing game do not click away"
 
                             //Upon clicking import get the steam user id then load in the games
-                            val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, steamIdText.toLong(), "json" )
-                            call.enqueue(object: Callback<SteamOwnedGames> {
-                                override fun onResponse(
-                                    call: Call<SteamOwnedGames>,
-                                    response: Response<SteamOwnedGames>
-                                ) {
-                                    if(response.isSuccessful)
-                                    {
-                                        val post = response.body()!!
-                                        //We need this and it is used
-                                        val res = post.response!!
-                                        val games:List<SteamOwnedGames.Response.SteamGames> = post.response.games
-                                        for(game in games) {
-                                            //make a game object and add it to games list
-                                            val gameconvert = Game()
-                                            gameconvert.gameName = game.name
-                                            gameconvert.gameId = game.appid
-                                            var convertToUrl = "https://steamcdn-a.akamaihd.net/steam/apps/"
-                                            convertToUrl = convertToUrl.plus(game.appid.toString())
-                                            //convertToUrl = convertToUrl.plus("/)"
-                                            convertToUrl = convertToUrl.plus("/header.jpg")
-                                            gameconvert.coverURL = convertToUrl
-                                            gameconvert.gamePlatform = "Steam"
-                                            gameconvert.gameTime = game.playtime_forever.toFloat()
-                                            Game.gameList.add(gameconvert)
+
+                            //Start of synch api call
+                            thread (start = true){
+                                //Start of first call
+                                val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, steamId.toLong(), "json" )
+                                val response = call.execute()
+                                if(response.isSuccessful)
+                                {
+                                    val post = response.body()!!
+                                    //We need this and it is used
+                                    val res = post.response!!
+                                    val games:List<SteamOwnedGames.Response.SteamGames> = post.response.games
+                                    for(game in games) {
+                                        //make a game object and add it to games list
+                                        val gameconvert = Game()
+                                        gameconvert.gameName = game.name
+                                        gameconvert.gameId = game.appid
+                                        val gameTimeHours = game.playtime_forever / 60
+                                        gameconvert.gameTime = gameTimeHours.toFloat()
+                                        var convertToUrl = "https://steamcdn-a.akamaihd.net/steam/apps/"
+                                        convertToUrl = convertToUrl.plus(game.appid.toString())
+                                        //convertToUrl = convertToUrl.plus("/)"
+                                        convertToUrl = convertToUrl.plus("/header.jpg")
+                                        gameconvert.coverURL = convertToUrl
+                                        val timeLastPlayed = Instant.ofEpochSecond(game.rtime_last_played).atZone(
+                                            ZoneId.systemDefault()).toLocalDateTime()
+                                        gameconvert.dateTimeLastPlayed = timeLastPlayed
+                                        gameconvert.gamePlatform = "Steam"
+                                        if(gameconvert.gameTime <= 0)
+                                        {
+                                            gameconvert.newlyAdded = true
                                         }
-                                        saveGameFile(Game.gameList)
-                                        steamId = steamIdText
-                                        steamIdText = "Now click achievements"
-
-
-                                        //context.startActivity(Intent(context, LibraryActivity::class.java))
-
+                                        Game.gameList.add(gameconvert)
                                     }
+                                    saveGameFile(Game.gameList)
                                 }
-                                override fun onFailure(p0: Call<SteamOwnedGames>, p1: Throwable) {
-                                    p1.printStackTrace()
-                                }
-
-                            })
-                        }, modifier = Modifier.padding(horizontal = 0.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                    ) {
-                        Text("Import", color = Color.Black)
-                    }
-
-                }
-            } }
-
-            item {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-
-
-                        Button(
-                            onClick = {
-                                //Loop through Game.game list and grab achievements
+                                //End of game import api call
                                 for (game in Game.gameList) {
-                                    val achievementCall =
-                                        SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
-                                            game.gameId,
-                                            "4A7BFC2A3443A093EA9953FD5529C795",
-                                            steamId.toLong()
-                                        )
-                                    achievementCall.enqueue(object :
-                                        Callback<SteamPlayerAchievements> {
+                                   val callAch = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
+                                        game.gameId, "4A7BFC2A3443A093EA9953FD5529C795",
+                                        steamId.toLong())
+                                    callAch.enqueue(object: Callback<SteamPlayerAchievements> {
                                         override fun onResponse(
-                                            call: Call<SteamPlayerAchievements>,
-                                            response: Response<SteamPlayerAchievements>
+                                            p0: Call<SteamPlayerAchievements>,
+                                            achResponse: Response<SteamPlayerAchievements>
                                         ) {
-                                            if (response.isSuccessful) {
-                                                val achievementPost = response.body()!!
+                                            if(achResponse.isSuccessful){
+                                                val achievementPost = achResponse.body()!!
                                                 val playerStats = achievementPost.playerstats!!
                                                 val gameAchievements = playerStats.achievements
                                                 for (ach in gameAchievements) {
                                                     val earnedFlag =
                                                         //Ignore the warning
                                                         if (ach.achieved == 1) true else false
-                                                    val toConvert = Achievement(
-                                                        0,
-                                                        ach.apiname,
-                                                        "",
-                                                        0.0,
-                                                        earnedFlag,
-                                                        0,
-                                                        0,
-                                                        0
-                                                    )
+                                                    val toConvert = Achievement(0, ach.apiname,
+                                                        "", 0.0,
+                                                        earnedFlag, 0, 0, 0)
                                                     game.achievements.add(toConvert)
-
                                                 }
                                             }
                                         }
-
                                         override fun onFailure(
                                             p0: Call<SteamPlayerAchievements>,
                                             p1: Throwable
@@ -223,19 +202,17 @@ class GameImportActivity: AppCompatActivity() {
                                     })
                                 }
                                 saveGameFile(Game.gameList)
+                                }
+                            steamIdText = "Done Importing"
 
-
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(horizontal = 40.dp, vertical = 8.dp)
-                        ) {
-                            Text("Import Achievements", color = Color.Black)
-                        }
+                        }, modifier = Modifier.padding(horizontal = 0.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                    ) {
+                        Text("Import", color = Color.Black)
                     }
 
-            }
+                }
+            } }
         }
-
     }
 }
