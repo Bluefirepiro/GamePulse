@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -26,6 +27,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -33,6 +35,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -90,7 +93,9 @@ class LibraryActivity : AppCompatActivity() {
     @ExperimentalMaterial3Api
     @Composable
     fun LibraryScreen() {
+
         //Setting may val and vars for future use
+        var dialogFlag = rememberSaveable { mutableStateOf(false) }
         val context = LocalContext.current
         val gameFile = File(context.filesDir, "gameList")
         val gameList = remember { mutableStateListOf<Game>() }
@@ -105,31 +110,6 @@ class LibraryActivity : AppCompatActivity() {
         var expandedDrop by remember { mutableStateOf(false) }
         /*I have this below to show an example of how to make a call
         this can be commented away when not used for testing
-         */
-
-        /*
-       val call = SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages("4A7BFC2A3443A093EA9953FD5529C795", 1158310, "json" )
-        call.enqueue(object: Callback<SteamAchievementPercentages>{
-            override fun onResponse(
-                call: Call<SteamAchievementPercentages>,
-                response: Response<SteamAchievementPercentages>
-            ) {
-                if(response.isSuccessful)
-                {
-                   val post = response.body()!!
-
-
-                    Log.v("api", post.toString())
-                   // Log.v("api", post.achievementpercentages[0].achievements[0].name)
-                }
-            }
-
-            override fun onFailure(p0: Call<SteamAchievementPercentages>, p1: Throwable) {
-                p1.printStackTrace()
-            }
-
-        })
-
          */
         fun getGameFile(): List<Game>? {
             return try {
@@ -167,6 +147,29 @@ class LibraryActivity : AppCompatActivity() {
                 Game.gameList.addAll(getGameFile() ?: emptyList())
             }
 
+        }
+        //Setting up a dialog alert
+        when {
+            dialogFlag.value -> {
+                AlertDialog(onDismissRequest = { dialogFlag.value = false }, confirmButton = {
+                    TextButton(onClick = {
+                        gameList.clear()
+                        Game.gameList.clear()
+                        Game.gameList.addAll(gameList)
+                        saveGameFile(Game.gameList)
+                        dialogFlag.value = false }) {
+                        Text(text = "Confirm")
+                        
+                    }
+
+                },
+                    title = { Text(text = "Delete all games?")},
+                    dismissButton = {
+                        TextButton(onClick = { dialogFlag.value = false }) {
+                            Text(text = "Dismiss")
+                        }
+                    })
+            }
         }
         Column(
             modifier = Modifier
@@ -249,12 +252,10 @@ class LibraryActivity : AppCompatActivity() {
                                 if (findMark) {
                                     gameList.clear()
                                     gameList.addAll(tempMutableList)
-                                }
-                                else if(searchText == ""){
+                                } else if (searchText == "") {
                                     gameList.clear()
                                     gameList.addAll(Game.gameList)
-                                }
-                                else {
+                                } else {
                                     val toast = Toast.makeText(
                                         context, "Name not found", Toast.LENGTH_SHORT
                                     )
@@ -340,9 +341,8 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
                                 var sortedList = mutableListOf<Game>()
-                                for(game in Game.gameList)
-                                {
-                                    if(game.newlyAdded)
+                                for (game in Game.gameList) {
+                                    if (game.newlyAdded)
                                         sortedList.add(game)
                                 }
 
@@ -374,10 +374,14 @@ class LibraryActivity : AppCompatActivity() {
                     Text(text = "Sort", color = Color.Black)
                 }
                 Button(onClick = {
+                    /*
                     gameList.clear()
                     Game.gameList.clear()
                     Game.gameList.addAll(gameList)
                     saveGameFile(Game.gameList)
+
+                     */
+                    dialogFlag.value = true
                 }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
                     Text(text = "Clear All", color = Color.Black)
                 }
@@ -471,7 +475,7 @@ class LibraryActivity : AppCompatActivity() {
                                                 Game.gameList.addAll(gameList)
                                                 saveGameFile(Game.gameList)
                                             },
-                                            onClick ={
+                                            onClick = {
                                                 Game.selectedGame = game
                                                 context.startActivity(
                                                     Intent(
@@ -480,7 +484,7 @@ class LibraryActivity : AppCompatActivity() {
                                                     )
                                                 )
 
-                                            } ),
+                                            }),
                                 )
                         }
                         Text(text = game.gameName)
