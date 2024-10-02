@@ -1,6 +1,5 @@
 package com.scottparrillo.gamepulse
 
-import android.media.MediaPlayer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +34,7 @@ class AchievementAdapter(
 
     override fun onBindViewHolder(holder: AchievementViewHolder, position: Int) {
         val achievement = achievements[position]
-        holder.icon.setImageResource(achievement.iconResId)
+        //holder.icon.setImageResource(achievement.iconResId)
         holder.title.text = achievement.title
         holder.description.text = achievement.description
         holder.progressBar.max = achievement.total
@@ -56,15 +55,15 @@ class AchievementAdapter(
             onFavorite(position)
         }
 
-        holder.itemView.setOnClickListener {
+       /* holder.itemView.setOnClickListener {
             achievement.soundResId?.let { soundId ->
-                val mediaPlayer = MediaPlayer.create(holder.itemView.context, soundId)
+               val mediaPlayer = MediaPlayer.create(holder.itemView.context, soundId)
                 mediaPlayer.start()
                 mediaPlayer.setOnCompletionListener {
                     it.release()
                 }
             }
-        }
+        }*/
 
         holder.deleteButton.setOnClickListener {
             onDelete(position)

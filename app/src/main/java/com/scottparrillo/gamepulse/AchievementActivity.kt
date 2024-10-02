@@ -25,25 +25,21 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
 
 data class Achievement(
-    val iconResId: Int,
     val title: String,
     val description: String,
     var percentageEarned: Double,
     val isEarned: Boolean,
     var progress: Int,
     val total: Int,
-    val soundResId: Int?,
     var isFavorite: Boolean = false
 ) : Serializable
 
@@ -181,14 +177,12 @@ class AchievementActivity : AppCompatActivity() {
         val isEarned = progress >= total
 
         val newAchievement = Achievement(
-            R.drawable.ic_achievement,
             title,
             description,
             percentageEarned,
             isEarned,
             progress,
-            total,
-            soundResId
+            total
         )
 
         achievements.add(newAchievement)

@@ -41,7 +41,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,7 +59,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
 import com.google.gson.Gson
-import com.scottparrillo.gamepulse.XboxPlayerAchievements.XboxAchievement
 import com.scottparrillo.gamepulse.api.ApiClient
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
@@ -67,9 +69,11 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 
+
 class MainActivity : ComponentActivity() {
 
-    private val apiService = ApiClient.openXBLApiService
+    private val apiService = ApiClient.xboxWebAPIClient
+    var xboxIdText by mutableStateOf("")
 
 
     private val NOTIFICATION_PERMISSION_REQUEST_CODE = 1
@@ -113,11 +117,11 @@ class MainActivity : ComponentActivity() {
                             putExtra("GAME_ID", game.gameId)
                         })
                         updateRecentlyPlayed(game)
-                        loadRecentlyPlayedGames()
+                        loadRecentlyPlayedGames(xuid = xboxIdText)
                     },
                     onAchievementUnlocked = { achievement ->
                         updateRecentlyAchieved(achievement)
-                        loadRecentlyAchievedAchievements()
+                        loadRecentlyAchievedAchievements(xuid = xboxIdText)
                     },
                     onNavigateToAchievements = {
                         startActivity(Intent(this, AchievementActivity::class.java))
@@ -139,8 +143,8 @@ class MainActivity : ComponentActivity() {
         }
 
         // Load recently played games from SharedPreferences when the activity starts
-        loadRecentlyPlayedGames()
-        loadRecentlyAchievedAchievements()
+        loadRecentlyPlayedGames(xuid = xboxIdText)
+        loadRecentlyAchievedAchievements(xuid = xboxIdText)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -300,19 +304,28 @@ class MainActivity : ComponentActivity() {
         recentlyAchievedAchievementsList.addAll(recentlyAchievedList)
     }
 
-      private fun loadRecentlyPlayedGames() {
+    private fun loadRecentlyPlayedGames(xuid: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Make the API call
-                val response = apiService.getRecentlyPlayedGames() // Adjust this to your actual API call
+                val response = ApiClient.xboxWebAPIClient.getRecentlyPlayedGames(xuid = xuid)
 
                 if (response.isSuccessful) {
-                    val gamesList = response.body() ?: emptyList()
+                    val apiGamesList = response.body()?.games ?: emptyList()
+
+                    // Convert the API response to your internal data model
+                    val gameList = apiGamesList.map { apiGame ->
+                        Game().apply {
+                            gameName = apiGame.name // Assuming the API has a 'name' field
+                            gameId = apiGame.titleId.toLongOrNull() ?: 0L // Convert titleId to Long if possible
+                            gamePlatform = "Xbox" // Adjust as needed
+                        }
+                    }
 
                     // Switch to the main thread to update the UI
                     withContext(Dispatchers.Main) {
                         recentlyPlayedGamesList.clear()
-                        recentlyPlayedGamesList.addAll(gamesList)
+                        recentlyPlayedGamesList.addAll(gameList)
                     }
                 } else {
                     // Handle API error (optional)
@@ -325,19 +338,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun loadRecentlyAchievedAchievements() {
+
+    private fun loadRecentlyAchievedAchievements(xuid: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Make the API call
-                val response = apiService.getRecentAchievements() // Adjust this to your actual API call
+                val response = ApiClient.xboxWebAPIClient.getRecentAchievements(xuid = xuid)
 
                 if (response.isSuccessful) {
-                    val achievementsList = response.body() ?: emptyList()
+                    val apiAchievementsList = response.body() ?: emptyList()
+
+                    // Convert the API response to your internal data model
+                    val achievementList = apiAchievementsList.map { apiAchievement ->
+                        Achievement(
+                            title = apiAchievement.title,
+                            description = apiAchievement.description,
+                            percentageEarned = apiAchievement.percentageEarned, // Directly from AchievementResponse
+                            isEarned = apiAchievement.isEarned,
+                            progress = apiAchievement.progress,
+                            total = apiAchievement.total
+                        )
+                    }
 
                     // Switch to the main thread to update the UI
                     withContext(Dispatchers.Main) {
                         recentlyAchievedAchievementsList.clear()
-                        recentlyAchievedAchievementsList.addAll(achievementsList)
+                        recentlyAchievedAchievementsList.addAll(achievementList)
                     }
                 } else {
                     // Handle API error (optional)
@@ -349,6 +375,9 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+
+
     private fun loadRecentlyPlayedGamesFromSharedPreferences(): List<Game> {
         val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
         val json = sharedPreferences.getString("recently_played", null)
@@ -385,6 +414,7 @@ fun HomeScreen(
     onOpenSettings: () -> Unit,
     onOpenNotifications: () -> Unit
 ) {
+
     val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
     Column(
         modifier = Modifier
