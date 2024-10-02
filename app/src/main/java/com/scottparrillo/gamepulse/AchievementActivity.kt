@@ -37,8 +37,8 @@ import java.io.Serializable
 
 data class Achievement(
     val iconResId: Int,
-    val title: String,
-    val description: String,
+    var title: String,
+    var description: String,
     var percentageEarned: Double,
     val isEarned: Boolean,
     var progress: Int,

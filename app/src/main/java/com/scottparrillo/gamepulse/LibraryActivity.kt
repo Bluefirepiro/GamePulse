@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -66,6 +67,7 @@ import java.io.File
 import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
+import java.time.LocalDateTime
 
 class LibraryActivity : AppCompatActivity() {
 
@@ -80,12 +82,12 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
     /*
-    1. Rescale images for game covers
-    2. Use blocking threads for api calls
-    3. Work on single game screen
+
+
+
     616 px x 353 px for capsule
     Center Search button on Add Game Button
-    Round top two corners on square buttons
+
      */
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalFoundationApi::class)
@@ -218,7 +220,7 @@ class LibraryActivity : AppCompatActivity() {
                 )
             }
             //This row holds the search bar and button
-            Row() {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 TextField(
                     value = searchText, onValueChange = { searchText = it },
                     label = { Text("Search Game") },
@@ -233,7 +235,7 @@ class LibraryActivity : AppCompatActivity() {
                         contentScale = ContentScale.Inside,
                         modifier = Modifier
                             .size(60.dp)
-                            .padding(horizontal = 8.dp, vertical = 10.dp)
+                            .padding(horizontal = 0.dp, vertical = 1.dp)
                             .clickable {
 
                                 val tempMutableList = mutableListOf<Game>()
@@ -286,8 +288,10 @@ class LibraryActivity : AppCompatActivity() {
                                 gameList.addAll(sortedList)
                             }
                             .padding(2.dp)
+                            .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
+                            .background(color = SpringGreen),
 
-                            .background(color = SpringGreen)
+
                     ) {
                         Text(text = "Recent")
                     }
@@ -299,15 +303,19 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                val sortedList =
-                                    gameList
-                                        .sortedBy { it.currentlyPlaying }
-                                        .toMutableList()
+                                var sortedList = mutableListOf<Game>()
+                                for(game in gameList){
+                                    if(LocalDateTime.now().dayOfYear == game.dateTimeLastPlayed.dayOfYear)
+                                    {
+                                        sortedList.add(game)
+                                    }
+                                }
                                 gameList.clear()
                                 gameList.addAll(sortedList)
+
                             }
                             .padding(2.dp)
-
+                            .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
                             .background(color = SpringGreen)
                     ) {
                         Text(text = "Current")
@@ -321,13 +329,13 @@ class LibraryActivity : AppCompatActivity() {
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
                                 val sortedList = gameList
-                                    .sortedBy { it.completed }
+                                    .sortedBy { it.allAchiev }
                                     .toMutableList()
                                 gameList.clear()
                                 gameList.addAll(sortedList)
                             }
                             .padding(2.dp)
-
+                            .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
                             .background(color = SpringGreen)
                     ) {
                         Text(text = "Beaten")
@@ -351,7 +359,7 @@ class LibraryActivity : AppCompatActivity() {
                                 gameList.addAll(sortedList)
                             }
                             .padding(2.dp)
-
+                            .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
                             .background(color = SpringGreen)
                     ) {
                         Text(text = "New")
