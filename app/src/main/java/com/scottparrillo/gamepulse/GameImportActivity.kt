@@ -145,26 +145,47 @@ class GameImportActivity: AppCompatActivity() {
                                     val res = post.response!!
                                     val games:List<SteamOwnedGames.Response.SteamGames> = post.response.games
                                     for(game in games) {
-                                        //make a game object and add it to games list
-                                        val gameconvert = Game()
-                                        gameconvert.gameName = game.name
-                                        gameconvert.gameId = game.appid
-                                        val gameTimeHours = game.playtime_forever / 60
-                                        gameconvert.gameTime = gameTimeHours.toFloat()
-                                        var convertToUrl = "https://steamcdn-a.akamaihd.net/steam/apps/"
-                                        convertToUrl = convertToUrl.plus(game.appid.toString())
-                                        //convertToUrl = convertToUrl.plus("/)"
-                                        convertToUrl = convertToUrl.plus("/header.jpg")
-                                        gameconvert.coverURL = convertToUrl
-                                        val timeLastPlayed = Instant.ofEpochSecond(game.rtime_last_played).atZone(
-                                            ZoneId.systemDefault()).toLocalDateTime()
-                                        gameconvert.dateTimeLastPlayed = timeLastPlayed
-                                        gameconvert.gamePlatform = "Steam"
-                                        if(gameconvert.gameTime <= 0)
+                                        //Sanity check to make sure we are not adding the same game
+                                        var sameNameFlag = false
+                                        if(Game.gameList.isNotEmpty())
                                         {
-                                            gameconvert.newlyAdded = true
+
+                                            for (gameL in Game.gameList)
+                                            {
+                                                if(gameL.gameName == game.name && gameL.gamePlatform == "Steam")
+                                                {
+                                                    sameNameFlag = true
+                                                }
+
+                                            }
                                         }
-                                        Game.gameList.add(gameconvert)
+                                        if(!sameNameFlag)
+                                        {
+                                            //make a game object and add it to games list
+                                            val gameconvert = Game()
+                                            gameconvert.gameName = game.name
+                                            gameconvert.gameId = game.appid
+                                            val gameTimeHours = game.playtime_forever / 60
+                                            gameconvert.gameTime = gameTimeHours.toFloat()
+                                            var convertToUrl = "https://steamcdn-a.akamaihd.net/steam/apps/"
+                                            convertToUrl = convertToUrl.plus(game.appid.toString())
+                                            //convertToUrl = convertToUrl.plus("/)"
+                                            convertToUrl = convertToUrl.plus("/header.jpg")
+                                            gameconvert.coverURL = convertToUrl
+                                            val timeLastPlayed = Instant.ofEpochSecond(game.rtime_last_played).atZone(
+                                                ZoneId.systemDefault()).toLocalDateTime()
+                                            gameconvert.dateTimeLastPlayed = timeLastPlayed
+                                            gameconvert.gamePlatform = "Steam"
+                                            if(gameconvert.gameTime <= 0)
+                                            {
+                                                gameconvert.newlyAdded = true
+                                            }
+                                            Game.gameList.add(gameconvert)
+                                        }
+                                        else
+                                        {
+                                            //Do nothing
+                                        }
                                     }
                                     saveGameFile(Game.gameList)
                                 }
@@ -179,17 +200,39 @@ class GameImportActivity: AppCompatActivity() {
                                             achResponse: Response<SteamPlayerAchievements>
                                         ) {
                                             if(achResponse.isSuccessful){
+                                                //go through and make sure the achievement isnt already added
+
                                                 val achievementPost = achResponse.body()!!
                                                 val playerStats = achievementPost.playerstats!!
                                                 val gameAchievements = playerStats.achievements
+
                                                 for (ach in gameAchievements) {
-                                                    val earnedFlag =
-                                                        //Ignore the warning
-                                                        if (ach.achieved == 1) true else false
-                                                    val toConvert = Achievement(0, ach.apiname,
-                                                        "", 0.0,
-                                                        earnedFlag, 0, 0, 0)
-                                                    game.achievements.add(toConvert)
+                                                    var sameElementFlag = false
+                                                    if(game.achievements.isNotEmpty())
+                                                    {
+                                                        for(achL in game.achievements)
+                                                        {
+                                                            if(achL.title == ach.apiname)
+                                                            {
+                                                                sameElementFlag = true
+                                                            }
+                                                        }
+                                                    }
+                                                    if(!sameElementFlag)
+                                                    {
+                                                        val earnedFlag =
+                                                            //Ignore the warning
+                                                            if (ach.achieved == 1) true else false
+                                                        val toConvert = Achievement(0, ach.apiname,
+                                                            "", 0.0,
+                                                            earnedFlag, 0, 0, 0)
+                                                        game.achievements.add(toConvert)
+                                                    }
+                                                    else
+                                                    {
+                                                        //do Nothing
+                                                    }
+
                                                 }
                                             }
                                         }

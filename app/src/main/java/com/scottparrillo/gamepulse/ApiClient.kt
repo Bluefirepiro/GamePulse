@@ -1,4 +1,6 @@
 package com.scottparrillo.gamepulse.api
+import com.scottparrillo.gamepulse.SteamRetrofit.retrofitSteam
+import com.scottparrillo.gamepulse.SteamWebAPIClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -11,7 +13,12 @@ object ApiClient {
             .build()
     }
 
-    val openXBLApiService: OpenXBLApiService by lazy {
-        retrofit.create(OpenXBLApiService::class.java)
+
+object openXBL{
+    val openXBLApiService: ApiClient by lazy {
+        retrofit.create(ApiClient::class.java)
     }
+}
+
+
 }
