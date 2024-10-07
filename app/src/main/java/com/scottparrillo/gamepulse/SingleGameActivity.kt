@@ -8,11 +8,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,15 +24,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -94,6 +99,7 @@ fun SingleGameScreen(){
                                 )
                             )
                         }
+                        .padding(2.dp)
                 )
 
             }
@@ -101,7 +107,7 @@ fun SingleGameScreen(){
                 contentDescription = "The cover of a game",
                 modifier = Modifier
                     //size(235.dp)
-                    .size(height = 353.dp, width = 616.dp)
+                    .size(height = 253.dp, width = 616.dp)
                     .clip(RectangleShape)
             )
         LazyColumn {
@@ -118,41 +124,50 @@ fun SingleGameScreen(){
                     Text(text = "Last played: $gameLastPlayed")
                 }
             }
-            item { if(game.achievements.size <= 0)
-                    {
-                        Text(text = "Achievements: No achievements for this game")
-                    }
-                    else
-                    {
-                        Text(text = "Total Achievements: $achievementsEarned / ${game.achievements.size}")
-                    }
-                }
+
 
         }
-        Text(text = "Achievements", modifier = Modifier.align(Alignment.CenterHorizontally))
+       Column (modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
+           Text(text = "Achievements", fontWeight = FontWeight.Bold)
+           if(game.achievements.size <= 0)
+           {
+               Text(text = "No achievements for this game")
+           }
+           else
+           {
+               Text(text = "$achievementsEarned / ${game.achievements.size}")
+           }
+       }
         LazyColumn {
 
             items(game.achievements){
                 achievement ->
-                Row (horizontalArrangement = Arrangement.SpaceBetween){
-                    Text(text = achievement.title)
-                    if(achievement.isEarned)
-                    {
-                        Text(text = "Earned", modifier = Modifier.padding(horizontal = 5.dp))
+                Column(modifier = Modifier
+                    .background(color = SpringGreen)
+                    .border(1.dp, color = Color.Black)
+                    .padding(vertical = 2.dp, horizontal = 2.dp)
+                    .fillMaxWidth()) {
+                    Row (horizontalArrangement = Arrangement.SpaceEvenly){
+
+                        Text(text = achievement.title)
+                        if(achievement.isEarned)
+                        {
+                            Text(text = "Earned", modifier = Modifier.padding(horizontal = 5.dp), fontWeight = FontWeight.Bold)
+                        }
+                        else
+                        {
+                            Text(text = "Not Earned", modifier = Modifier.padding(horizontal = 5.dp), fontWeight = FontWeight.Bold)
+                        }
                     }
-                    else
-                    {
-                        Text(text = "Not Earned", modifier = Modifier.padding(horizontal = 5.dp))
+                    Text(text = "Description", modifier = Modifier.padding(vertical = 5.dp), fontWeight = FontWeight.Bold)
+                    if(achievement.description == "") {
+                        Text(text = "No Description")
+                    }
+                    else{
+                        Text(text = achievement.description)
                     }
                 }
-
-                Text(text = "Description", modifier = Modifier.padding(vertical = 5.dp))
-
-                Text(text = achievement.description, modifier = Modifier.padding(vertical = 5.dp))
-
-
             }
         }
     }
-
 }
