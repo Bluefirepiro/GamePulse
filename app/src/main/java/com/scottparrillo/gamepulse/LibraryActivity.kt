@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -20,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -213,7 +213,8 @@ class LibraryActivity : AppCompatActivity() {
                     contentScale = ContentScale.Inside,
                     modifier = Modifier
                         .size(98.dp)
-                        .padding(horizontal = 2.dp)
+                        .requiredSize(98.dp)
+                        .padding(horizontal = 3.dp)
                         .clickable {
                             context.startActivity(Intent(context, GameImportActivity::class.java))
                         }

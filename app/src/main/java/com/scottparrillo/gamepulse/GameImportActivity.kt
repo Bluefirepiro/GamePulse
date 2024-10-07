@@ -127,9 +127,7 @@ class GameImportActivity: AppCompatActivity() {
                                     dialogFlag.value = true
                                     })
                                 }
-
                     }
-
                     }
             item { Row (){
                 Text(text = "Steam Import", fontSize = 35.sp,
@@ -138,7 +136,6 @@ class GameImportActivity: AppCompatActivity() {
                         .fillMaxWidth()
                         .padding(vertical = 8.dp))
             } }
-
             item { LazyRow {
                 item {TextField(
                     value = steamIdText, onValueChange = { steamIdText = it},
@@ -380,7 +377,7 @@ class GameImportActivity: AppCompatActivity() {
                                 steamIdText = "Done Importing"
                                 }
 
-                        }, modifier = Modifier.padding(horizontal = 0.dp),
+                        }, modifier = Modifier.padding(horizontal = 2.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
                     ) {
                         Text("Import", color = Color.Black)
