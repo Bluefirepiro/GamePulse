@@ -112,7 +112,7 @@ fun SingleGameScreen(){
             )
         LazyColumn {
             item { Text(text = "Platform: $gamePlatform") }
-            item { Text(text = "Title: $gameTitle") }
+           // item { Text(text = "Title: $gameTitle") }
             item {Text(text = "Total Hours played: $gameTimeTotal")}
             item {
                 if(noTime)

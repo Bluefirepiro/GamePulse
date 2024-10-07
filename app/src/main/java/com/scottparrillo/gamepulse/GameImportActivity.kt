@@ -19,9 +19,11 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -64,6 +66,7 @@ class GameImportActivity: AppCompatActivity() {
     fun GameImportScreen()
     {  var steamIdText by rememberSaveable { mutableStateOf("") }
         var steamId by rememberSaveable { mutableStateOf("") }
+        var dialogFlag = rememberSaveable { mutableStateOf(false) }
        // val enterFlag = rememberSaveable { mutableStateOf(false) }
         val context = LocalContext.current
         fun saveGameFile(mutableGameList: MutableList<Game>): Boolean {
@@ -77,6 +80,23 @@ class GameImportActivity: AppCompatActivity() {
                 return false
             }
             return true
+        }
+        //Setting up a dialog alert
+        when {
+            dialogFlag.value -> {
+                AlertDialog(onDismissRequest = { dialogFlag.value = false }, confirmButton = {
+
+
+                },
+                    title = { Text(text = "Help")},
+                    text = { Text(text = "If steam is not importing correctly please make sure your profile is set to public\n" +
+                            "If your steam ID is not showing go to your steam profile edit profile and delete your custom URL")},
+                    dismissButton = {
+                        TextButton(onClick = { dialogFlag.value = false }) {
+                            Text(text = "Dismiss")
+                        }
+                    })
+            }
         }
         LazyColumn (
             modifier = Modifier
@@ -99,6 +119,14 @@ class GameImportActivity: AppCompatActivity() {
                         ) }
                         item {Text(text = "Game Import", fontSize = 40.sp,
                             modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp)) }
+                        item {
+                            Image(painter = painterResource(id = R.drawable.questionmark), contentDescription = "question mark",
+                                modifier = Modifier
+                                    .size(width = 50.dp, height = 50.dp)
+                                    .clickable {
+                                    dialogFlag.value = true
+                                    })
+                                }
 
                     }
 
