@@ -249,19 +249,16 @@ class GameImportActivity: AppCompatActivity() {
 
                     }
 
-                    // Xbox Live Import Section
+                    // Xbox Import Section (Below Steam Import)
                     item {
-                        Row {
-                            Text(
-                                text = "Xbox Live Import", fontSize = 35.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                            )
-                        }
+                        Text(
+                            text = "Xbox Live Import", fontSize = 35.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp)
+                        )
                     }
-
                     item {
                         LazyRow {
                             item {
@@ -272,48 +269,43 @@ class GameImportActivity: AppCompatActivity() {
                                     modifier = Modifier
                                         .size(width = 280.dp, height = 50.dp)
                                         .padding(horizontal = 8.dp, vertical = 8.dp)
-                                        .requiredHeight(height = 50.dp),
                                 )
                             }
                             item {
                                 Button(
                                     onClick = {
-                                        xboxId = xboxIdText
-                                        xboxIdText = "Importing Xbox games..."
-
                                         // Start Xbox game import
                                         CoroutineScope(Dispatchers.IO).launch {
                                             try {
-                                                // Call the suspend function directly
-                                                val response = ApiClient.xboxWebAPIClient.getRecentlyPlayedGames(
-                                                    xuid = xboxIdText // Use the entered Xbox ID
-                                                )
+                                                val response =
+                                                    ApiClient.xboxWebAPIClient.getRecentlyPlayedGames(
+                                                        xuid = xboxIdText
+                                                    )
 
                                                 if (response.isSuccessful) {
-                                                    val gamesList = response.body()?.games ?: emptyList()
+                                                    val gamesList =
+                                                        response.body()?.games ?: emptyList()
                                                     for (game in gamesList) {
-                                                        val gameconvert = Game().apply {
+                                                        val gameConvert = Game().apply {
                                                             gameName = game.name
-                                                            gameId = game.titleId.toLongOrNull() ?: 0L // Convert titleId to Long if possible
+                                                            gameId =
+                                                                game.titleId.toLongOrNull() ?: 0L
                                                             gamePlatform = "Xbox"
                                                         }
-                                                        Game.gameList.add(gameconvert)
+                                                        Game.gameList.add(gameConvert)
                                                     }
-                                                    saveGameFile(Game.gameList) // Save game data locally
+                                                    saveGameFile(Game.gameList)
 
                                                     // Update UI on the main thread
                                                     withContext(Dispatchers.Main) {
                                                         xboxIdText = "Done Importing Xbox games"
                                                     }
                                                 } else {
-                                                    // Handle API error
                                                     withContext(Dispatchers.Main) {
                                                         xboxIdText = "Error importing games."
                                                     }
-                                                    println("Error fetching recently played games: ${response.errorBody()}")
                                                 }
                                             } catch (e: Exception) {
-                                                // Handle exception
                                                 e.printStackTrace()
                                                 withContext(Dispatchers.Main) {
                                                     xboxIdText = "Error during import."
