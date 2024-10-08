@@ -270,6 +270,7 @@ class GameImportActivity: AppCompatActivity() {
                             modifier = Modifier
                                 .size(width = 280.dp, height = 50.dp)
                                 .padding(horizontal = 8.dp, vertical = 8.dp)
+                                .requiredHeight(height = 50.dp),
                         )
                     }
                     item {
