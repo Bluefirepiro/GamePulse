@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,6 +40,7 @@ import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import kotlin.math.truncate
 
 class SingleGameActivity: AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -142,21 +145,46 @@ fun SingleGameScreen(){
 
             items(game.achievements){
                 achievement ->
-                Column(modifier = Modifier
+                val percentEarned = truncate(achievement.percentageEarned)
+                Column (modifier = Modifier
                     .background(color = SpringGreen)
                     .border(1.dp, color = Color.Black)
-                    .padding(vertical = 2.dp, horizontal = 2.dp)
-                    .fillMaxWidth()) {
-                    Row (horizontalArrangement = Arrangement.SpaceEvenly){
+                    .padding(horizontal = 2.dp)
+                    .fillMaxWidth(),
+                    ){
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth())
+                    {
+                        Column {
+                            Text(text = achievement.title, fontWeight = FontWeight.Bold)
+                            Text(text = "People that have earned: $percentEarned%")
 
-                        Text(text = achievement.title)
+                        }
                         if(achievement.isEarned)
                         {
-                            Text(text = "Earned", modifier = Modifier.padding(horizontal = 5.dp), fontWeight = FontWeight.Bold)
+                            if(achievement.achImageUrl != ""){
+                                AsyncImage(model = achievement.achImageUrl, contentDescription = "", modifier = Modifier
+                                    .size(width = 120.dp, height = 120.dp)
+                                    .requiredSize(width = 120.dp, height = 120.dp)
+                                    .padding(horizontal = 0.dp),
+                                    alignment = Alignment.CenterEnd)
+                            }
+                            else{
+                                Text(text = "Earned", modifier = Modifier.padding(horizontal = 5.dp), fontWeight = FontWeight.Bold)
+                            }
                         }
                         else
                         {
-                            Text(text = "Not Earned", modifier = Modifier.padding(horizontal = 5.dp), fontWeight = FontWeight.Bold)
+                            if(achievement.achImageUrlGray != ""){
+                                AsyncImage(model = achievement.achImageUrlGray, contentDescription = "", modifier = Modifier
+                                    .size(width = 120.dp, height = 120.dp)
+                                    .requiredSize(width = 120.dp, height = 120.dp)
+                                    .padding(horizontal = 0.dp),
+                                    alignment = Alignment.CenterEnd)
+
+                            }
+                            else{
+                                Text(text = "Not Earned", modifier = Modifier.padding(horizontal = 5.dp), fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                     Text(text = "Description", modifier = Modifier.padding(vertical = 5.dp), fontWeight = FontWeight.Bold)
@@ -167,6 +195,24 @@ fun SingleGameScreen(){
                         Text(text = achievement.description)
                     }
                 }
+
+                /*
+                Column(modifier = Modifier.background(color = SpringGreen)
+                    .fillMaxWidth()
+                    .padding(horizontal = 2.dp)
+                    .border(1.dp, color = SpringGreen)
+                    ) {
+                    Text(text = "Description", modifier = Modifier.padding(vertical = 5.dp), fontWeight = FontWeight.Bold)
+                    if(achievement.description == "") {
+                        Text(text = "No Description")
+                    }
+                    else{
+                        Text(text = achievement.description)
+                    }
+                }
+
+                 */
+
             }
         }
     }
