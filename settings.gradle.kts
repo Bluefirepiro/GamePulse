@@ -9,6 +9,7 @@ pluginManagement {
             }
         }
         mavenCentral()
+
         gradlePluginPortal()
 
     }
@@ -18,8 +19,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
     }
 }
 
 rootProject.name = "GamePulse"
 include(":app")
+

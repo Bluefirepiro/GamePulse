@@ -10,10 +10,11 @@ import retrofit2.http.Query
 
 interface XboxWebAPIClient {
 
+
     // Get Xbox Profile Information
     @GET("profile")
     fun getProfile(
-        @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY
+        @Header("Authorization") accessToken: String
     ): Call<ProfileResponse>
 
     // Get achievements for a specific game and user
@@ -29,7 +30,7 @@ interface XboxWebAPIClient {
     fun getGameDetails(
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("titleId") titleId: String
-    ): Call<XboxGameDetails>
+    ): Call<XboxOwnedGames>
 
     // Get recently played games by a user
     @GET("/xbox/users/{xuid}/recentlyplayed")
@@ -64,5 +65,5 @@ interface XboxWebAPIClient {
     fun getAllGamesByID(
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("xuid") xuid: String
-    ): Call<XboxGameDetails>
+    ): Call<XboxOwnedGames>
 }

@@ -1,0 +1,13 @@
+{
+    "client_id": "ab25b9b1-f9cf-49fe-8562-26d8fe8c2af2",
+    "redirect_uri": "msauth://com.scottparrillo.gamepulse/KnlZj5n%2FGlArVWkZ0iDoQ7ej22w%3D",
+    "authorities": [
+        {
+            "type": "AAD",
+            "audience": {
+                "type": "PersonalMicrosoftAccount",
+                "tenant_id": "consumers"
+            }
+        }
+    ]
+}

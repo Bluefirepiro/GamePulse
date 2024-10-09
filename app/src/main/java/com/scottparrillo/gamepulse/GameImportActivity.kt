@@ -68,6 +68,7 @@ class GameImportActivity: AppCompatActivity() {
         }
     }
 
+
     @SuppressLint("SuspiciousIndentation")
     @RequiresApi(Build.VERSION_CODES.O)
     @Preview(showBackground = true)
@@ -260,6 +261,7 @@ class GameImportActivity: AppCompatActivity() {
                         .padding(vertical = 16.dp)
                 )
             }
+
             item {
                 LazyRow {
                     item {
@@ -273,25 +275,34 @@ class GameImportActivity: AppCompatActivity() {
                                 .requiredHeight(height = 50.dp),
                         )
                     }
+
                     item {
                         Button(
                             onClick = {
                                 // Start Xbox game import
                                 CoroutineScope(Dispatchers.IO).launch {
                                     try {
-                                        val response =
-                                            ApiClient.xboxWebAPIClient.getRecentlyPlayedGames(
-                                                xuid = xboxIdText
-                                            )
+                                        // Fetch all games by Xbox ID from Xbox API
+                                        val response = ApiClient.xboxWebAPIClient.getAllGamesByID(
+                                            xuid = xboxIdText
+                                        ).execute()  // Using execute() for a synchronous call
+
                                         if (response.isSuccessful) {
-                                            val gamesList =
-                                                response.body()?.games ?: emptyList()
+                                            val xboxGamesResponse = response.body()
+                                            val gamesList: List<XboxOwnedGames.Response.XboxGame> =
+                                                xboxGamesResponse?.response?.games ?: emptyList()
+
                                             for (game in gamesList) {
                                                 val gameConvert = Game().apply {
                                                     gameName = game.name
-                                                    gameId =
-                                                        game.titleId.toLongOrNull() ?: 0L
+                                                    gameId = game.titleId.toLongOrNull() ?: 0L
                                                     gamePlatform = "Xbox"
+                                                    coverURL = game.displayImage // Assuming you want the display image
+                                                    dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
+                                                        .atZone(ZoneId.systemDefault())
+                                                        .toLocalDateTime()
+                                                    //currentGamerscore = game.achievement.currentGamerscore
+                                                    //totalGamerscore = game.achievement.totalGamerscore
                                                 }
                                                 Game.gameList.add(gameConvert)
                                             }
