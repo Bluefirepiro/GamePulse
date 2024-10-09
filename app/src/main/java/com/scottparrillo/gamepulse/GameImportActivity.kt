@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,6 +70,8 @@ class GameImportActivity: AppCompatActivity() {
         var dialogFlag = rememberSaveable { mutableStateOf(false) }
        // val enterFlag = rememberSaveable { mutableStateOf(false) }
         val context = LocalContext.current
+        val view = LocalView.current
+        view.keepScreenOn = true
         fun saveGameFile(mutableGameList: MutableList<Game>): Boolean {
             try {
                 val fos = context.openFileOutput("gameList", MODE_PRIVATE)

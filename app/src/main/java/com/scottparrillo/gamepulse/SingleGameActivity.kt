@@ -2,6 +2,7 @@ package com.scottparrillo.gamepulse
 
 import android.content.Intent
 import android.os.Build
+import android.os.Build.VERSION_CODES.O_MR1
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +45,7 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.truncate
 
 class SingleGameActivity: AppCompatActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(O_MR1)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -66,6 +68,7 @@ fun SingleGameScreen(){
     val gameLastPlayed = game.dateTimeLastPlayed.truncatedTo(ChronoUnit.DAYS)
     var noTime = false
     //1969 12 31 18:00
+
     if(gameLastPlayed == LocalDateTime.of(1969, 12, 31, 0,0))
     {
         noTime = true
