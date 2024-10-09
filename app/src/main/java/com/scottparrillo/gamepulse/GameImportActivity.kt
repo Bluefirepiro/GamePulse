@@ -154,7 +154,7 @@ class GameImportActivity: AppCompatActivity() {
 
                             //Upon clicking import get the steam user id then load in the games
 
-                            //Start of synch api call
+                            //Start of sync api call
                             thread (start = true){
                                 //Start of first call
                                 val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, steamId.toLong(), "json" )
@@ -170,14 +170,12 @@ class GameImportActivity: AppCompatActivity() {
                                         var sameNameFlag = false
                                         if(Game.gameList.isNotEmpty())
                                         {
-
                                             for (gameL in Game.gameList)
                                             {
                                                 if(gameL.gameName == game.name && gameL.gamePlatform == "Steam")
                                                 {
                                                     sameNameFlag = true
                                                 }
-
                                             }
                                         }
                                         if(!sameNameFlag)
@@ -246,61 +244,26 @@ class GameImportActivity: AppCompatActivity() {
                                             }
                                         }
                                     }
-                                    /*
-                                   val callAch = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
-                                        game.gameId, "4A7BFC2A3443A093EA9953FD5529C795",
-                                        steamId.toLong())
-                                    callAch.enqueue(object: Callback<SteamPlayerAchievements> {
-                                        override fun onResponse(
-                                            p0: Call<SteamPlayerAchievements>,
-                                            achResponse: Response<SteamPlayerAchievements>
-                                        ) {
-                                            if(achResponse.isSuccessful){
-                                                //go through and make sure the achievement isnt already added
-
-                                                val achievementPost = achResponse.body()!!
-                                                val playerStats = achievementPost.playerstats!!
-                                                val gameAchievements = playerStats.achievements
-                                                for (ach in gameAchievements) {
-                                                    var sameElementFlag = false
-                                                    if(game.achievements.isNotEmpty())
-                                                    {
-                                                        for(achL in game.achievements)
-                                                        {
-                                                            if(achL.title == ach.apiname)
-                                                            {
-                                                                sameElementFlag = true
-                                                            }
-                                                        }
-                                                    }
-                                                    if(!sameElementFlag)
-                                                    {
-                                                        val earnedFlag =
-                                                            //Ignore the warning
-                                                            if (ach.achieved == 1) true else false
-                                                        val toConvert = Achievement(0, ach.apiname,
-                                                            "", 0.0,
-                                                            earnedFlag, 0, 0, 0)
-                                                        game.achievements.add(toConvert)
-                                                    }
-                                                    else
-                                                    {
-                                                        //do Nothing
+                                }
+                                //End of player achievement Call
+                                //Start of achievement percentage call
+                                for(game in Game.gameList){
+                                    val callAchPercent = SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages(game.gameId, "json")
+                                    val achPercentResponse = callAchPercent.execute()
+                                    if(achPercentResponse.isSuccessful){
+                                        val achPercentList = achPercentResponse.body()?.achievementpercentages?.achievements
+                                        if (achPercentList != null) {
+                                            for(achPercent in achPercentList){
+                                                for(ach in game.achievements){
+                                                    if(achPercent.name == ach.title){
+                                                        ach.percentageEarned = achPercent.percent.toDouble()
                                                     }
                                                 }
                                             }
                                         }
-                                        override fun onFailure(
-                                            p0: Call<SteamPlayerAchievements>,
-                                            p1: Throwable
-                                        ) {
-                                            p1.printStackTrace()
-                                        }
-                                    })
-
-                                     */
+                                    }
                                 }
-                                //End of player achievement Call
+                                saveGameFile(Game.gameList)
                                 for(game in Game.gameList){
                                     val callAch = SteamRetrofit.apiSteam.apiS.getGameSchema(
                                         "4A7BFC2A3443A093EA9953FD5529C795",game.gameId)
@@ -314,48 +277,14 @@ class GameImportActivity: AppCompatActivity() {
                                                         if(achI.title == ach.name){
                                                             achI.title = ach.displayName
                                                             achI.description = ach.description
+                                                            achI.achImageUrl = ach.icon
+                                                            achI.achImageUrlGray = ach.icongray
                                                         }
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                    /*
-                                    val callAch = SteamRetrofit.apiSteam.apiS.getGameSchema(
-                                        "4A7BFC2A3443A093EA9953FD5529C795",game.gameId)
-                                    callAch.enqueue(object: Callback<SteamGameSchema>{
-                                        override fun onResponse(
-                                            achCall: Call<SteamGameSchema>,
-                                            achResponse: Response<SteamGameSchema>
-                                        ) {
-                                            if(achResponse.isSuccessful){
-                                                val achievements = achResponse.body()?.availableGameStats?.achievements
-                                                if (game.achievements.isNotEmpty()){
-                                                    if (achievements != null) {
-                                                        for(ach in achievements){
-                                                            for(achI in game.achievements){
-                                                                if(achI.title == ach.name){
-                                                                    achI.title = ach.displayName
-                                                                    achI.description = ach.description
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        override fun onFailure(
-                                            p0: Call<SteamGameSchema>,
-                                            p1: Throwable
-                                        ) {
-                                            p1.printStackTrace()
-                                        }
-
-                                    })
-
-                                     */
-                                   // saveGameFile(Game.gameList)
                                 }
                                 //Determine which games have been completed
                                 if(Game.gameList.isNotEmpty()){

@@ -44,7 +44,9 @@ data class Achievement(
     var progress: Int,
     val total: Int,
     val soundResId: Int?,
-    var isFavorite: Boolean = false
+    var isFavorite: Boolean = false,
+    var achImageUrl: String = "",
+    var achImageUrlGray: String = ""
 ) : Serializable
 
 class AchievementActivity : AppCompatActivity() {
