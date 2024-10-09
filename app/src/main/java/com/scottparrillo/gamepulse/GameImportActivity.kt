@@ -283,7 +283,6 @@ class GameImportActivity: AppCompatActivity() {
                                             ApiClient.xboxWebAPIClient.getRecentlyPlayedGames(
                                                 xuid = xboxIdText
                                             )
-
                                         if (response.isSuccessful) {
                                             val gamesList =
                                                 response.body()?.games ?: emptyList()

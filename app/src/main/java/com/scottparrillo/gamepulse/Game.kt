@@ -13,6 +13,7 @@ class Game: Serializable {
     var gameTime: Float = 0f
     var timeToBeat: Float = 0f
     var gameId: Long = 0
+    var xboxGameId: Long = 0
     var gamePlatform: String = ""
     var coverURL: String = ""
     var gameName: String = ""

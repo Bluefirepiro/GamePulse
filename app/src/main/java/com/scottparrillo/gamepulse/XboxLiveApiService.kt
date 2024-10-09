@@ -59,4 +59,10 @@ interface XboxWebAPIClient {
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("xuid") xuid: String
     ): Call<List<GameDetailsResponse>>
+
+    @GET("player/titleHistory/{xuid}")
+    fun getAllGamesByID(
+        @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
+        @Path("xuid") xuid: String
+    ): Call<XboxGameDetails>
 }
