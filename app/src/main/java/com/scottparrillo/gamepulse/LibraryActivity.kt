@@ -1,4 +1,5 @@
 package com.scottparrillo.gamepulse
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -50,6 +51,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -125,6 +129,37 @@ class LibraryActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 null
+            }
+        }
+        //Some Helper Functions
+        fun SearchList(){
+            val tempMutableList = mutableListOf<Game>()
+            var findMark = false
+            if (searchText.contains("\n")){
+                searchText = searchText.replace("\n","")
+            }
+            for (game in Game.gameList) {
+                if (game.gameName.contains(searchText, ignoreCase = true)) {
+                    tempMutableList.add(game)
+                    findMark = true
+                    searchFlag.value = true
+                } else if (searchText == "") {
+                    gameList.clear()
+                    gameList.addAll(Game.gameList)
+                }
+
+            }
+            if (findMark) {
+                gameList.clear()
+                gameList.addAll(tempMutableList)
+            } else if (searchText == "") {
+                gameList.clear()
+                gameList.addAll(Game.gameList)
+            } else {
+                val toast = Toast.makeText(
+                    context, "Name not found", Toast.LENGTH_SHORT
+                )
+                toast.show()
             }
         }
 
@@ -227,7 +262,19 @@ class LibraryActivity : AppCompatActivity() {
                     label = { Text("Search Game") },
                     modifier = Modifier
                         .size(width = 280.dp, height = 46.dp)
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 8.dp)
+                        .onKeyEvent {
+                            if (it.key == Key.Enter){
+                                SearchList()
+                                return@onKeyEvent true
+                            }
+                            else{
+                                return@onKeyEvent false
+                            }
+
+
+
+                        },
                 )
 
                     Image(
@@ -238,38 +285,10 @@ class LibraryActivity : AppCompatActivity() {
                             .size(60.dp)
                             .padding(horizontal = 0.dp, vertical = 1.dp)
                             .clickable {
-
-                                val tempMutableList = mutableListOf<Game>()
-                                var findMark = false
-                                for (game in Game.gameList) {
-                                    if (game.gameName.contains(searchText, ignoreCase = true)) {
-                                        tempMutableList.add(game)
-                                        findMark = true
-                                        searchFlag.value = true
-                                    } else if (searchText == "") {
-                                        gameList.clear()
-                                        gameList.addAll(Game.gameList)
-                                    }
-
-                                }
-                                if (findMark) {
-                                    gameList.clear()
-                                    gameList.addAll(tempMutableList)
-                                } else if (searchText == "") {
-                                    gameList.clear()
-                                    gameList.addAll(Game.gameList)
-                                } else {
-                                    val toast = Toast.makeText(
-                                        context, "Name not found", Toast.LENGTH_SHORT
-                                    )
-                                    toast.show()
-                                }
-
-
+                            SearchList()
                             }
                     )
             }
-
             LazyRow(
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
@@ -503,3 +522,4 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
 }
+
