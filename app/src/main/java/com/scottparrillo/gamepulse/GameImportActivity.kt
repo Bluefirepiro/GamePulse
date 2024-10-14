@@ -289,8 +289,8 @@ class GameImportActivity: AppCompatActivity() {
 
                                         if (response.isSuccessful) {
                                             val xboxGamesResponse = response.body()
-                                            val gamesList: List<XboxOwnedGames.Response.XboxGame> =
-                                                xboxGamesResponse?.response?.games ?: emptyList()
+                                            val gamesList: List<XboxOwnedGames.XboxGame> =
+                                                xboxGamesResponse?.games ?: emptyList()
 
                                             for (game in gamesList) {
                                                 val gameConvert = Game().apply {

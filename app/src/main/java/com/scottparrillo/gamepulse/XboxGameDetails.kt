@@ -3,16 +3,10 @@ package com.scottparrillo.gamepulse
 import com.google.gson.annotations.SerializedName
 
 class XboxOwnedGames {
-    @SerializedName("response")
-    val response: Response? = null
-
-    class Response {
-        @SerializedName("game_count")
-        val game_count: Long = 0
-
-        @SerializedName("games")
+        @SerializedName("xuid")
+        val xuid:Long = 0
+        @SerializedName("titles")
         val games = listOf<XboxGame>()
-
         class XboxGame {
             @SerializedName("titleId")
             val titleId: String = ""
@@ -100,5 +94,4 @@ class XboxOwnedGames {
                 val canHide: Boolean = false
             }
         }
-    }
 }
