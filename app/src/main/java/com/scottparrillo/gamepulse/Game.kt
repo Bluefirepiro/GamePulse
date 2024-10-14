@@ -32,7 +32,6 @@ class Game: Serializable {
     companion object{
         var gameList = mutableListOf<Game>()
         var selectedGame = Game()
-
     }
 
 }
