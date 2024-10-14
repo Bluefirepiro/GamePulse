@@ -34,13 +34,18 @@ import java.io.ObjectOutputStream
 import java.io.Serializable
 
 data class Achievement(
-    val title: String,
-    val description: String,
+    val iconResId: Int,
+    var title: String,
+    var description: String,
     var percentageEarned: Double,
     val isEarned: Boolean,
     var progress: Int,
     val total: Int,
-    var isFavorite: Boolean = false
+    val soundResId: Int?,
+    var isFavorite: Boolean = false,
+    var achImageUrl: String = "",
+    var achImageUrlGray: String = ""
+
 ) : Serializable
 
 class AchievementActivity : AppCompatActivity() {

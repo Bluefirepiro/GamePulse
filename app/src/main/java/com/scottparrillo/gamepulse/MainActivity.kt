@@ -72,6 +72,7 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
 
+
     private val apiService = ApiClient.xboxWebAPIClient
     var xboxIdText by mutableStateOf("")
 
@@ -109,20 +110,34 @@ class MainActivity : ComponentActivity() {
         setContent {
             GamePulseTheme {
                 HomeScreen(
+
                     recentlyPlayedGames = recentlyPlayedGamesList,
                     recentlyAchievedAchievements = recentlyAchievedAchievementsList,
+/*
                     onGamePlayed = { game ->
                         // Handle the game that was played, e.g., navigate to details
                         startActivity(Intent(this, GameDetailActivity::class.java).apply {
                             putExtra("GAME_ID", game.gameId)
                         })
                         updateRecentlyPlayed(game)
+
                         loadRecentlyPlayedGames(xuid = xboxIdText)
+
                     },
+
+ */
+
+/*
                     onAchievementUnlocked = { achievement ->
                         updateRecentlyAchieved(achievement)
+
                         loadRecentlyAchievedAchievements(xuid = xboxIdText)
+
                     },
+
+ */
+
+
                     onNavigateToAchievements = {
                         startActivity(Intent(this, AchievementActivity::class.java))
                     },
@@ -134,15 +149,21 @@ class MainActivity : ComponentActivity() {
                     },
                     onOpenSettings = {
                         openDeviceSettings() // Handle settings click
-                    },
+                    }
+/*
                     onOpenNotifications = {
                         openNotificationSettings() // Handle notifications click
                     }
+
+ */
+
+
                 )
             }
         }
 
         // Load recently played games from SharedPreferences when the activity starts
+
         loadRecentlyPlayedGames(xuid = xboxIdText)
         loadRecentlyAchievedAchievements(xuid = xboxIdText)
     }
@@ -253,7 +274,7 @@ class MainActivity : ComponentActivity() {
         val intent = Intent(this, MainActivity::class.java)
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
-
+/*
     private fun updateRecentlyPlayed(game: Game) {
         val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
@@ -279,6 +300,8 @@ class MainActivity : ComponentActivity() {
         recentlyPlayedGamesList.addAll(recentlyPlayedList)
     }
 
+ */
+/*
     private fun updateRecentlyAchieved(achievement: Achievement) {
         val sharedPreferences: SharedPreferences = getSharedPreferences("GamePulsePrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
@@ -303,6 +326,7 @@ class MainActivity : ComponentActivity() {
         recentlyAchievedAchievementsList.clear()
         recentlyAchievedAchievementsList.addAll(recentlyAchievedList)
     }
+
 
     private fun loadRecentlyPlayedGames(xuid: String) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -399,6 +423,8 @@ class MainActivity : ComponentActivity() {
             emptyList()
         }
     }
+
+ */
 }
 
 @Composable
@@ -406,13 +432,13 @@ fun HomeScreen(
 
     recentlyPlayedGames: List<Game>,
     recentlyAchievedAchievements: List<Achievement>,
-    onGamePlayed: (Game) -> Unit,
-    onAchievementUnlocked: (Achievement) -> Unit,
+   // onGamePlayed: (Game) -> Unit,
+   // onAchievementUnlocked: (Achievement) -> Unit,
     onNavigateToAchievements: () -> Unit,
     onNavigateToLibrary: () -> Unit,
     onNavigateToFriends: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenNotifications: () -> Unit
+   // onOpenNotifications: () -> Unit
 ) {
 
     val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
@@ -443,7 +469,7 @@ fun HomeScreen(
                     contentDescription = "Notifications",
                     modifier = Modifier
                         .size(24.dp)
-                        .clickable { onOpenNotifications() } // Call the notifications function
+                     //   .clickable { onOpenNotifications() } // Call the notifications function
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -489,7 +515,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .size(100.dp)
                         .background(SpringGreen)
-                        .clickable { onGamePlayed(game) }
+                        //.clickable { onGamePlayed(game) }
                         .padding(8.dp)
                 ) {
                     Text(game.gameName, fontFamily = jockeyOne)
@@ -517,7 +543,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .size(100.dp)
                         .background(SpringGreen)
-                        .clickable { onAchievementUnlocked(achievement) }
+                        //.clickable { onAchievementUnlocked(achievement) }
                         .padding(8.dp)
                 ) {
                     Text(achievement.title, fontFamily = jockeyOne)
