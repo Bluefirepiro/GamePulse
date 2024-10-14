@@ -1,5 +1,4 @@
 package com.scottparrillo.gamepulse
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -102,7 +101,8 @@ class LibraryActivity : AppCompatActivity() {
     fun LibraryScreen() {
 
         //Setting may val and vars for future use
-        var dialogFlag = rememberSaveable { mutableStateOf(false) }
+        val dialogFlag = rememberSaveable { mutableStateOf(false) }
+        val toastSearchFlag = rememberSaveable { mutableStateOf(false) }
         val context = LocalContext.current
         val gameFile = File(context.filesDir, "gameList")
         val gameList = remember { mutableStateListOf<Game>() }
@@ -136,24 +136,17 @@ class LibraryActivity : AppCompatActivity() {
         fun SearchList(){
             var findMark = false
             val tempMutableList = mutableListOf<Game>()
-            thread(true) {
-
-
-                if (searchText.contains("\n")) {
-                    searchText = searchText.replace("\n", "")
-                }
+            if (searchText.contains("\n")) {
+                searchText = searchText.replace("\n", "")
+            }
+            thread(true){
                 for (game in Game.gameList) {
                     if (game.gameName.contains(searchText, ignoreCase = true)) {
                         tempMutableList.add(game)
                         findMark = true
                         searchFlag.value = true
-                    } else if (searchText == "") {
-                        gameList.clear()
-                        gameList.addAll(Game.gameList)
                     }
-
                 }
-            }
                 if (findMark) {
                     gameList.clear()
                     gameList.addAll(tempMutableList)
@@ -161,13 +154,19 @@ class LibraryActivity : AppCompatActivity() {
                     gameList.clear()
                     gameList.addAll(Game.gameList)
                 } else {
-                    val toast = Toast.makeText(
-                        context, "Name not found", Toast.LENGTH_SHORT
-                    )
-                    toast.show()
+                    toastSearchFlag.value = true
                 }
-
-
+            }
+            when {toastSearchFlag.value ->
+                {
+                    if(toastSearchFlag.value){
+                        val toast = Toast.makeText(
+                            context, "Name not found", Toast.LENGTH_SHORT
+                        )
+                        toast.show()
+                        toastSearchFlag.value = true
+                    }
+                }}
         }
 
         fun saveGameFile(mutableGameList: MutableList<Game>): Boolean {
@@ -332,17 +331,18 @@ class LibraryActivity : AppCompatActivity() {
                         modifier = Modifier
                             .width(120.dp)
                             .height(31.dp)
-                            .clickable { /* Handle Category clicks */
-                                var sortedList = mutableListOf<Game>()
-                                for(game in gameList){
-                                    if(LocalDateTime.now().dayOfYear == game.dateTimeLastPlayed.dayOfYear)
-                                    {
-                                        sortedList.add(game)
+                            .clickable {/* Handle Category clicks */
+                                thread(start = true){
+                                    val sortedList = mutableListOf<Game>()
+                                    for(game in gameList){
+                                        if(LocalDateTime.now().dayOfYear == game.dateTimeLastPlayed.dayOfYear)
+                                        {
+                                            sortedList.add(game)
+                                        }
                                     }
+                                    gameList.clear()
+                                    gameList.addAll(sortedList)
                                 }
-                                gameList.clear()
-                                gameList.addAll(sortedList)
-
                             }
                             .padding(2.dp)
                             .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
@@ -357,12 +357,15 @@ class LibraryActivity : AppCompatActivity() {
                         modifier = Modifier
                             .width(120.dp)
                             .height(31.dp)
-                            .clickable { /* Handle Category clicks */
-                                val sortedList = gameList
-                                    .sortedBy { it.allAchiev }
-                                    .toMutableList()
-                                gameList.clear()
-                                gameList.addAll(sortedList)
+                            .clickable {/* Handle Category clicks */
+                                thread (start = true){
+                                    val sortedList = gameList
+                                        .sortedBy { it.allAchiev }
+                                        .toMutableList()
+                                    gameList.clear()
+                                    gameList.addAll(sortedList)
+                                }
+
                             }
                             .padding(2.dp)
                             .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
@@ -378,15 +381,15 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                var sortedList = mutableListOf<Game>()
-                                for (game in Game.gameList) {
-                                    if (game.newlyAdded)
-                                        sortedList.add(game)
+                                thread(start = true){
+                                    val sortedList = mutableListOf<Game>()
+                                    for (game in Game.gameList) {
+                                        if (game.newlyAdded)
+                                            sortedList.add(game)
+                                    }
+                                    gameList.clear()
+                                    gameList.addAll(sortedList)
                                 }
-
-
-                                gameList.clear()
-                                gameList.addAll(sortedList)
                             }
                             .padding(2.dp)
                             .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
