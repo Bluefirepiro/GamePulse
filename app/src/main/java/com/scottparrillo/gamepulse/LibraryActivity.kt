@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -26,6 +27,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -33,6 +36,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,6 +50,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -63,6 +70,8 @@ import java.io.File
 import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
+import java.time.LocalDateTime
+import kotlin.concurrent.thread
 
 class LibraryActivity : AppCompatActivity() {
 
@@ -77,12 +86,12 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
     /*
-    1. Rescale images for game covers
-    2. Use blocking threads for api calls
-    3. Work on single game screen
+
+
+
     616 px x 353 px for capsule
     Center Search button on Add Game Button
-    Round top two corners on square buttons
+
      */
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalFoundationApi::class)
@@ -90,7 +99,10 @@ class LibraryActivity : AppCompatActivity() {
     @ExperimentalMaterial3Api
     @Composable
     fun LibraryScreen() {
+
         //Setting may val and vars for future use
+        val dialogFlag = rememberSaveable { mutableStateOf(false) }
+        val toastSearchFlag = rememberSaveable { mutableStateOf(false) }
         val context = LocalContext.current
         val gameFile = File(context.filesDir, "gameList")
         val gameList = remember { mutableStateListOf<Game>() }
@@ -106,31 +118,6 @@ class LibraryActivity : AppCompatActivity() {
         /*I have this below to show an example of how to make a call
         this can be commented away when not used for testing
          */
-
-        /*
-       val call = SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages("4A7BFC2A3443A093EA9953FD5529C795", 1158310, "json" )
-        call.enqueue(object: Callback<SteamAchievementPercentages>{
-            override fun onResponse(
-                call: Call<SteamAchievementPercentages>,
-                response: Response<SteamAchievementPercentages>
-            ) {
-                if(response.isSuccessful)
-                {
-                   val post = response.body()!!
-
-
-                    Log.v("api", post.toString())
-                   // Log.v("api", post.achievementpercentages[0].achievements[0].name)
-                }
-            }
-
-            override fun onFailure(p0: Call<SteamAchievementPercentages>, p1: Throwable) {
-                p1.printStackTrace()
-            }
-
-        })
-
-         */
         fun getGameFile(): List<Game>? {
             return try {
                 val fis = context.openFileInput("gameList")
@@ -144,6 +131,42 @@ class LibraryActivity : AppCompatActivity() {
                 e.printStackTrace()
                 null
             }
+        }
+        //Some Helper Functions
+        fun SearchList(){
+            var findMark = false
+            val tempMutableList = mutableListOf<Game>()
+            if (searchText.contains("\n")) {
+                searchText = searchText.replace("\n", "")
+            }
+            thread(true){
+                for (game in Game.gameList) {
+                    if (game.gameName.contains(searchText, ignoreCase = true)) {
+                        tempMutableList.add(game)
+                        findMark = true
+                        searchFlag.value = true
+                    }
+                }
+                if (findMark) {
+                    gameList.clear()
+                    gameList.addAll(tempMutableList)
+                } else if (searchText == "") {
+                    gameList.clear()
+                    gameList.addAll(Game.gameList)
+                } else {
+                    toastSearchFlag.value = true
+                }
+            }
+            when {toastSearchFlag.value ->
+                {
+                    if(toastSearchFlag.value){
+                        val toast = Toast.makeText(
+                            context, "Name not found", Toast.LENGTH_SHORT
+                        )
+                        toast.show()
+                        toastSearchFlag.value = true
+                    }
+                }}
         }
 
         fun saveGameFile(mutableGameList: MutableList<Game>): Boolean {
@@ -163,10 +186,36 @@ class LibraryActivity : AppCompatActivity() {
             if (gameList.size != getGameFile()?.size) {
                 gameList.clear()
                 gameList.addAll(getGameFile() ?: emptyList())
+
+            }
+            if (Game.gameList.size != getGameFile()?.size){
                 Game.gameList.clear()
                 Game.gameList.addAll(getGameFile() ?: emptyList())
             }
 
+        }
+        //Setting up a dialog alert
+        when {
+            dialogFlag.value -> {
+                AlertDialog(onDismissRequest = { dialogFlag.value = false }, confirmButton = {
+                    TextButton(onClick = {
+                        gameList.clear()
+                        Game.gameList.clear()
+                        Game.gameList.addAll(gameList)
+                        saveGameFile(Game.gameList)
+                        dialogFlag.value = false }) {
+                        Text(text = "Confirm")
+                        
+                    }
+
+                },
+                    title = { Text(text = "Delete all games?")},
+                    dismissButton = {
+                        TextButton(onClick = { dialogFlag.value = false }) {
+                            Text(text = "Dismiss")
+                        }
+                    })
+            }
         }
         Column(
             modifier = Modifier
@@ -208,20 +257,33 @@ class LibraryActivity : AppCompatActivity() {
                     contentScale = ContentScale.Inside,
                     modifier = Modifier
                         .size(98.dp)
-                        .padding(horizontal = 2.dp)
+                        .requiredSize(98.dp)
+                        .padding(horizontal = 3.dp)
                         .clickable {
                             context.startActivity(Intent(context, GameImportActivity::class.java))
                         }
                 )
             }
             //This row holds the search bar and button
-            Row() {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 TextField(
                     value = searchText, onValueChange = { searchText = it },
                     label = { Text("Search Game") },
                     modifier = Modifier
                         .size(width = 280.dp, height = 46.dp)
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 8.dp)
+                        .onKeyEvent {
+                            if (it.key == Key.Enter){
+                                SearchList()
+                                return@onKeyEvent true
+                            }
+                            else{
+                                return@onKeyEvent false
+                            }
+
+
+
+                        },
                 )
 
                     Image(
@@ -230,42 +292,12 @@ class LibraryActivity : AppCompatActivity() {
                         contentScale = ContentScale.Inside,
                         modifier = Modifier
                             .size(60.dp)
-                            .padding(horizontal = 8.dp, vertical = 10.dp)
+                            .padding(horizontal = 0.dp, vertical = 1.dp)
                             .clickable {
-
-                                val tempMutableList = mutableListOf<Game>()
-                                var findMark = false
-                                for (game in Game.gameList) {
-                                    if (game.gameName.contains(searchText, ignoreCase = true)) {
-                                        tempMutableList.add(game)
-                                        findMark = true
-                                        searchFlag.value = true
-                                    } else if (searchText == "") {
-                                        gameList.clear()
-                                        gameList.addAll(Game.gameList)
-                                    }
-
-                                }
-                                if (findMark) {
-                                    gameList.clear()
-                                    gameList.addAll(tempMutableList)
-                                }
-                                else if(searchText == ""){
-                                    gameList.clear()
-                                    gameList.addAll(Game.gameList)
-                                }
-                                else {
-                                    val toast = Toast.makeText(
-                                        context, "Name not found", Toast.LENGTH_SHORT
-                                    )
-                                    toast.show()
-                                }
-
-
+                            SearchList()
                             }
                     )
             }
-
             LazyRow(
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
@@ -285,8 +317,10 @@ class LibraryActivity : AppCompatActivity() {
                                 gameList.addAll(sortedList)
                             }
                             .padding(2.dp)
+                            .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
+                            .background(color = SpringGreen),
 
-                            .background(color = SpringGreen)
+
                     ) {
                         Text(text = "Recent")
                     }
@@ -297,16 +331,21 @@ class LibraryActivity : AppCompatActivity() {
                         modifier = Modifier
                             .width(120.dp)
                             .height(31.dp)
-                            .clickable { /* Handle Category clicks */
-                                val sortedList =
-                                    gameList
-                                        .sortedBy { it.currentlyPlaying }
-                                        .toMutableList()
-                                gameList.clear()
-                                gameList.addAll(sortedList)
+                            .clickable {/* Handle Category clicks */
+                                thread(start = true){
+                                    val sortedList = mutableListOf<Game>()
+                                    for(game in gameList){
+                                        if(LocalDateTime.now().dayOfYear == game.dateTimeLastPlayed.dayOfYear)
+                                        {
+                                            sortedList.add(game)
+                                        }
+                                    }
+                                    gameList.clear()
+                                    gameList.addAll(sortedList)
+                                }
                             }
                             .padding(2.dp)
-
+                            .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
                             .background(color = SpringGreen)
                     ) {
                         Text(text = "Current")
@@ -318,15 +357,18 @@ class LibraryActivity : AppCompatActivity() {
                         modifier = Modifier
                             .width(120.dp)
                             .height(31.dp)
-                            .clickable { /* Handle Category clicks */
-                                val sortedList = gameList
-                                    .sortedBy { it.completed }
-                                    .toMutableList()
-                                gameList.clear()
-                                gameList.addAll(sortedList)
+                            .clickable {/* Handle Category clicks */
+                                thread (start = true){
+                                    val sortedList = gameList
+                                        .sortedBy { it.allAchiev }
+                                        .toMutableList()
+                                    gameList.clear()
+                                    gameList.addAll(sortedList)
+                                }
+
                             }
                             .padding(2.dp)
-
+                            .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
                             .background(color = SpringGreen)
                     ) {
                         Text(text = "Beaten")
@@ -339,19 +381,18 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                var sortedList = mutableListOf<Game>()
-                                for(game in Game.gameList)
-                                {
-                                    if(game.newlyAdded)
-                                        sortedList.add(game)
+                                thread(start = true){
+                                    val sortedList = mutableListOf<Game>()
+                                    for (game in Game.gameList) {
+                                        if (game.newlyAdded)
+                                            sortedList.add(game)
+                                    }
+                                    gameList.clear()
+                                    gameList.addAll(sortedList)
                                 }
-
-
-                                gameList.clear()
-                                gameList.addAll(sortedList)
                             }
                             .padding(2.dp)
-
+                            .clip(RoundedCornerShape(5.dp, 5.dp, 0.dp, 0.dp))
                             .background(color = SpringGreen)
                     ) {
                         Text(text = "New")
@@ -374,29 +415,36 @@ class LibraryActivity : AppCompatActivity() {
                     Text(text = "Sort", color = Color.Black)
                 }
                 Button(onClick = {
-                    gameList.clear()
-                    Game.gameList.clear()
-                    Game.gameList.addAll(gameList)
-                    saveGameFile(Game.gameList)
+                    dialogFlag.value = true
                 }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
                     Text(text = "Clear All", color = Color.Black)
                 }
                 DropdownMenu(expanded = expandedDrop, onDismissRequest = { expandedDrop = false }) {
+
                     DropdownMenuItem(text = { Text(text = "Console") }, onClick = {
-                        val sortedList = gameList.sortedBy { it.gamePlatform }.toMutableList()
-                        gameList.clear()
-                        gameList.addAll(sortedList)
+                        thread(start = true){
+                            val sortedList = gameList.sortedBy { it.gamePlatform }.toMutableList()
+                            gameList.clear()
+                            gameList.addAll(sortedList)
+                        }
+
                     })
                     DropdownMenuItem(text = { Text(text = "Alphabetically") }, onClick = {
-                        val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
-                        gameList.clear()
-                        gameList.addAll(sortedList)
+                        thread(start = true){
+                            val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
+                            gameList.clear()
+                            gameList.addAll(sortedList)
+                        }
+
                     })
                     DropdownMenuItem(text = { Text(text = "Time Spent") }, onClick = {
-                        val sortedList = gameList.sortedBy { it.gameTime }.toMutableList()
-                        sortedList.reverse()
-                        gameList.clear()
-                        gameList.addAll(sortedList)
+                        thread (start = true){
+                            val sortedList = gameList.sortedBy { it.gameTime }.toMutableList()
+                            sortedList.reverse()
+                            gameList.clear()
+                            gameList.addAll(sortedList)
+                        }
+
                     })
                 }
 
@@ -471,7 +519,7 @@ class LibraryActivity : AppCompatActivity() {
                                                 Game.gameList.addAll(gameList)
                                                 saveGameFile(Game.gameList)
                                             },
-                                            onClick ={
+                                            onClick = {
                                                 Game.selectedGame = game
                                                 context.startActivity(
                                                     Intent(
@@ -480,7 +528,7 @@ class LibraryActivity : AppCompatActivity() {
                                                     )
                                                 )
 
-                                            } ),
+                                            }),
                                 )
                         }
                         Text(text = game.gameName)
@@ -490,3 +538,4 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
 }
+

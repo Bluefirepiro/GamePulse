@@ -7,7 +7,7 @@ class SteamPlayerAchievements {
     val playerstats: Playerstats? = null
             class Playerstats{
                 @SerializedName("steamID")
-                val steamID: Long = 0;
+                val steamID: Long = 0
                 @SerializedName("gameName")
                 val gameName:String = ""
                 @SerializedName("achievements")

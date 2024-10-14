@@ -34,13 +34,18 @@ import java.io.ObjectOutputStream
 import java.io.Serializable
 
 data class Achievement(
-    val title: String,
-    val description: String,
+    val iconResId: Int,
+    var title: String,
+    var description: String,
     var percentageEarned: Double,
     val isEarned: Boolean,
     var progress: Int,
-    val total: Int,
-    var isFavorite: Boolean = false
+    val total: Int = 0,
+    val soundResId: Int = 0,
+    var isFavorite: Boolean = false,
+    var achImageUrl: String = "",
+    var achImageUrlGray: String = ""
+
 ) : Serializable
 
 class AchievementActivity : AppCompatActivity() {
@@ -177,6 +182,7 @@ class AchievementActivity : AppCompatActivity() {
         val isEarned = progress >= total
 
         val newAchievement = Achievement(
+            iconResId = 0,
             title,
             description,
             percentageEarned,
