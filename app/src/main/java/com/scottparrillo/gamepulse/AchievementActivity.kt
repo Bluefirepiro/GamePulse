@@ -40,8 +40,8 @@ data class Achievement(
     var percentageEarned: Double,
     val isEarned: Boolean,
     var progress: Int,
-    val total: Int,
-    val soundResId: Int?,
+    val total: Int = 0,
+    val soundResId: Int = 0,
     var isFavorite: Boolean = false,
     var achImageUrl: String = "",
     var achImageUrlGray: String = ""
@@ -182,6 +182,7 @@ class AchievementActivity : AppCompatActivity() {
         val isEarned = progress >= total
 
         val newAchievement = Achievement(
+            iconResId = 0,
             title,
             description,
             percentageEarned,

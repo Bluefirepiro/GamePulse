@@ -100,9 +100,13 @@ class GameImportActivity: AppCompatActivity() {
             dialogFlag.value -> {
                 AlertDialog(onDismissRequest = { dialogFlag.value = false }, confirmButton = {
                 },
-                    title = { Text(text = "Help")},
-                    text = { Text(text = "If steam is not importing correctly please make sure your profile is set to public\n" +
-                            "If your steam ID is not showing go to your steam profile edit profile and delete your custom URL")},
+                    title = { Text(text = "Help") },
+                    text = {
+                        Text(
+                            text = "If steam is not importing correctly please make sure your profile is set to public\n" +
+                                    "If your steam ID is not showing go to your steam profile edit profile and delete your custom URL"
+                        )
+                    },
                     dismissButton = {
                         TextButton(onClick = { dialogFlag.value = false }) {
                             Text(text = "Dismiss")
@@ -130,281 +134,317 @@ class GameImportActivity: AppCompatActivity() {
                                     context.startActivity(Intent(context, MainActivity::class.java))
                                 }
 
-                        ) }
-                        item {Text(text = "Game Import", fontSize = 40.sp,
-                            modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp)) }
-                        item {
-                            Image(painter = painterResource(id = R.drawable.questionmark), contentDescription = "question mark",
-                                modifier = Modifier
-                                    .size(width = 50.dp, height = 50.dp)
-                                    .clickable {
+                        )
+                    }
+                    item {
+                        Text(
+                            text = "Game Import", fontSize = 40.sp,
+                            modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp)
+                        )
+                    }
+                    item {
+                        Image(painter = painterResource(id = R.drawable.questionmark),
+                            contentDescription = "question mark",
+                            modifier = Modifier
+                                .size(width = 50.dp, height = 50.dp)
+                                .clickable {
                                     dialogFlag.value = true
-                                    })
-                                }
+                                })
                     }
+                }
+            }
+            item {
+                Row {
+                    Text(
+                        text = "Steam Import", fontSize = 35.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    )
+                }
+            }
+            item {
+                LazyRow {
+                    item {
+                        TextField(
+                            value = steamIdText, onValueChange = { steamIdText = it },
+                            label = { Text("Enter Steam Id") },
+                            modifier = Modifier
+                                .size(width = 280.dp, height = 50.dp)
+                                .padding(horizontal = 8.dp, vertical = 8.dp)
+                                .requiredHeight(height = 50.dp),
+
+                            )
                     }
-            item { Row {
-                Text(text = "Steam Import", fontSize = 35.sp,
-                     textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp))
-            } }
-            item { LazyRow {
-                item {TextField(
-                    value = steamIdText, onValueChange = { steamIdText = it},
-                    label = { Text("Enter Steam Id") },
-                    modifier = Modifier
-                        .size(width = 280.dp, height = 50.dp)
-                        .padding(horizontal = 8.dp, vertical = 8.dp)
-                        .requiredHeight(height = 50.dp),
+                    item {
+                        Button(
+                            onClick = {
+                                steamId = steamIdText
+                                steamIdText = "Importing game do not click away"
 
-                )  }
-                item {
-                    Button(
-                        onClick = {
-                            steamId = steamIdText
-                            steamIdText = "Importing game do not click away"
+                                //Upon clicking import get the steam user id then load in the games
 
-                            //Upon clicking import get the steam user id then load in the games
+                                //Start of sync api call
+                                thread(start = true) {
+                                    //Start of first call
+                                    val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames(
+                                        "4A7BFC2A3443A093EA9953FD5529C795",
+                                        true,
+                                        steamId.toLong(),
+                                        "json"
+                                    )
+                                    val response = call.execute()
+                                    if (response.isSuccessful) {
+                                        val post = response.body()!!
+                                        //We need this and it is used
+                                        val res = post.response!!
+                                        val games: List<SteamOwnedGames.Response.SteamGames> =
+                                            post.response.games
+                                        for (game in games) {
+                                            //Sanity check to make sure we are not adding the same game
+                                            var sameNameFlag = false
+                                            if (Game.gameList.isNotEmpty()) {
+                                                for (gameL in Game.gameList) {
+                                                    if (gameL.gameName == game.name && gameL.gamePlatform == "Steam") {
+                                                        sameNameFlag = true
+                                                    }
+                                                }
+                                            }
+                                            if (!sameNameFlag) {
 
-                            //Start of sync api call
-                            thread (start = true){
-                                //Start of first call
-                                val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames("4A7BFC2A3443A093EA9953FD5529C795", true, steamId.toLong(), "json" )
-                                val response = call.execute()
-                                if(response.isSuccessful)
-                                {
-                                    val post = response.body()!!
-                                    //We need this and it is used
-                                    val res = post.response!!
-                                    val games:List<SteamOwnedGames.Response.SteamGames> = post.response.games
-                                    for(game in games) {
-                                        //Sanity check to make sure we are not adding the same game
-                                        var sameNameFlag = false
-                                        if(Game.gameList.isNotEmpty())
-                                        {
-                                            for (gameL in Game.gameList)
-                                            {
-                                                if(gameL.gameName == game.name && gameL.gamePlatform == "Steam")
-                                                {
-                                                    sameNameFlag = true
+                                                //make a game object and add it to games list
+                                                val gameconvert = Game()
+                                                gameconvert.gameName = game.name
+                                                gameconvert.gameId = game.appid
+                                                val gameTimeHours = game.playtime_forever / 60
+                                                gameconvert.gameTime = gameTimeHours.toFloat()
+
+                                                var convertToUrl =
+                                                    "https://steamcdn-a.akamaihd.net/steam/apps/"
+
+                                                convertToUrl =
+                                                    convertToUrl.plus(game.appid.toString())
+                                                //convertToUrl = convertToUrl.plus("/)"
+                                                convertToUrl = convertToUrl.plus("/header.jpg")
+                                                gameconvert.coverURL = convertToUrl
+                                                val timeLastPlayed =
+                                                    Instant.ofEpochSecond(game.rtime_last_played)
+                                                        .atZone(
+                                                            ZoneId.systemDefault()
+                                                        ).toLocalDateTime()
+                                                gameconvert.dateTimeLastPlayed = timeLastPlayed
+                                                gameconvert.gamePlatform = "Steam"
+                                                if (gameconvert.gameTime <= 0) {
+                                                    gameconvert.newlyAdded = true
+                                                }
+                                                Game.gameList.add(gameconvert)
+                                            } else {
+                                                //Do nothing
+                                            }
+                                        }
+                                        saveGameFile(Game.gameList)
+                                    }
+                                    //End of game import api call
+                                    for (game in Game.gameList) {
+                                        val callAch =
+                                            SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
+                                                game.gameId, "4A7BFC2A3443A093EA9953FD5529C795",
+                                                steamId.toLong()
+                                            )
+                                        val achResponse = callAch.execute()
+                                        if (achResponse.isSuccessful) {
+                                            //go through and make sure the achievement isnt already added
+
+                                            val achievementPost = achResponse.body()!!
+                                            val playerStats = achievementPost.playerstats!!
+                                            val gameAchievements = playerStats.achievements
+                                            for (ach in gameAchievements) {
+                                                var sameElementFlag = false
+                                                if (game.achievements.isNotEmpty()) {
+                                                    for (achL in game.achievements) {
+                                                        if (achL.title == ach.apiname) {
+                                                            sameElementFlag = true
+                                                        }
+                                                    }
+                                                }
+                                                if (!sameElementFlag) {
+                                                    val earnedFlag =
+                                                        //Ignore the warning
+                                                        if (ach.achieved == 1) true else false
+                                                    val toConvert = Achievement(
+                                                        0, ach.apiname,
+                                                        "", 0.0,
+                                                        earnedFlag, 0, 0, 0
+                                                    )
+                                                    game.achievements.add(toConvert)
+                                                } else {
+                                                    //do Nothing
                                                 }
                                             }
                                         }
-                                        if(!sameNameFlag)
-                                        {
-
-                                            //make a game object and add it to games list
-                                            val gameconvert = Game()
-                                            gameconvert.gameName = game.name
-                                            gameconvert.gameId = game.appid
-                                            val gameTimeHours = game.playtime_forever / 60
-                                            gameconvert.gameTime = gameTimeHours.toFloat()
-
-                                            var convertToUrl = "https://steamcdn-a.akamaihd.net/steam/apps/"
-
-                                            convertToUrl = convertToUrl.plus(game.appid.toString())
-                                            //convertToUrl = convertToUrl.plus("/)"
-                                            convertToUrl = convertToUrl.plus("/header.jpg")
-                                            gameconvert.coverURL = convertToUrl
-                                            val timeLastPlayed = Instant.ofEpochSecond(game.rtime_last_played).atZone(
-                                                ZoneId.systemDefault()).toLocalDateTime()
-                                            gameconvert.dateTimeLastPlayed = timeLastPlayed
-                                            gameconvert.gamePlatform = "Steam"
-                                            if(gameconvert.gameTime <= 0)
-                                            {
-                                                gameconvert.newlyAdded = true
+                                    }
+                                    //End of player achievement Call
+                                    //Start of achievement percentage call
+                                    for (game in Game.gameList) {
+                                        val callAchPercent =
+                                            SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages(
+                                                game.gameId,
+                                                "json"
+                                            )
+                                        val achPercentResponse = callAchPercent.execute()
+                                        if (achPercentResponse.isSuccessful) {
+                                            val achPercentList =
+                                                achPercentResponse.body()?.achievementpercentages?.achievements
+                                            if (achPercentList != null) {
+                                                for (achPercent in achPercentList) {
+                                                    for (ach in game.achievements) {
+                                                        if (achPercent.name == ach.title) {
+                                                            ach.percentageEarned =
+                                                                achPercent.percent.toDouble()
+                                                        }
+                                                    }
+                                                }
                                             }
-                                            Game.gameList.add(gameconvert)
-                                        }
-                                        else
-                                        {
-                                            //Do nothing
                                         }
                                     }
                                     saveGameFile(Game.gameList)
-                                }
-                                //End of game import api call
-                                for (game in Game.gameList) {
-                                    val callAch = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
-                                        game.gameId, "4A7BFC2A3443A093EA9953FD5529C795",
-                                        steamId.toLong())
-                                    val achResponse = callAch.execute()
-                                    if(achResponse.isSuccessful) {
-                                        //go through and make sure the achievement isnt already added
-
-                                        val achievementPost = achResponse.body()!!
-                                        val playerStats = achievementPost.playerstats!!
-                                        val gameAchievements = playerStats.achievements
-                                        for (ach in gameAchievements) {
-                                            var sameElementFlag = false
+                                    for (game in Game.gameList) {
+                                        val callAch = SteamRetrofit.apiSteam.apiS.getGameSchema(
+                                            "4A7BFC2A3443A093EA9953FD5529C795", game.gameId
+                                        )
+                                        val achResponse = callAch.execute()
+                                        if (achResponse.isSuccessful) {
+                                            val achievements =
+                                                achResponse.body()?.game?.availableGameStats?.achievements
                                             if (game.achievements.isNotEmpty()) {
-                                                for (achL in game.achievements) {
-                                                    if (achL.title == ach.apiname) {
-                                                        sameElementFlag = true
-                                                    }
-                                                }
-                                            }
-                                            if (!sameElementFlag) {
-                                                val earnedFlag =
-                                                    //Ignore the warning
-                                                    if (ach.achieved == 1) true else false
-                                                val toConvert = Achievement(
-                                                    0, ach.apiname,
-                                                    "", 0.0,
-                                                    earnedFlag, 0, 0, 0
-                                                )
-                                                game.achievements.add(toConvert)
-                                            } else {
-                                                //do Nothing
-                                            }
-                                        }
-                                    }
-                                }
-                                //End of player achievement Call
-                                //Start of achievement percentage call
-                                for(game in Game.gameList){
-                                    val callAchPercent = SteamRetrofit.apiSteam.apiS.getAllAchievementPercentages(game.gameId, "json")
-                                    val achPercentResponse = callAchPercent.execute()
-                                    if(achPercentResponse.isSuccessful){
-                                        val achPercentList = achPercentResponse.body()?.achievementpercentages?.achievements
-                                        if (achPercentList != null) {
-                                            for(achPercent in achPercentList){
-                                                for(ach in game.achievements){
-                                                    if(achPercent.name == ach.title){
-                                                        ach.percentageEarned = achPercent.percent.toDouble()
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                saveGameFile(Game.gameList)
-                                for(game in Game.gameList){
-                                    val callAch = SteamRetrofit.apiSteam.apiS.getGameSchema(
-                                        "4A7BFC2A3443A093EA9953FD5529C795",game.gameId)
-                                    val achResponse = callAch.execute()
-                                    if(achResponse.isSuccessful){
-                                        val achievements = achResponse.body()?.game?.availableGameStats?.achievements
-                                        if (game.achievements.isNotEmpty()){
-                                            if (achievements != null) {
-                                                for(ach in achievements){
-                                                    for(achI in game.achievements){
-                                                        if(achI.title == ach.name){
-                                                            achI.title = ach.displayName
-                                                            achI.description = ach.description
-                                                            achI.achImageUrl = ach.icon
-                                                            achI.achImageUrlGray = ach.icongray
+                                                if (achievements != null) {
+                                                    for (ach in achievements) {
+                                                        for (achI in game.achievements) {
+                                                            if (achI.title == ach.name) {
+                                                                achI.title = ach.displayName
+                                                                achI.description = ach.description
+                                                                achI.achImageUrl = ach.icon
+                                                                achI.achImageUrlGray = ach.icongray
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                }
-                                //Determine which games have been completed
-                                if(Game.gameList.isNotEmpty()){
-                                    for(game in Game.gameList){
-                                        var score = 0
-                                        if(game.achievements.isNotEmpty()){
-                                            for (ach in game.achievements){
-                                                if(ach.isEarned){
-                                                    score++
+                                    //Determine which games have been completed
+                                    if (Game.gameList.isNotEmpty()) {
+                                        for (game in Game.gameList) {
+                                            var score = 0
+                                            if (game.achievements.isNotEmpty()) {
+                                                for (ach in game.achievements) {
+                                                    if (ach.isEarned) {
+                                                        score++
+                                                    }
                                                 }
-                                            }
-                                            if(score == game.achievements.size){
-                                                game.allAchiev = true
+                                                if (score == game.achievements.size) {
+                                                    game.allAchiev = true
+                                                }
                                             }
                                         }
                                     }
-                                }
-                                saveGameFile(Game.gameList)
-                                steamIdText = "Done Importing"
+                                    saveGameFile(Game.gameList)
+                                    steamIdText = "Done Importing"
                                 }
 
-                        }, modifier = Modifier.padding(horizontal = 2.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                    ) {
-                        Text("Import", color = Color.Black)               
-                    // Xbox Live Import Section
-                    item {
-                        Row {
-                            Text(
-                                text = "Xbox Live Import", fontSize = 35.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                            )
+                            }, modifier = Modifier.padding(horizontal = 2.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                        ) {
+                            Text("Import", color = Color.Black)
                         }
                     }
+                            // Xbox Live Import Section
 
+
+
+                        }
+                    }
+            item {
+                Row {
+                    Text(
+                        text = "Xbox Live Import", fontSize = 35.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    )
+                    }
+                }
+            item {
+                LazyRow {
                     item {
-                        LazyRow {
-                            item {
-                                TextField(
-                                    value = xboxIdText,
-                                    onValueChange = { xboxIdText = it },
-                                    label = { Text("Enter Xbox Live ID") },
-                                    modifier = Modifier
-                                        .size(width = 280.dp, height = 50.dp)
-                                        .padding(horizontal = 8.dp, vertical = 8.dp)
-                                        .requiredHeight(height = 50.dp),
-                                )
-                            }
-                            item {
-                                Button(
-                                    onClick = {
-                                        xboxId = xboxIdText
-                                        xboxIdText = "Importing Xbox games..."
+                        TextField(
+                            value = xboxIdText,
+                            onValueChange = { xboxIdText = it },
+                            label = { Text("Enter Xbox Live ID") },
+                            modifier = Modifier
+                                .size(width = 280.dp, height = 50.dp)
+                                .padding(horizontal = 8.dp, vertical = 8.dp)
+                                .requiredHeight(height = 50.dp),
+                        )
+                    }
+                    item {
+                        Button(
+                            onClick = {
+                                xboxId = xboxIdText
+                                xboxIdText = "Importing Xbox games..."
 
-                                        // Start Xbox game import
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            try {
-                                                // Call the suspend function directly
-                                                val response = ApiClient.xboxWebAPIClient.getRecentlyPlayedGames(
-                                                    xuid = xboxIdText // Use the entered Xbox ID
-                                                )
+                                // Start Xbox game import
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    try {
+                                        // Call the suspend function directly
+                                        val response =
+                                            ApiClient.openXBL.openXBLApiService.getRecentlyPlayedGames(
+                                                xuid = xboxIdText // Use the entered Xbox ID
+                                            )
 
-                                                if (response.isSuccessful) {
-                                                    val gamesList = response.body()?.games ?: emptyList()
-                                                    for (game in gamesList) {
-                                                        val gameconvert = Game().apply {
-                                                            gameName = game.name
-                                                            gameId = game.titleId.toLongOrNull() ?: 0L // Convert titleId to Long if possible
-                                                            gamePlatform = "Xbox"
-                                                        }
-                                                        Game.gameList.add(gameconvert)
-                                                    }
-                                                    saveGameFile(Game.gameList) // Save game data locally
-
-                                                    // Update UI on the main thread
-                                                    withContext(Dispatchers.Main) {
-                                                        xboxIdText = "Done Importing Xbox games"
-                                                    }
-                                                } else {
-                                                    // Handle API error
-                                                    withContext(Dispatchers.Main) {
-                                                        xboxIdText = "Error importing games."
-                                                    }
-                                                    println("Error fetching recently played games: ${response.errorBody()}")
+                                        if (response.isSuccessful) {
+                                            val gamesList = response.body()?.games
+                                                ?: emptyList()
+                                            for (game in gamesList) {
+                                                val gameconvert = Game().apply {
+                                                    gameName = game.name
+                                                    gameId =
+                                                        game.titleId.toLongOrNull()
+                                                            ?: 0L // Convert titleId to Long if possible
+                                                    gamePlatform = "Xbox"
                                                 }
-                                            } catch (e: Exception) {
-                                                // Handle exception
-                                                e.printStackTrace()
-                                                withContext(Dispatchers.Main) {
-                                                    xboxIdText = "Error during import."
-                                                }
+                                                Game.gameList.add(gameconvert)
                                             }
+                                            saveGameFile(Game.gameList) // Save game data locally
+
+                                            // Update UI on the main thread
+                                            withContext(Dispatchers.Main) {
+                                                xboxIdText =
+                                                    "Done Importing Xbox games"
+                                            }
+                                        } else {
+                                            // Handle API error
+                                            withContext(Dispatchers.Main) {
+                                                xboxIdText =
+                                                    "Error importing games."
+                                            }
+                                            println("Error fetching recently played games: ${response.errorBody()}")
                                         }
-                                    },
-                                    modifier = Modifier.padding(horizontal = 0.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                                ) {
-                                    Text("Import", color = Color.Black)
+                                    } catch (e: Exception) {
+                                        // Handle exception
+                                        e.printStackTrace()
+                                        withContext(Dispatchers.Main) {
+                                            xboxIdText = "Error during import."
+                                        }
+                                    }
                                 }
-                            }
+                            },
+                            modifier = Modifier.padding(horizontal = 0.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                        ) {
+                            Text("Import", color = Color.Black)
                         }
                     }
                 }
@@ -412,3 +452,5 @@ class GameImportActivity: AppCompatActivity() {
         }
     }
 }
+
+

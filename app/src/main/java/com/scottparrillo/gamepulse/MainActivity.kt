@@ -73,7 +73,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : ComponentActivity() {
 
 
-    private val apiService = ApiClient.xboxWebAPIClient
+    private val apiService = ApiClient.openXBL.openXBLApiService
     var xboxIdText by mutableStateOf("")
 
 
@@ -164,8 +164,8 @@ class MainActivity : ComponentActivity() {
 
         // Load recently played games from SharedPreferences when the activity starts
 
-        loadRecentlyPlayedGames(xuid = xboxIdText)
-        loadRecentlyAchievedAchievements(xuid = xboxIdText)
+        //loadRecentlyPlayedGames(xuid = xboxIdText)
+        //loadRecentlyAchievedAchievements(xuid = xboxIdText)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
