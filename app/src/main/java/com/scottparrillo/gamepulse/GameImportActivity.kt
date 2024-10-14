@@ -132,7 +132,7 @@ class GameImportActivity: AppCompatActivity() {
                                 }
                     }
                     }
-            item { Row (){
+            item { Row {
                 Text(text = "Steam Import", fontSize = 35.sp,
                      textAlign = TextAlign.Center,
                     modifier = Modifier

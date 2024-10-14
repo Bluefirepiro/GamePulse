@@ -72,6 +72,7 @@ import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.time.LocalDateTime
+import kotlin.concurrent.thread
 
 class LibraryActivity : AppCompatActivity() {
 
@@ -133,34 +134,40 @@ class LibraryActivity : AppCompatActivity() {
         }
         //Some Helper Functions
         fun SearchList(){
-            val tempMutableList = mutableListOf<Game>()
             var findMark = false
-            if (searchText.contains("\n")){
-                searchText = searchText.replace("\n","")
+            val tempMutableList = mutableListOf<Game>()
+            thread(true) {
+
+
+                if (searchText.contains("\n")) {
+                    searchText = searchText.replace("\n", "")
+                }
+                for (game in Game.gameList) {
+                    if (game.gameName.contains(searchText, ignoreCase = true)) {
+                        tempMutableList.add(game)
+                        findMark = true
+                        searchFlag.value = true
+                    } else if (searchText == "") {
+                        gameList.clear()
+                        gameList.addAll(Game.gameList)
+                    }
+
+                }
             }
-            for (game in Game.gameList) {
-                if (game.gameName.contains(searchText, ignoreCase = true)) {
-                    tempMutableList.add(game)
-                    findMark = true
-                    searchFlag.value = true
+                if (findMark) {
+                    gameList.clear()
+                    gameList.addAll(tempMutableList)
                 } else if (searchText == "") {
                     gameList.clear()
                     gameList.addAll(Game.gameList)
+                } else {
+                    val toast = Toast.makeText(
+                        context, "Name not found", Toast.LENGTH_SHORT
+                    )
+                    toast.show()
                 }
 
-            }
-            if (findMark) {
-                gameList.clear()
-                gameList.addAll(tempMutableList)
-            } else if (searchText == "") {
-                gameList.clear()
-                gameList.addAll(Game.gameList)
-            } else {
-                val toast = Toast.makeText(
-                    context, "Name not found", Toast.LENGTH_SHORT
-                )
-                toast.show()
-            }
+
         }
 
         fun saveGameFile(mutableGameList: MutableList<Game>): Boolean {
@@ -180,6 +187,9 @@ class LibraryActivity : AppCompatActivity() {
             if (gameList.size != getGameFile()?.size) {
                 gameList.clear()
                 gameList.addAll(getGameFile() ?: emptyList())
+
+            }
+            if (Game.gameList.size != getGameFile()?.size){
                 Game.gameList.clear()
                 Game.gameList.addAll(getGameFile() ?: emptyList())
             }
@@ -402,33 +412,36 @@ class LibraryActivity : AppCompatActivity() {
                     Text(text = "Sort", color = Color.Black)
                 }
                 Button(onClick = {
-                    /*
-                    gameList.clear()
-                    Game.gameList.clear()
-                    Game.gameList.addAll(gameList)
-                    saveGameFile(Game.gameList)
-
-                     */
                     dialogFlag.value = true
                 }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
                     Text(text = "Clear All", color = Color.Black)
                 }
                 DropdownMenu(expanded = expandedDrop, onDismissRequest = { expandedDrop = false }) {
+
                     DropdownMenuItem(text = { Text(text = "Console") }, onClick = {
-                        val sortedList = gameList.sortedBy { it.gamePlatform }.toMutableList()
-                        gameList.clear()
-                        gameList.addAll(sortedList)
+                        thread(start = true){
+                            val sortedList = gameList.sortedBy { it.gamePlatform }.toMutableList()
+                            gameList.clear()
+                            gameList.addAll(sortedList)
+                        }
+
                     })
                     DropdownMenuItem(text = { Text(text = "Alphabetically") }, onClick = {
-                        val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
-                        gameList.clear()
-                        gameList.addAll(sortedList)
+                        thread(start = true){
+                            val sortedList = gameList.sortedBy { it.gameName }.toMutableList()
+                            gameList.clear()
+                            gameList.addAll(sortedList)
+                        }
+
                     })
                     DropdownMenuItem(text = { Text(text = "Time Spent") }, onClick = {
-                        val sortedList = gameList.sortedBy { it.gameTime }.toMutableList()
-                        sortedList.reverse()
-                        gameList.clear()
-                        gameList.addAll(sortedList)
+                        thread (start = true){
+                            val sortedList = gameList.sortedBy { it.gameTime }.toMutableList()
+                            sortedList.reverse()
+                            gameList.clear()
+                            gameList.addAll(sortedList)
+                        }
+
                     })
                 }
 
