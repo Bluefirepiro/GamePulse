@@ -31,7 +31,6 @@ val response: Response? = null
             val playtime_deck_forever: Int = 0
             @SerializedName("rtime_last_played")
             val rtime_last_played: Long = 0
-
         }
     }
 }

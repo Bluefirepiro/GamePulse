@@ -21,7 +21,9 @@ data class GameDetailsResponse(
     val publisher: String,
     val genres: List<String>,
     val coverImageUrl: String,
-    val achievements: List<AchievementResponse> // Add this to include achievements
+    val achievements: List<AchievementResponse>, // Add this to include achievements
+    val currentGamerscore: Int,
+    val totalGamerscore: Int
 ) : Serializable
 
 data class ProfileResponse(
