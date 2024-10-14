@@ -12,7 +12,7 @@ object ApiClient {
             .build()
     }
 object openXBL{
-    val openXBLApiService: XboxWebAPIClient by lazy {
+    val xboxWebAPIClient: XboxWebAPIClient by lazy {
         retrofit.create(XboxWebAPIClient::class.java)
     }
   }
