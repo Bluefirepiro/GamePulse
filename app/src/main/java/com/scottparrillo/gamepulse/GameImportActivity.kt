@@ -1,6 +1,4 @@
 package com.scottparrillo.gamepulse
-
-
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
@@ -41,14 +39,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.scottparrillo.gamepulse.api.ApiClient
+import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.SteamPlayerAchievements
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.IOException
 import java.io.ObjectOutputStream
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.concurrent.thread
+
 
 class GameImportActivity: AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -60,15 +68,18 @@ class GameImportActivity: AppCompatActivity() {
             }
         }
     }
+
     @SuppressLint("SuspiciousIndentation")
     @RequiresApi(Build.VERSION_CODES.O)
     @Preview(showBackground = true)
     @Composable
-    fun GameImportScreen()
-    {  var steamIdText by rememberSaveable { mutableStateOf("") }
+    fun GameImportScreen() {
+        var steamIdText by rememberSaveable { mutableStateOf("") }
         var steamId by rememberSaveable { mutableStateOf("") }
         var dialogFlag = rememberSaveable { mutableStateOf(false) }
-       // val enterFlag = rememberSaveable { mutableStateOf(false) }
+        var xboxIdText by rememberSaveable { mutableStateOf("") }
+        var xboxId by rememberSaveable { mutableStateOf("") }
+        // val enterFlag = rememberSaveable { mutableStateOf(false) }
         val context = LocalContext.current
         val view = LocalView.current
         view.keepScreenOn = true
@@ -88,8 +99,6 @@ class GameImportActivity: AppCompatActivity() {
         when {
             dialogFlag.value -> {
                 AlertDialog(onDismissRequest = { dialogFlag.value = false }, confirmButton = {
-
-
                 },
                     title = { Text(text = "Help")},
                     text = { Text(text = "If steam is not importing correctly please make sure your profile is set to public\n" +
@@ -101,14 +110,15 @@ class GameImportActivity: AppCompatActivity() {
                     })
             }
         }
-        LazyColumn (
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = CuriousBlue)
-        ){
+        ) {
             item {
-                    LazyRow(verticalAlignment = Alignment.CenterVertically) {
-                        item { Image(
+                LazyRow(verticalAlignment = Alignment.CenterVertically) {
+                    item {
+                        Image(
                             painter = painterResource(id = R.drawable.homeicon),
                             contentDescription = "Back arrow",
                             contentScale = ContentScale.Inside,
@@ -119,6 +129,7 @@ class GameImportActivity: AppCompatActivity() {
                                     saveGameFile(Game.gameList)
                                     context.startActivity(Intent(context, MainActivity::class.java))
                                 }
+
                         ) }
                         item {Text(text = "Game Import", fontSize = 40.sp,
                             modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp)) }
@@ -183,13 +194,16 @@ class GameImportActivity: AppCompatActivity() {
                                         }
                                         if(!sameNameFlag)
                                         {
+
                                             //make a game object and add it to games list
                                             val gameconvert = Game()
                                             gameconvert.gameName = game.name
                                             gameconvert.gameId = game.appid
                                             val gameTimeHours = game.playtime_forever / 60
                                             gameconvert.gameTime = gameTimeHours.toFloat()
+
                                             var convertToUrl = "https://steamcdn-a.akamaihd.net/steam/apps/"
+
                                             convertToUrl = convertToUrl.plus(game.appid.toString())
                                             //convertToUrl = convertToUrl.plus("/)"
                                             convertToUrl = convertToUrl.plus("/header.jpg")
@@ -312,11 +326,89 @@ class GameImportActivity: AppCompatActivity() {
                         }, modifier = Modifier.padding(horizontal = 2.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
                     ) {
-                        Text("Import", color = Color.Black)
+                        Text("Import", color = Color.Black)               
+                    // Xbox Live Import Section
+                    item {
+                        Row {
+                            Text(
+                                text = "Xbox Live Import", fontSize = 35.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            )
+                        }
                     }
 
+                    item {
+                        LazyRow {
+                            item {
+                                TextField(
+                                    value = xboxIdText,
+                                    onValueChange = { xboxIdText = it },
+                                    label = { Text("Enter Xbox Live ID") },
+                                    modifier = Modifier
+                                        .size(width = 280.dp, height = 50.dp)
+                                        .padding(horizontal = 8.dp, vertical = 8.dp)
+                                        .requiredHeight(height = 50.dp),
+                                )
+                            }
+                            item {
+                                Button(
+                                    onClick = {
+                                        xboxId = xboxIdText
+                                        xboxIdText = "Importing Xbox games..."
+
+                                        // Start Xbox game import
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            try {
+                                                // Call the suspend function directly
+                                                val response = ApiClient.xboxWebAPIClient.getRecentlyPlayedGames(
+                                                    xuid = xboxIdText // Use the entered Xbox ID
+                                                )
+
+                                                if (response.isSuccessful) {
+                                                    val gamesList = response.body()?.games ?: emptyList()
+                                                    for (game in gamesList) {
+                                                        val gameconvert = Game().apply {
+                                                            gameName = game.name
+                                                            gameId = game.titleId.toLongOrNull() ?: 0L // Convert titleId to Long if possible
+                                                            gamePlatform = "Xbox"
+                                                        }
+                                                        Game.gameList.add(gameconvert)
+                                                    }
+                                                    saveGameFile(Game.gameList) // Save game data locally
+
+                                                    // Update UI on the main thread
+                                                    withContext(Dispatchers.Main) {
+                                                        xboxIdText = "Done Importing Xbox games"
+                                                    }
+                                                } else {
+                                                    // Handle API error
+                                                    withContext(Dispatchers.Main) {
+                                                        xboxIdText = "Error importing games."
+                                                    }
+                                                    println("Error fetching recently played games: ${response.errorBody()}")
+                                                }
+                                            } catch (e: Exception) {
+                                                // Handle exception
+                                                e.printStackTrace()
+                                                withContext(Dispatchers.Main) {
+                                                    xboxIdText = "Error during import."
+                                                }
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.padding(horizontal = 0.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                                ) {
+                                    Text("Import", color = Color.Black)
+                                }
+                            }
+                        }
+                    }
                 }
-            } }
+            }
         }
     }
 }
