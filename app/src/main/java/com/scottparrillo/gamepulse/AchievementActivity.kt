@@ -47,7 +47,7 @@ class AchievementActivity : ComponentActivity() {
         var steamIdText by remember { mutableStateOf("") }
         var xboxIdText by remember { mutableStateOf("") }
         var dialogFlag by remember { mutableStateOf(false) }
-        var steamAchievements by remember { mutableStateOf<List<SteamPlayerAchievements.Playerstats>>(emptyList()) }
+        var steamAchievements by remember { mutableStateOf<List<SteamPlayerAchievements.Playerstats.SteamAchievement>>(emptyList()) }
         var xboxAchievements by remember { mutableStateOf<List<XboxPlayerAchievements.XboxAchievement>>(emptyList()) }
 
         // LazyColumn to hold achievements and input fields
@@ -77,20 +77,22 @@ class AchievementActivity : ComponentActivity() {
             }
 
             // AlertDialog for help information
-            if (dialogFlag) {
-                AlertDialog(
-                    onDismissRequest = { dialogFlag = false },
-                    confirmButton = {},
-                    title = { Text(text = "Help") },
-                    text = {
-                        Text(text = "Make sure your IDs are correct and that your profiles are public.")
-                    },
-                    dismissButton = {
-                        Button(onClick = { dialogFlag = false }) {
-                            Text(text = "Dismiss")
+            item{
+                if (dialogFlag) {
+                    AlertDialog(
+                        onDismissRequest = { dialogFlag = false },
+                        confirmButton = {},
+                        title = { Text(text = "Help") },
+                        text = {
+                            Text(text = "Make sure your IDs are correct and that your profiles are public.")
+                        },
+                        dismissButton = {
+                            Button(onClick = { dialogFlag = false }) {
+                                Text(text = "Dismiss")
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
 
             // Section for Steam achievements
@@ -177,12 +179,16 @@ class AchievementActivity : ComponentActivity() {
         }
     }
 
-    private fun importSteamAchievements(steamId: String, onResult: (List<SteamPlayerAchievements.Playerstats>) -> Unit) {
+    private fun importSteamAchievements(steamId: String, onResult: (List<SteamPlayerAchievements.Playerstats.SteamAchievement>) -> Unit) {
         // Coroutine for fetching Steam achievements
         CoroutineScope(Dispatchers.IO).launch {
-            val response = SteamRetrofit.apiSteam.getAllGameAchievements(steamId, "4A7BFC2A3443A093EA9953FD5529C795")
+            //This api call needs a game id, so it knows what game to pull achievements for
+            //1. AppID
+            //2. API key A7BFC2A3443A093EA9953FD5529C795
+            // SteamiD steamid
+            val response = SteamRetrofit.apiSteam.apiS.getAllGameAchievements()
             if (response.isSuccessful) {
-                val achievements = response.body()?.playerstats?.achievements ?: emptyList()
+                val achievements = response.body()?.playerstats?.achievements?: emptyList()
                 withContext(Dispatchers.Main) {
                     onResult(achievements)
                 }
@@ -197,7 +203,7 @@ class AchievementActivity : ComponentActivity() {
     private fun importXboxAchievements(xboxId: String, onResult: (List<XboxPlayerAchievements.XboxAchievement>) -> Unit) {
         // Coroutine for fetching Xbox achievements
         CoroutineScope(Dispatchers.IO).launch {
-            val response = ApiClient.openXBL.getUserAchievements("139d737c-b4c4-46c4-b972-08e176ce102f", xboxId, "YOUR_TITLE_ID") // Replace with your titleId
+            val response = ApiClient.openXBL.xboxWebAPIClient.getUserAchievements("139d737c-b4c4-46c4-b972-08e176ce102f", xboxId, "YOUR_TITLE_ID").execute() // Replace with your titleId
             if (response.isSuccessful) {
                 val achievements = response.body()?.achievements ?: emptyList()
                 withContext(Dispatchers.Main) {
