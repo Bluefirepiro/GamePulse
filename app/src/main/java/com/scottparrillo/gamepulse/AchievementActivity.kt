@@ -6,7 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.AlertDialog
@@ -14,12 +18,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.api.ApiClient
@@ -43,6 +52,7 @@ class AchievementActivity : ComponentActivity() {
     }
 
     @Composable
+    @Preview(showBackground = true)
     fun AchievementScreen() {
         var steamIdText by remember { mutableStateOf("") }
         var xboxIdText by remember { mutableStateOf("") }
@@ -117,7 +127,9 @@ class AchievementActivity : ComponentActivity() {
                     )
                     Button(
                         onClick = {
-                            importSteamAchievements(steamIdText) {
+
+                            val appId: Long = 0
+                            importSteamAchievements(steamIdText, appId) {
                                 steamAchievements = it
                             }
                         },
@@ -179,22 +191,29 @@ class AchievementActivity : ComponentActivity() {
         }
     }
 
-    private fun importSteamAchievements(steamId: String, onResult: (List<SteamPlayerAchievements.Playerstats.SteamAchievement>) -> Unit) {
+    private fun importSteamAchievements(steamId: String, appId: Long, onResult: (List<SteamPlayerAchievements.Playerstats.SteamAchievement>) -> Unit) {
         // Coroutine for fetching Steam achievements
         CoroutineScope(Dispatchers.IO).launch {
-            //This api call needs a game id, so it knows what game to pull achievements for
-            //1. AppID
-            //2. API key A7BFC2A3443A093EA9953FD5529C795
-            // SteamiD steamid
-            val response = SteamRetrofit.apiSteam.apiS.getAllGameAchievements()
-            if (response.isSuccessful) {
-                val achievements = response.body()?.playerstats?.achievements?: emptyList()
-                withContext(Dispatchers.Main) {
-                    onResult(achievements)
+            try {
+                val response = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
+                    appid = appId,
+                    key = "4A7BFC2A3443A093EA9953FD5529C795", // Your Steam API key
+                    steamid = steamId.toLong()
+                ).execute()
+
+                if (response.isSuccessful) {
+                    val achievements = response.body()?.playerstats?.achievements ?: emptyList()
+                    withContext(Dispatchers.Main) {
+                        onResult(achievements)
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        onResult(emptyList()) // Handle API failure
+                    }
                 }
-            } else {
+            } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    onResult(emptyList()) // Handle error or show a message
+                    onResult(emptyList()) // Handle exception
                 }
             }
         }

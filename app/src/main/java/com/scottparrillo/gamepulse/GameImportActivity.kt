@@ -40,7 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.api.ApiClient
-import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.SteamPlayerAchievements
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
@@ -48,9 +47,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.IOException
 import java.io.ObjectOutputStream
 import java.time.Instant
@@ -274,9 +270,9 @@ class GameImportActivity: AppCompatActivity() {
                                                         //Ignore the warning
                                                         if (ach.achieved == 1) true else false
                                                     val toConvert = Achievement(
-                                                        0, ach.apiname,
-                                                        "", 0.0,
-                                                        earnedFlag, 0, 0, 0
+                                                        //0, ach.apiname,
+                                                        //"", 0.0,
+                                                        //earnedFlag, 0, 0, 0
                                                     )
                                                     game.achievements.add(toConvert)
                                                 } else {
