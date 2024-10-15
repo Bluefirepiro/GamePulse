@@ -158,15 +158,15 @@ class LibraryActivity : AppCompatActivity() {
                 }
             }
             when {toastSearchFlag.value ->
-                {
-                    if(toastSearchFlag.value){
-                        val toast = Toast.makeText(
-                            context, "Name not found", Toast.LENGTH_SHORT
-                        )
-                        toast.show()
-                        toastSearchFlag.value = true
-                    }
-                }}
+            {
+                if(toastSearchFlag.value){
+                    val toast = Toast.makeText(
+                        context, "Name not found", Toast.LENGTH_SHORT
+                    )
+                    toast.show()
+                    toastSearchFlag.value = true
+                }
+            }}
         }
 
         fun saveGameFile(mutableGameList: MutableList<Game>): Boolean {
@@ -205,7 +205,7 @@ class LibraryActivity : AppCompatActivity() {
                         saveGameFile(Game.gameList)
                         dialogFlag.value = false }) {
                         Text(text = "Confirm")
-                        
+
                     }
 
                 },
@@ -227,7 +227,7 @@ class LibraryActivity : AppCompatActivity() {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(8.dp),
 
-            ) {
+                ) {
                 Image(
                     painter = painterResource(id = R.drawable.homeicon),
                     contentDescription = "Back arrow",
@@ -286,17 +286,17 @@ class LibraryActivity : AppCompatActivity() {
                         },
                 )
 
-                    Image(
-                        painter = painterResource(id = R.drawable.searchicon),
-                        contentDescription = "Magnifying Glass",
-                        contentScale = ContentScale.Inside,
-                        modifier = Modifier
-                            .size(60.dp)
-                            .padding(horizontal = 0.dp, vertical = 1.dp)
-                            .clickable {
+                Image(
+                    painter = painterResource(id = R.drawable.searchicon),
+                    contentDescription = "Magnifying Glass",
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(horizontal = 0.dp, vertical = 1.dp)
+                        .clickable {
                             SearchList()
-                            }
-                    )
+                        }
+                )
             }
             LazyRow(
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -321,7 +321,7 @@ class LibraryActivity : AppCompatActivity() {
                             .background(color = SpringGreen),
 
 
-                    ) {
+                        ) {
                         Text(text = "Recent")
                     }
                 }
@@ -478,7 +478,7 @@ class LibraryActivity : AppCompatActivity() {
                                     gameList[gameList.indexOf(game)] = game
                                     saveGameFile(gameList)
                                 }
-                            )
+                        )
 
                         // Game Icon
                         if(game.coverURL == "") {
@@ -501,35 +501,35 @@ class LibraryActivity : AppCompatActivity() {
                                             // Handle single click if needed
                                         }
                                     )
-                                )
+                            )
                         }
                         else{
-                                AsyncImage(model = game.coverURL, contentScale = ContentScale.Fit,
-                                    contentDescription = "The cover of a game",
-                                    modifier = Modifier
-                                        //size(235.dp)
-                                        .size(height = 112.dp, width = 195.dp)
-                                        .clip(RectangleShape)
-                                        .combinedClickable(
-                                            enabled = true,
-                                            onLongClick = {
-                                                //Rectangle two games per row
-                                                gameList.remove(game)
-                                                Game.gameList.clear()
-                                                Game.gameList.addAll(gameList)
-                                                saveGameFile(Game.gameList)
-                                            },
-                                            onClick = {
-                                                Game.selectedGame = game
-                                                context.startActivity(
-                                                    Intent(
-                                                        context,
-                                                        SingleGameActivity::class.java
-                                                    )
+                            AsyncImage(model = game.coverURL, contentScale = ContentScale.Fit,
+                                contentDescription = "The cover of a game",
+                                modifier = Modifier
+                                    //size(235.dp)
+                                    .size(height = 112.dp, width = 195.dp)
+                                    .clip(RectangleShape)
+                                    .combinedClickable(
+                                        enabled = true,
+                                        onLongClick = {
+                                            //Rectangle two games per row
+                                            gameList.remove(game)
+                                            Game.gameList.clear()
+                                            Game.gameList.addAll(gameList)
+                                            saveGameFile(Game.gameList)
+                                        },
+                                        onClick = {
+                                            Game.selectedGame = game
+                                            context.startActivity(
+                                                Intent(
+                                                    context,
+                                                    SingleGameActivity::class.java
                                                 )
+                                            )
 
-                                            }),
-                                )
+                                        }),
+                            )
                         }
                         Text(text = game.gameName)
                     }
