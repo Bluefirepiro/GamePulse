@@ -69,11 +69,10 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 
-
 class MainActivity : ComponentActivity() {
 
 
-    private val apiService = ApiClient.openXBL.openXBLApiService
+    private val apiService = ApiClient.openXBL.xboxWebAPIClient
     var xboxIdText by mutableStateOf("")
 
 
@@ -610,3 +609,4 @@ fun HomeScreen(
         }
     }
 }
+

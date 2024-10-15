@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.api.ApiClient
+import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.SteamPlayerAchievements
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
@@ -47,6 +48,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.IOException
 import java.io.ObjectOutputStream
 import java.time.Instant
@@ -64,6 +68,7 @@ class GameImportActivity: AppCompatActivity() {
             }
         }
     }
+
 
     @SuppressLint("SuspiciousIndentation")
     @RequiresApi(Build.VERSION_CODES.O)
@@ -355,23 +360,20 @@ class GameImportActivity: AppCompatActivity() {
                             Text("Import", color = Color.Black)
                         }
                     }
-                    // Xbox Live Import Section
-
-
 
                 }
             }
+            // Xbox Import Section (Below Steam Import)
             item {
-                Row {
-                    Text(
-                        text = "Xbox Live Import", fontSize = 35.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    )
-                }
+                Text(
+                    text = "Xbox Live Import", fontSize = 35.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                )
             }
+
             item {
                 LazyRow {
                     item {
@@ -384,69 +386,78 @@ class GameImportActivity: AppCompatActivity() {
                                 .padding(horizontal = 8.dp, vertical = 8.dp)
                                 .requiredHeight(height = 50.dp),
                         )
+
                     }
                     item {
-                        Button(
-                            onClick = {
-                                xboxId = xboxIdText
-                                xboxIdText = "Importing Xbox games..."
+                        Row {
 
-                                // Start Xbox game import
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    try {
-                                        // Call the suspend function directly
-                                        val response =
-                                            ApiClient.openXBL.openXBLApiService.getRecentlyPlayedGames(
-                                                xuid = xboxIdText // Use the entered Xbox ID
-                                            )
+                                Button(
+                                    onClick = {
+                                        // Start Xbox game import
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            try {
+                                                // Fetch all games by Xbox ID from Xbox API
 
-                                        if (response.isSuccessful) {
-                                            val gamesList = response.body()?.games
-                                                ?: emptyList()
-                                            for (game in gamesList) {
-                                                val gameconvert = Game().apply {
-                                                    gameName = game.name
-                                                    gameId =
-                                                        game.titleId.toLongOrNull()
-                                                            ?: 0L // Convert titleId to Long if possible
-                                                    gamePlatform = "Xbox"
+                                                val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(
+                                                    xuid = xboxIdText
+                                                ).execute()  // Using execute() for a synchronous call
+
+                                                if (response.isSuccessful) {
+                                                    val xboxGamesResponse = response.body()
+                                                    val gamesList: List<XboxOwnedGames.XboxGame> =
+                                                        xboxGamesResponse?.games ?: emptyList()
+
+                                                    for (game in gamesList) {
+                                                        val gameConvert = Game().apply {
+                                                            gameName = game.name
+                                                            gameId = game.titleId.toLongOrNull() ?: 0L
+                                                            gamePlatform = "Xbox"
+                                                            coverURL = game.displayImage // Assuming you want the display image
+                                                            dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
+                                                                .atZone(ZoneId.systemDefault())
+                                                                .toLocalDateTime()
+                                                            //currentGamerscore = game.achievement.currentGamerscore
+                                                            //totalGamerscore = game.achievement.totalGamerscore
+                                                        }
+                                                        Game.gameList.add(gameConvert)
+                                                    }
+                                                    saveGameFile(Game.gameList)
+
+                                                    // Update UI on the main thread
+                                                    withContext(Dispatchers.Main) {
+                                                        xboxIdText = "Done Importing Xbox games"
+                                                    }
+                                                }  else {
+                                                    // Handle API error
+                                                    withContext(Dispatchers.Main) {
+                                                        xboxIdText =
+                                                            "Error importing games."
+                                                    }
+                                                    println("Error fetching recently played games: ${response.errorBody()}")
                                                 }
-                                                Game.gameList.add(gameconvert)
+                                            }  catch (e: Exception) {
+                                                e.printStackTrace()
+                                                withContext(Dispatchers.Main) {
+                                                    xboxIdText = "Error during import."
+                                                }
                                             }
-                                            saveGameFile(Game.gameList) // Save game data locally
-
-                                            // Update UI on the main thread
-                                            withContext(Dispatchers.Main) {
-                                                xboxIdText =
-                                                    "Done Importing Xbox games"
-                                            }
-                                        } else {
-                                            // Handle API error
-                                            withContext(Dispatchers.Main) {
-                                                xboxIdText =
-                                                    "Error importing games."
-                                            }
-                                            println("Error fetching recently played games: ${response.errorBody()}")
                                         }
-                                    } catch (e: Exception) {
-                                        // Handle exception
-                                        e.printStackTrace()
-                                        withContext(Dispatchers.Main) {
-                                            xboxIdText = "Error during import."
-                                        }
-                                    }
+                                    },
+                                    modifier = Modifier.padding(horizontal = 0.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                                ) {
+                                    Text("Import", color = Color.Black)
                                 }
-                            },
-                            modifier = Modifier.padding(horizontal = 0.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                        ) {
-                            Text("Import", color = Color.Black)
+
                         }
                     }
+
+
                 }
             }
         }
     }
 }
+
 
 
