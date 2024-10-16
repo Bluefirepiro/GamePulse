@@ -47,8 +47,8 @@ class AchievementActivity : ComponentActivity() {
         var xboxIdText by remember { mutableStateOf("") }
         var dialogFlag by remember { mutableStateOf(false) }
         var steamAchievements by remember { mutableStateOf<List<SteamPlayerAchievements.Playerstats.SteamAchievement>>(emptyList()) }
-        var steamGames by remember { mutableStateOf<List<SteamOwnedGames.Response.SteamGame>>(emptyList()) }
-        var selectedGame by remember { mutableStateOf<SteamOwnedGames.Response.SteamGame?>(null) }
+        var steamGames by remember { mutableStateOf<List<SteamOwnedGames.Response.SteamGames>>(emptyList()) }
+        var selectedGame by remember { mutableStateOf<SteamOwnedGames.Response.SteamGames?>(null) }
         var xboxAchievements by remember { mutableStateOf<List<XboxPlayerAchievements.XboxAchievement>>(emptyList()) }
 
         LazyColumn(
@@ -134,15 +134,19 @@ class AchievementActivity : ComponentActivity() {
             item {
                 LazyColumn {
                     steamGames.forEach { game ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { selectedGame = game }
-                                .padding(8.dp)
-                        ) {
-                            Text(text = "Game: ${game.name}", modifier = Modifier.padding(4.dp))
+                        item{
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { selectedGame = game }
+                                    .padding(8.dp)
+                            ) {
+                                Text(text = "Game: ${game.name}", modifier = Modifier.padding(4.dp))
+                            }
                         }
+
                     }
+
                 }
             }
 
@@ -217,10 +221,10 @@ class AchievementActivity : ComponentActivity() {
     }
 
     // Fetch owned games from Steam
-    private fun fetchSteamOwnedGames(steamId: String, onResult: (List<SteamOwnedGames.Response.SteamGame>) -> Unit) {
+    private fun fetchSteamOwnedGames(steamId: String, onResult: (List<SteamOwnedGames.Response.SteamGames>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = ApiClient.steamWebAPIClient.getAllOwnedGames(
+                val response = SteamRetrofit.apiSteam.apiS.getAllOwnedGames(
                     key = "4A7BFC2A3443A093EA9953FD5529C795",
                     include_appinfo = true,
                     steamid = steamId.toLong(),
@@ -249,7 +253,7 @@ class AchievementActivity : ComponentActivity() {
     private fun importSteamAchievements(steamId: String, appId: Long, onResult: (List<SteamPlayerAchievements.Playerstats.SteamAchievement>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = ApiClient.steamWebAPIClient.getAllGameAchievements(
+                val response = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
                     appid = appId,
                     key = "4A7BFC2A3443A093EA9953FD5529C795",
                     steamid = steamId.toLong()
@@ -277,9 +281,9 @@ class AchievementActivity : ComponentActivity() {
     private fun importXboxAchievements(xboxId: String, onResult: (List<XboxPlayerAchievements.XboxAchievement>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = ApiClient.xboxWebAPIClient.getUserAchievements(
+                val response = ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(
                     apiKey = "139d737c-b4c4-46c4-b972-08e176ce102f",
-                    xboxId = xboxId
+                    xuid = xboxId
                 ).execute()
 
                 if (response.isSuccessful) {
