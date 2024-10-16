@@ -6,23 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.scottparrillo.gamepulse.SteamOwnedGames
 
 class AchievementActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,14 +47,16 @@ class AchievementActivity : ComponentActivity() {
         var xboxIdText by remember { mutableStateOf("") }
         var dialogFlag by remember { mutableStateOf(false) }
         var steamAchievements by remember { mutableStateOf<List<SteamPlayerAchievements.Playerstats.SteamAchievement>>(emptyList()) }
+        var steamGames by remember { mutableStateOf<List<SteamOwnedGames.Response.SteamGame>>(emptyList()) }
+        var selectedGame by remember { mutableStateOf<SteamOwnedGames.Response.SteamGame?>(null) }
         var xboxAchievements by remember { mutableStateOf<List<XboxPlayerAchievements.XboxAchievement>>(emptyList()) }
 
-        // LazyColumn to hold achievements and input fields
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = CuriousBlue)
         ) {
+            // Title row with help icon
             item {
                 LazyRow(verticalAlignment = Alignment.CenterVertically) {
                     item {
@@ -86,8 +77,8 @@ class AchievementActivity : ComponentActivity() {
                 }
             }
 
-            // AlertDialog for help information
-            item{
+            // Help dialog
+            item {
                 if (dialogFlag) {
                     AlertDialog(
                         onDismissRequest = { dialogFlag = false },
@@ -105,7 +96,7 @@ class AchievementActivity : ComponentActivity() {
                 }
             }
 
-            // Section for Steam achievements
+            // Steam Achievements Section
             item {
                 Text(
                     text = "Steam Achievements", fontSize = 35.sp,
@@ -127,16 +118,47 @@ class AchievementActivity : ComponentActivity() {
                     )
                     Button(
                         onClick = {
-
-                            val appId: Long = 0
-                            importSteamAchievements(steamIdText, appId) {
-                                steamAchievements = it
+                            fetchSteamOwnedGames(steamIdText) {
+                                steamGames = it
                             }
                         },
                         modifier = Modifier.padding(horizontal = 2.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
                     ) {
-                        Text("Import", color = Color.Black)
+                        Text("Get Games", color = Color.Black)
+                    }
+                }
+            }
+
+            // List of Steam Games
+            item {
+                LazyColumn {
+                    steamGames.forEach { game ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedGame = game }
+                                .padding(8.dp)
+                        ) {
+                            Text(text = "Game: ${game.name}", modifier = Modifier.padding(4.dp))
+                        }
+                    }
+                }
+            }
+
+            // Fetch Steam Achievements for the selected game
+            selectedGame?.let { game ->
+                item {
+                    Button(
+                        onClick = {
+                            importSteamAchievements(steamIdText, game.appid) { achievements ->
+                                steamAchievements = achievements
+                            }
+                        },
+                        modifier = Modifier.padding(horizontal = 2.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                    ) {
+                        Text("Import Achievements for ${game.name}", color = Color.Black)
                     }
                 }
             }
@@ -144,11 +166,14 @@ class AchievementActivity : ComponentActivity() {
             // Display Steam Achievements
             item {
                 steamAchievements.forEach { achievement ->
-                    Text(text = "Achievement: ${achievement.apiname}, Unlocked: ${achievement.achieved == 1}", modifier = Modifier.padding(4.dp))
+                    Text(
+                        text = "Achievement: ${achievement.apiname}, Unlocked: ${achievement.achieved == 1}",
+                        modifier = Modifier.padding(4.dp)
+                    )
                 }
             }
 
-            // Section for Xbox achievements
+            // Xbox Achievements Section
             item {
                 Text(
                     text = "Xbox Achievements", fontSize = 35.sp,
@@ -191,13 +216,42 @@ class AchievementActivity : ComponentActivity() {
         }
     }
 
-    private fun importSteamAchievements(steamId: String, appId: Long, onResult: (List<SteamPlayerAchievements.Playerstats.SteamAchievement>) -> Unit) {
-        // Coroutine for fetching Steam achievements
+    // Fetch owned games from Steam
+    private fun fetchSteamOwnedGames(steamId: String, onResult: (List<SteamOwnedGames.Response.SteamGame>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
+                val response = ApiClient.steamWebAPIClient.getAllOwnedGames(
+                    key = "4A7BFC2A3443A093EA9953FD5529C795",
+                    include_appinfo = true,
+                    steamid = steamId.toLong(),
+                    format = "json"
+                ).execute()
+
+                if (response.isSuccessful) {
+                    val games = response.body()?.response?.games ?: emptyList()
+                    withContext(Dispatchers.Main) {
+                        onResult(games)
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        onResult(emptyList()) // Handle API failure
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onResult(emptyList()) // Handle exception
+                }
+            }
+        }
+    }
+
+    // Import Steam Achievements
+    private fun importSteamAchievements(steamId: String, appId: Long, onResult: (List<SteamPlayerAchievements.Playerstats.SteamAchievement>) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiClient.steamWebAPIClient.getAllGameAchievements(
                     appid = appId,
-                    key = "4A7BFC2A3443A093EA9953FD5529C795", // Your Steam API key
+                    key = "4A7BFC2A3443A093EA9953FD5529C795",
                     steamid = steamId.toLong()
                 ).execute()
 
@@ -219,18 +273,28 @@ class AchievementActivity : ComponentActivity() {
         }
     }
 
+    // Import Xbox Achievements
     private fun importXboxAchievements(xboxId: String, onResult: (List<XboxPlayerAchievements.XboxAchievement>) -> Unit) {
-        // Coroutine for fetching Xbox achievements
         CoroutineScope(Dispatchers.IO).launch {
-            val response = ApiClient.openXBL.xboxWebAPIClient.getUserAchievements("139d737c-b4c4-46c4-b972-08e176ce102f", xboxId, "YOUR_TITLE_ID").execute() // Replace with your titleId
-            if (response.isSuccessful) {
-                val achievements = response.body()?.achievements ?: emptyList()
-                withContext(Dispatchers.Main) {
-                    onResult(achievements)
+            try {
+                val response = ApiClient.xboxWebAPIClient.getUserAchievements(
+                    apiKey = "139d737c-b4c4-46c4-b972-08e176ce102f",
+                    xboxId = xboxId
+                ).execute()
+
+                if (response.isSuccessful) {
+                    val achievements = response.body()?.achievements ?: emptyList()
+                    withContext(Dispatchers.Main) {
+                        onResult(achievements)
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        onResult(emptyList()) // Handle API failure
+                    }
                 }
-            } else {
+            } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    onResult(emptyList()) // Handle error or show a message
+                    onResult(emptyList()) // Handle exception
                 }
             }
         }
