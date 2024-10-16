@@ -62,6 +62,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
@@ -87,11 +88,18 @@ class LibraryActivity : AppCompatActivity() {
     }
     /*
 
-
-
+    Adjust home screen button to be same size as game import
+    Make star aligned with image, as right now it leads to confusion about what game it's for
     616 px x 353 px for capsule
     Center Search button on Add Game Button
-
+    Align search icon with game import button
+    Center text and add static size to the three main buttons
+    Center image
+    Add border to image
+    Make dedicated word box for word wrap desc
+    give score based on achievements possibly based on rarity
+    have a score based on all consoles and platforms
+    grand/meta/omni score based on pc and xbox
      */
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalFoundationApi::class)
@@ -481,56 +489,37 @@ class LibraryActivity : AppCompatActivity() {
                         )
 
                         // Game Icon
-                        if(game.coverURL == "") {
-                            Image(
-                                painter = painterResource(id = R.drawable.plus),
-                                contentDescription = "Game icon",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(135.dp)
-                                    .clip(CircleShape)
-                                    .combinedClickable(
-                                        enabled = true,
-                                        onLongClick = {
-                                            gameList.remove(game)
-                                            Game.gameList.clear()
-                                            Game.gameList.addAll(gameList)
-                                            saveGameFile(Game.gameList)
-                                        },
-                                        onClick = {
-                                            // Handle single click if needed
-                                        }
-                                    )
-                            )
-                        }
-                        else{
-                            AsyncImage(model = game.coverURL, contentScale = ContentScale.Fit,
-                                contentDescription = "The cover of a game",
-                                modifier = Modifier
-                                    //size(235.dp)
-                                    .size(height = 112.dp, width = 195.dp)
-                                    .clip(RectangleShape)
-                                    .combinedClickable(
-                                        enabled = true,
-                                        onLongClick = {
-                                            //Rectangle two games per row
-                                            gameList.remove(game)
-                                            Game.gameList.clear()
-                                            Game.gameList.addAll(gameList)
-                                            saveGameFile(Game.gameList)
-                                        },
-                                        onClick = {
-                                            Game.selectedGame = game
-                                            context.startActivity(
-                                                Intent(
-                                                    context,
-                                                    SingleGameActivity::class.java
-                                                )
+                        AsyncImage(model = ImageRequest.Builder(context)
+                            .data(game.coverURL)
+                            .crossfade(true)
+                            .build(), contentScale = ContentScale.Fit,
+                            placeholder = painterResource(R.drawable.plus),
+                            contentDescription = "The cover of a game",
+                            modifier = Modifier
+                                //size(235.dp)
+                                .size(height = 112.dp, width = 195.dp)
+                                .clip(RectangleShape)
+                                .combinedClickable(
+                                    enabled = true,
+                                    onLongClick = {
+                                        //Rectangle two games per row
+                                        gameList.remove(game)
+                                        Game.gameList.clear()
+                                        Game.gameList.addAll(gameList)
+                                        saveGameFile(Game.gameList)
+                                    },
+                                    onClick = {
+                                        Game.selectedGame = game
+                                        context.startActivity(
+                                            Intent(
+                                                context,
+                                                SingleGameActivity::class.java
                                             )
+                                        )
 
-                                        }),
-                            )
-                        }
+                                    }),
+                        )
+
                         Text(text = game.gameName)
                     }
                 }

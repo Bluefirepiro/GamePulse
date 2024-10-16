@@ -409,6 +409,8 @@ class GameImportActivity: AppCompatActivity() {
                                                         gameId = game.titleId.toLongOrNull() ?: 0L
                                                         gamePlatform = "Xbox"
                                                         coverURL = game.displayImage // Assuming you want the display image
+                                                        //We needed a secure connection and it defaulted to http not https
+                                                        coverURL = coverURL.replace("http", "https")
                                                         dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
                                                             .atZone(ZoneId.systemDefault())
                                                             .toLocalDateTime()
