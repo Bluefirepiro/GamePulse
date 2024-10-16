@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -58,21 +58,11 @@ class AchievementActivity : ComponentActivity() {
         var xboxIdText by remember { mutableStateOf("") }
         var dialogFlag by remember { mutableStateOf(false) }
         var steamAchievements by remember {
-            mutableStateOf<List<SteamPlayerAchievements.Playerstats.SteamAchievement>>(
-                emptyList()
-            )
+            mutableStateOf<List<SteamPlayerAchievements.Playerstats.SteamAchievement>>(emptyList())
         }
-        var steamGames by remember {
-            mutableStateOf<List<SteamOwnedGames.Response.SteamGames>>(
-                emptyList()
-            )
-        }
+        var steamGames by remember { mutableStateOf<List<SteamOwnedGames.Response.SteamGames>>(emptyList()) }
         var selectedGame by remember { mutableStateOf<SteamOwnedGames.Response.SteamGames?>(null) }
-        var xboxAchievements by remember {
-            mutableStateOf<List<XboxPlayerAchievements.XboxAchievement>>(
-                emptyList()
-            )
-        }
+        var xboxAchievements by remember { mutableStateOf<List<XboxPlayerAchievements.XboxAchievement>>(emptyList()) }
 
         LazyColumn(
             modifier = Modifier
@@ -81,22 +71,18 @@ class AchievementActivity : ComponentActivity() {
         ) {
             // Title row with help icon
             item {
-                LazyRow(verticalAlignment = Alignment.CenterVertically) {
-                    item {
-                        Text(
-                            text = "Achievement Import", fontSize = 40.sp,
-                            modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp)
-                        )
-                    }
-                    item {
-                        Image(
-                            painter = painterResource(id = R.drawable.questionmark), // Replace with your drawable resource
-                            contentDescription = "Help Icon",
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clickable { dialogFlag = true }
-                        )
-                    }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Achievement Import", fontSize = 40.sp,
+                        modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.questionmark),
+                        contentDescription = "Help Icon",
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clickable { dialogFlag = true }
+                    )
                 }
             }
 
@@ -107,9 +93,7 @@ class AchievementActivity : ComponentActivity() {
                         onDismissRequest = { dialogFlag = false },
                         confirmButton = {},
                         title = { Text(text = "Help") },
-                        text = {
-                            Text(text = "Make sure your IDs are correct and that your profiles are public.")
-                        },
+                        text = { Text(text = "Make sure your IDs are correct and that your profiles are public.") },
                         dismissButton = {
                             Button(onClick = { dialogFlag = false }) {
                                 Text(text = "Dismiss")
@@ -136,7 +120,7 @@ class AchievementActivity : ComponentActivity() {
                         onValueChange = { steamIdText = it },
                         label = { Text("Enter Steam ID") },
                         modifier = Modifier
-                            .size(width = 280.dp, height = 50.dp)
+                            .fillMaxWidth(0.8f)
                             .padding(horizontal = 8.dp)
                     )
                     Button(
@@ -154,22 +138,14 @@ class AchievementActivity : ComponentActivity() {
             }
 
             // List of Steam Games
-            item {
-                LazyColumn {
-                    steamGames.forEach { game ->
-                        item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { selectedGame = game }
-                                    .padding(8.dp)
-                            ) {
-                                Text(text = "Game: ${game.name}", modifier = Modifier.padding(4.dp))
-                            }
-                        }
-
-                    }
-
+            items(steamGames) { game ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { selectedGame = game }
+                        .padding(8.dp)
+                ) {
+                    Text(text = "Game: ${game.name}", modifier = Modifier.padding(4.dp))
                 }
             }
 
@@ -191,14 +167,13 @@ class AchievementActivity : ComponentActivity() {
             }
 
             // Display Steam Achievements
-            item {
-                steamAchievements.forEach { achievement ->
-                    Text(
-                        text = "Achievement: ${achievement.apiname}, Unlocked: ${achievement.achieved == 1}",
-                        modifier = Modifier.padding(4.dp)
-                    )
-                }
+            items(steamAchievements) { achievement ->
+                Text(
+                    text = "Achievement: ${achievement.apiname}, Unlocked: ${achievement.achieved == 1}",
+                    modifier = Modifier.padding(4.dp)
+                )
             }
+
             val titleId = "YOUR_TITLE_ID"
             // Xbox Achievements Section
             item {
@@ -217,7 +192,7 @@ class AchievementActivity : ComponentActivity() {
                         onValueChange = { xboxIdText = it },
                         label = { Text("Enter Xbox Live ID") },
                         modifier = Modifier
-                            .size(width = 280.dp, height = 50.dp)
+                            .fillMaxWidth(0.8f)
                             .padding(horizontal = 8.dp)
                     )
                     Button(
@@ -235,16 +210,15 @@ class AchievementActivity : ComponentActivity() {
             }
 
             // Display Xbox Achievements
-            item {
-                xboxAchievements.forEach { achievement ->
-                    Text(
-                        text = "Achievement: ${achievement.name}, Unlocked: ${achievement.unlocked}",
-                        modifier = Modifier.padding(4.dp)
-                    )
-                }
+            items(xboxAchievements) { achievement ->
+                Text(
+                    text = "Achievement: ${achievement.name}, Unlocked: ${achievement.unlocked}",
+                    modifier = Modifier.padding(4.dp)
+                )
             }
         }
     }
+}
 
     // Fetch owned games from Steam
     private fun fetchSteamOwnedGames(
@@ -341,6 +315,6 @@ class AchievementActivity : ComponentActivity() {
             }
         }
     }
-}
+
 
 
