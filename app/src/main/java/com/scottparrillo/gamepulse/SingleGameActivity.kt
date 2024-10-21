@@ -30,9 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -116,7 +114,7 @@ fun SingleGameScreen(){
                     .size(height = 253.dp, width = 616.dp)
                     .clip(RectangleShape)
             )
-        LazyColumn {
+        LazyColumn (horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()){
             item { Text(text = "Platform: $gamePlatform") }
            // item { Text(text = "Title: $gameTitle") }
             item {Text(text = "Total Hours played: $gameTimeTotal")}
@@ -154,21 +152,20 @@ fun SingleGameScreen(){
                     .border(1.dp, color = Color.Black)
                     .padding(horizontal = 2.dp)
                     .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                     ){
-                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth())
-                    {
-                        Column {
                             Text(text = achievement.title, fontWeight = FontWeight.Bold)
                             Text(text = "People that have earned: $percentEarned%")
 
-                        }
+
                         if(achievement.isEarned)
                         {
                             if(achievement.achImageUrl != ""){
                                 AsyncImage(model = achievement.achImageUrl, contentDescription = "", modifier = Modifier
                                     .size(width = 120.dp, height = 120.dp)
                                     .requiredSize(width = 120.dp, height = 120.dp)
-                                    .padding(horizontal = 0.dp),
+                                    .padding(horizontal = 0.dp)
+                                    .border(2.dp, CuriousBlue, RectangleShape),
                                     alignment = Alignment.CenterEnd)
                             }
                             else{
@@ -181,7 +178,8 @@ fun SingleGameScreen(){
                                 AsyncImage(model = achievement.achImageUrlGray, contentDescription = "", modifier = Modifier
                                     .size(width = 120.dp, height = 120.dp)
                                     .requiredSize(width = 120.dp, height = 120.dp)
-                                    .padding(horizontal = 0.dp),
+                                    .padding(horizontal = 0.dp)
+                                    .border(2.dp, CuriousBlue, RectangleShape),
                                     alignment = Alignment.CenterEnd)
 
                             }
@@ -189,7 +187,6 @@ fun SingleGameScreen(){
                                 Text(text = "Not Earned", modifier = Modifier.padding(horizontal = 5.dp), fontWeight = FontWeight.Bold)
                             }
                         }
-                    }
                     Text(text = "Description", modifier = Modifier.padding(vertical = 5.dp), fontWeight = FontWeight.Bold)
                     if(achievement.description == "") {
                         Text(text = "No Description")
@@ -197,26 +194,12 @@ fun SingleGameScreen(){
                     else{
                         Text(text = achievement.description)
                     }
+                    }
+
                 }
 
-                /*
-                Column(modifier = Modifier.background(color = SpringGreen)
-                    .fillMaxWidth()
-                    .padding(horizontal = 2.dp)
-                    .border(1.dp, color = SpringGreen)
-                    ) {
-                    Text(text = "Description", modifier = Modifier.padding(vertical = 5.dp), fontWeight = FontWeight.Bold)
-                    if(achievement.description == "") {
-                        Text(text = "No Description")
-                    }
-                    else{
-                        Text(text = achievement.description)
-                    }
-                }
 
-                 */
 
             }
         }
     }
-}
