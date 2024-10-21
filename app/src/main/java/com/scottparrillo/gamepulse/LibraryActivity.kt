@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,6 +66,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import com.scottparrillo.gamepulse.ui.theme.NeonLightGreen
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import java.io.EOFException
 import java.io.File
@@ -95,6 +97,7 @@ class LibraryActivity : AppCompatActivity() {
     Align search icon with game import button
     Center text and add static size to the three main buttons
     Center image
+
     Add border to image
     Make dedicated word box for word wrap desc
     give score based on achievements possibly based on rarity
@@ -233,7 +236,9 @@ class LibraryActivity : AppCompatActivity() {
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(4.dp)
+                .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+
 
                 ) {
                 Image(
@@ -255,31 +260,37 @@ class LibraryActivity : AppCompatActivity() {
                     text = "Library Screen",
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
-                        .padding(vertical = 16.dp, horizontal = 20.dp),
+                        .padding(horizontal = 1.dp),
                     fontFamily = jockeyOne,
                     fontSize = 40.sp
                 )
                 Image(
                     painter = painterResource(id = R.drawable.gameimport),
-                    contentDescription = "Magnifying Glass",
-                    contentScale = ContentScale.Inside,
+                    contentDescription = "Game Import Button",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(98.dp)
-                        .requiredSize(98.dp)
-                        .padding(horizontal = 3.dp)
+                        .size(100.dp)
+                        .requiredSize(90.dp)
+                        .padding(horizontal = 5.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, NeonLightGreen, CircleShape)
+                        .background(color = SpringGreen)
                         .clickable {
+
                             context.startActivity(Intent(context, GameImportActivity::class.java))
                         }
                 )
             }
             //This row holds the search bar and button
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()) {
                 TextField(
                     value = searchText, onValueChange = { searchText = it },
                     label = { Text("Search Game") },
                     modifier = Modifier
-                        .size(width = 280.dp, height = 46.dp)
-                        .padding(horizontal = 8.dp)
+                        .size(width = 291.dp, height = 50.dp)
+                        .requiredSize(width = 291.dp, height = 50.dp)
+                        .padding(horizontal = 3.dp)
                         .onKeyEvent {
                             if (it.key == Key.Enter){
                                 SearchList()
@@ -297,10 +308,13 @@ class LibraryActivity : AppCompatActivity() {
                 Image(
                     painter = painterResource(id = R.drawable.searchicon),
                     contentDescription = "Magnifying Glass",
-                    contentScale = ContentScale.Inside,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(60.dp)
+                        .size(80.dp)
                         .padding(horizontal = 0.dp, vertical = 1.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, NeonLightGreen, CircleShape)
+                        .background(color = SpringGreen)
                         .clickable {
                             SearchList()
                         }
@@ -491,12 +505,10 @@ class LibraryActivity : AppCompatActivity() {
                         // Game Icon
                         AsyncImage(model = ImageRequest.Builder(context)
                             .data(game.coverURL)
-                            .crossfade(true)
                             .build(), contentScale = ContentScale.Fit,
                             placeholder = painterResource(R.drawable.plus),
                             contentDescription = "The cover of a game",
                             modifier = Modifier
-                                //size(235.dp)
                                 .size(height = 112.dp, width = 195.dp)
                                 .clip(RectangleShape)
                                 .combinedClickable(
