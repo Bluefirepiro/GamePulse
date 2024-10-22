@@ -1,5 +1,6 @@
 package com.scottparrillo.gamepulse
 
+import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.XuidResponse
 import com.scottparrillo.gamepulse.util.Constants.OPENXBL_API_KEY
 import retrofit2.Call
 import retrofit2.Response
@@ -66,4 +67,10 @@ interface XboxWebAPIClient {
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("xuid") xuid: String
     ): Call<XboxOwnedGames>
-}
+
+        @GET("/v2/gamertag/{gamertag}")
+        suspend fun getXuidFromGamertag(
+            @Path("gamertag") gamertag: String,
+            @Header("Authorization") authHeader: String = "Bearer $OPENXBL_API_KEY"
+        ): Response<XuidResponse>
+    }
