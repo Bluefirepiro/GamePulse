@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,7 +51,7 @@ class AchievementActivity : ComponentActivity() {
             }
         }
     }
-
+//Resize the import buttons, center the screen better
     @Composable
     @Preview(showBackground = true)
     fun AchievementScreen() {
@@ -73,8 +74,8 @@ class AchievementActivity : ComponentActivity() {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Achievement Import", fontSize = 40.sp,
-                        modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp)
+                        text = "Achievement Import", fontSize = 30.sp,
+                        modifier = Modifier.padding(vertical = 20.dp, horizontal = 24.dp)
                     )
                     Image(
                         painter = painterResource(id = R.drawable.questionmark),
@@ -106,7 +107,7 @@ class AchievementActivity : ComponentActivity() {
             // Steam Achievements Section
             item {
                 Text(
-                    text = "Steam Achievements", fontSize = 35.sp,
+                    text = "Steam Achievements", fontSize = 25.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -120,8 +121,9 @@ class AchievementActivity : ComponentActivity() {
                         onValueChange = { steamIdText = it },
                         label = { Text("Enter Steam ID") },
                         modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .padding(horizontal = 8.dp)
+                            .size(width = 280.dp, height = 50.dp)
+                            .padding(horizontal = 8.dp, vertical = 8.dp)
+                            .requiredHeight(height = 50.dp),
                     )
                     Button(
                         onClick = {
@@ -129,10 +131,10 @@ class AchievementActivity : ComponentActivity() {
                                 steamGames = it
                             }
                         },
-                        modifier = Modifier.padding(horizontal = 2.dp),
+                        modifier = Modifier.padding(horizontal = 3.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
                     ) {
-                        Text("Get Games", color = Color.Black)
+                        Text("Import", color = Color.Black)
                     }
                 }
             }
@@ -178,7 +180,7 @@ class AchievementActivity : ComponentActivity() {
             // Xbox Achievements Section
             item {
                 Text(
-                    text = "Xbox Achievements", fontSize = 35.sp,
+                    text = "Xbox Achievements", fontSize = 25.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -192,8 +194,9 @@ class AchievementActivity : ComponentActivity() {
                         onValueChange = { xboxIdText = it },
                         label = { Text("Enter Xbox Live ID") },
                         modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .padding(horizontal = 8.dp)
+                            .size(width = 280.dp, height = 50.dp)
+                            .padding(horizontal = 8.dp, vertical = 8.dp)
+                            .requiredHeight(height = 50.dp),
                     )
                     Button(
                         onClick = {
