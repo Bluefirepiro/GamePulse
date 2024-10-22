@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -66,7 +65,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
-import com.scottparrillo.gamepulse.ui.theme.NeonLightGreen
+import com.scottparrillo.gamepulse.ui.theme.Lime
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import java.io.EOFException
 import java.io.File
@@ -91,10 +90,12 @@ class LibraryActivity : AppCompatActivity() {
     /*
 
     Adjust home screen button to be same size as game import
+    Done
     Make star aligned with image, as right now it leads to confusion about what game it's for
     616 px x 353 px for capsule
     Center Search button on Add Game Button
     Align search icon with game import button
+    Done
     Center text and add static size to the three main buttons
     Center image
 
@@ -126,9 +127,11 @@ class LibraryActivity : AppCompatActivity() {
         //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
         //Setting up drop down menu
         var expandedDrop by remember { mutableStateOf(false) }
-        /*I have this below to show an example of how to make a call
-        this can be commented away when not used for testing
-         */
+        //Button sizes
+        val mainButtonSize = 60.dp
+        val mainButtonCut = 10.dp
+        val optionsButtonSizeWidth = 115.dp
+        val optionsButtonSizeHeight = 40.dp
         fun getGameFile(): List<Game>? {
             return try {
                 val fis = context.openFileInput("gameList")
@@ -232,96 +235,103 @@ class LibraryActivity : AppCompatActivity() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = CuriousBlue)
+                .padding(2.dp)
         ) {
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(4.dp)
-                .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier
+                    .padding(vertical = 10.dp, horizontal = 1.dp)
+                    .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
 
 
                 ) {
-                Image(
-                    painter = painterResource(id = R.drawable.homeicon),
-                    contentDescription = "Back arrow",
-                    contentScale = ContentScale.Inside,
-                    modifier = Modifier
-                        .size(65.dp)
-                        .clickable {
-                            context.startActivity(
-                                Intent(
-                                    context,
-                                    MainActivity::class.java
-                                )
+                Box(modifier = Modifier
+                    .clip(RoundedCornerShape(mainButtonCut))
+                    .size(mainButtonSize)
+                    .background(Lime)
+                    .clickable {
+                        context.startActivity(
+                            Intent(
+                                context,
+                                MainActivity::class.java
                             )
-                        }
-                )
+                        )
+                    },
+                    contentAlignment = Alignment.Center){
+                    Image(
+                        painter = painterResource(id = R.drawable.homeicon),
+                        contentDescription = "Back arrow",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(4.dp)
+                    )
+                }
+
                 Text(
                     text = "Library Screen",
                     style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .padding(horizontal = 1.dp),
                     fontFamily = jockeyOne,
                     fontSize = 40.sp
                 )
-                Image(
-                    painter = painterResource(id = R.drawable.gameimport),
-                    contentDescription = "Game Import Button",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .requiredSize(90.dp)
-                        .padding(horizontal = 5.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, NeonLightGreen, CircleShape)
-                        .background(color = SpringGreen)
-                        .clickable {
+                Box(modifier = Modifier
+                    .clip(RoundedCornerShape(mainButtonCut))
+                    .size(mainButtonSize)
+                    .background(Lime)
+                    .clickable {
+                        context.startActivity(Intent(context, GameImportActivity::class.java))
+                    },
+                    contentAlignment = Alignment.Center){
+                    Image(
+                        painter = painterResource(id = R.drawable.gameimport),
+                        contentDescription = "Game Import Button",
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
 
-                            context.startActivity(Intent(context, GameImportActivity::class.java))
-                        }
-                )
             }
             //This row holds the search bar and button
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()) {
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 1.dp, vertical = 10.dp)) {
                 TextField(
                     value = searchText, onValueChange = { searchText = it },
                     label = { Text("Search Game") },
                     modifier = Modifier
                         .size(width = 291.dp, height = 50.dp)
                         .requiredSize(width = 291.dp, height = 50.dp)
-                        .padding(horizontal = 3.dp)
                         .onKeyEvent {
-                            if (it.key == Key.Enter){
+                            if (it.key == Key.Enter) {
                                 SearchList()
                                 return@onKeyEvent true
-                            }
-                            else{
+                            } else {
                                 return@onKeyEvent false
                             }
 
 
-
                         },
                 )
-
-                Image(
-                    painter = painterResource(id = R.drawable.searchicon),
-                    contentDescription = "Magnifying Glass",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .padding(horizontal = 0.dp, vertical = 1.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, NeonLightGreen, CircleShape)
-                        .background(color = SpringGreen)
-                        .clickable {
-                            SearchList()
-                        }
-                )
+                Box(modifier = Modifier
+                    .clip(RoundedCornerShape(mainButtonCut))
+                    .size(mainButtonSize)
+                    .background(Lime)
+                    .clickable {
+                        SearchList()
+                    },
+                    contentAlignment = Alignment.Center){
+                    Image(
+                        painter = painterResource(id = R.drawable.searchicon),
+                        contentDescription = "Magnifying Glass",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(4.dp)
+                    )
+                }
             }
             LazyRow(
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 1.dp, horizontal = 1.dp)
             ) {
                 item {
                     Box(
@@ -354,11 +364,10 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable {/* Handle Category clicks */
-                                thread(start = true){
+                                thread(start = true) {
                                     val sortedList = mutableListOf<Game>()
-                                    for(game in gameList){
-                                        if(LocalDateTime.now().dayOfYear == game.dateTimeLastPlayed.dayOfYear)
-                                        {
+                                    for (game in gameList) {
+                                        if (LocalDateTime.now().dayOfYear == game.dateTimeLastPlayed.dayOfYear) {
                                             sortedList.add(game)
                                         }
                                     }
@@ -380,7 +389,7 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable {/* Handle Category clicks */
-                                thread (start = true){
+                                thread(start = true) {
                                     val sortedList = gameList
                                         .sortedBy { it.allAchiev }
                                         .toMutableList()
@@ -403,7 +412,7 @@ class LibraryActivity : AppCompatActivity() {
                             .width(120.dp)
                             .height(31.dp)
                             .clickable { /* Handle Category clicks */
-                                thread(start = true){
+                                thread(start = true) {
                                     val sortedList = mutableListOf<Game>()
                                     for (game in Game.gameList) {
                                         if (game.newlyAdded)
@@ -424,7 +433,7 @@ class LibraryActivity : AppCompatActivity() {
 
             Row(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(vertical = 5.dp, horizontal = 1.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
 
@@ -432,13 +441,16 @@ class LibraryActivity : AppCompatActivity() {
 
                 Button(
                     onClick = { expandedDrop = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
+                    modifier = Modifier.size(optionsButtonSizeWidth, optionsButtonSizeHeight)
+
                 ) {
                     Text(text = "Sort", color = Color.Black)
                 }
                 Button(onClick = {
                     dialogFlag.value = true
-                }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
+                    modifier = Modifier.size(optionsButtonSizeWidth, optionsButtonSizeHeight)) {
                     Text(text = "Clear All", color = Color.Black)
                 }
                 DropdownMenu(expanded = expandedDrop, onDismissRequest = { expandedDrop = false }) {
@@ -473,35 +485,18 @@ class LibraryActivity : AppCompatActivity() {
 
                 Button(onClick = {
                     context.startActivity(Intent(context, GameInputActivity::class.java))
-                }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
+                    modifier = Modifier.size(optionsButtonSizeWidth, optionsButtonSizeHeight)) {
                     Text(text = "Add Game", color = Color.Black)
                 }
             }
 
-            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 180.dp)) {
+            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 140.dp)) {
                 items(gameList) { game ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(horizontal = 2.dp)
                     ) {
-                        // Favorite Icon
-                        val favoriteIcon =
-                            if (game.isFavorite) R.drawable.ic_favorite else R.drawable.ic_favorite_border
-                        Image(
-                            painter = painterResource(id = favoriteIcon),
-                            contentDescription = "Favorite icon",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .clickable {
-                                    // Toggle favorite state
-                                    game.isFavorite = !game.isFavorite
-                                    gameList[gameList.indexOf(game)] = game
-                                    saveGameFile(gameList)
-                                }
-                        )
-
                         // Game Icon
                         AsyncImage(model = ImageRequest.Builder(context)
                             .data(game.coverURL)
@@ -528,10 +523,25 @@ class LibraryActivity : AppCompatActivity() {
                                                 SingleGameActivity::class.java
                                             )
                                         )
-
                                     }),
                         )
-
+                        // Favorite Icon
+                        val favoriteIcon =
+                            if (game.isFavorite) R.drawable.ic_favorite else R.drawable.ic_favorite_border
+                        Image(
+                            painter = painterResource(id = favoriteIcon),
+                            contentDescription = "Favorite icon",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    // Toggle favorite state
+                                    game.isFavorite = !game.isFavorite
+                                    gameList[gameList.indexOf(game)] = game
+                                    saveGameFile(gameList)
+                                }
+                        )
                         Text(text = game.gameName)
                     }
                 }
