@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import com.scottparrillo.gamepulse.ui.theme.Lime
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -66,6 +69,8 @@ fun SingleGameScreen(){
     val gameLastPlayed = game.dateTimeLastPlayed.truncatedTo(ChronoUnit.DAYS)
     var noTime = false
     //1969 12 31 18:00
+    val mainButtonSize = 60.dp
+    val mainButtonCut = 10.dp
 
     if(gameLastPlayed == LocalDateTime.of(1969, 12, 31, 0,0))
     {
@@ -80,70 +85,83 @@ fun SingleGameScreen(){
                 achievementsEarned++
             }
         }
-
-
     Column(modifier = Modifier
         .background(color = CuriousBlue)
         .fillMaxSize()
             ) {
-
-
-            Row (horizontalArrangement = Arrangement.Start){
-                Image(
-                    painter = painterResource(id = R.drawable.homeicon),
-                    contentDescription = "Back arrow",
-                    contentScale = ContentScale.Inside,
-                    modifier = Modifier
-                        .size(65.dp)
-                        .clickable {
-                            context.startActivity(
-                                Intent(
-                                    context,
-                                    LibraryActivity::class.java
-                                )
-                            )
-                        }
-                        .padding(2.dp)
-                )
-
-            }
-            AsyncImage(model = Game.selectedGame.coverURL, contentScale = ContentScale.Fit,
-                contentDescription = "The cover of a game",
+            Row (horizontalArrangement = Arrangement.Start,
                 modifier = Modifier
-                    //size(235.dp)
-                    .size(height = 253.dp, width = 616.dp)
-                    .clip(RectangleShape)
-            )
-        LazyColumn (horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()){
-            item { Text(text = "Platform: $gamePlatform") }
-           // item { Text(text = "Title: $gameTitle") }
-            item {Text(text = "Total Hours played: $gameTimeTotal")}
-            item {
-                if(noTime)
-                {
-                    Text(text = "Last played: No data available")
-                }
-                else
-                {
-                    Text(text = "Last played: $gameLastPlayed")
+                    .padding(0.dp)
+                    .fillMaxWidth()
+                    .background(Color.Black)){
+                Box(modifier = Modifier
+                    .clip(RoundedCornerShape(mainButtonCut))
+                    .size(mainButtonSize)
+                    .background(Lime)
+                    .clickable {
+                        context.startActivity(
+                            Intent(
+                                context,
+                                MainActivity::class.java
+                            )
+                        )
+                    },
+                    contentAlignment = Alignment.Center){
+                    Image(
+                        painter = painterResource(id = R.drawable.homeicon),
+                        contentDescription = "Back arrow",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(4.dp)
+                    )
                 }
             }
-
-
-        }
-       Column (modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
-           Text(text = "Achievements", fontWeight = FontWeight.Bold)
-           if(game.achievements.size <= 0)
-           {
-               Text(text = "No achievements for this game")
-           }
-           else
-           {
-               Text(text = "$achievementsEarned / ${game.achievements.size}")
-           }
-       }
         LazyColumn {
+            item {
+                AsyncImage(model = Game.selectedGame.coverURL, contentScale = ContentScale.Fit,
+                    contentDescription = "The cover of a game",
+                    modifier = Modifier
+                        //size(235.dp)
+                        .size(height = 253.dp, width = 616.dp)
+                        .clip(RectangleShape)
+                )
+            }
+            item {
+                Column (horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()){
+                     Text(text = "Platform: $gamePlatform")
+                    // item { Text(text = "Title: $gameTitle") }
+                    Text(text = "Total Hours played: $gameTimeTotal")
 
+                        if(noTime)
+                        {
+                            Text(text = "Last played: No data available")
+                        }
+                        else
+                        {
+                            Text(text = "Last played: $gameLastPlayed")
+                        }
+
+
+
+                }
+            }
+            item {
+                Column (modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally){
+
+                        Text(text = "Achievements", fontWeight = FontWeight.Bold)
+                        if(game.achievements.size <= 0)
+                        {
+                            Text(text = "No achievements for this game")
+                        }
+                        else
+                        {
+                            Text(text = "$achievementsEarned / ${game.achievements.size}")
+                        }
+
+
+                }
+            }
             items(game.achievements){
                 achievement ->
                 val percentEarned = truncate(achievement.percentageEarned)

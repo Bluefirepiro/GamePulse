@@ -89,21 +89,20 @@ class LibraryActivity : AppCompatActivity() {
     }
     /*
 
-    Adjust home screen button to be same size as game import
-    Done
-    Make star aligned with image, as right now it leads to confusion about what game it's for
+    Adjust home screen button to be same size as game import (Done)
+    Make star aligned with image, as right now it leads to confusion about what game it's for (Done?)
     616 px x 353 px for capsule
     Center Search button on Add Game Button
-    Align search icon with game import button
-    Done
-    Center text and add static size to the three main buttons
-    Center image
+    Align search icon with game import button (Done)
+    Center text and add static size to the three main buttons (Done)
 
-    Add border to image
+    Center image (Done)
+    Add border to image (Done)
     Make dedicated word box for word wrap desc
     give score based on achievements possibly based on rarity
     have a score based on all consoles and platforms
     grand/meta/omni score based on pc and xbox
+    Scroll till lock on single game detail screen
      */
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalFoundationApi::class)
@@ -234,15 +233,20 @@ class LibraryActivity : AppCompatActivity() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = CuriousBlue)
-                .padding(2.dp)
+                //.background(color = CuriousBlue)
+                .background(color = Color.Black)
+                .padding(0.dp)
         ) {
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .padding(vertical = 10.dp, horizontal = 1.dp)
-                    .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(vertical = 0.dp, horizontal = 1.dp)
+                    .fillMaxWidth()
+                    .size(width = 100.dp, height = 100.dp)
+                    .background(color = Color.Black),
+                    horizontalArrangement = Arrangement.SpaceBetween
+
 
 
                 ) {
@@ -263,7 +267,7 @@ class LibraryActivity : AppCompatActivity() {
                         painter = painterResource(id = R.drawable.homeicon),
                         contentDescription = "Back arrow",
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(40.dp)
                             .padding(4.dp)
                     )
                 }
@@ -272,7 +276,10 @@ class LibraryActivity : AppCompatActivity() {
                     text = "Library Screen",
                     style = MaterialTheme.typography.headlineLarge,
                     fontFamily = jockeyOne,
-                    fontSize = 40.sp
+                    fontSize = 40.sp,
+                    color = Lime
+
+
                 )
                 Box(modifier = Modifier
                     .clip(RoundedCornerShape(mainButtonCut))
@@ -295,7 +302,8 @@ class LibraryActivity : AppCompatActivity() {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 1.dp, vertical = 10.dp)) {
+                    .padding(horizontal = 1.dp, vertical = 4.dp)
+                    .background(color = Color.Black)) {
                 TextField(
                     value = searchText, onValueChange = { searchText = it },
                     label = { Text("Search Game") },
@@ -325,13 +333,15 @@ class LibraryActivity : AppCompatActivity() {
                         painter = painterResource(id = R.drawable.searchicon),
                         contentDescription = "Magnifying Glass",
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(40.dp)
                             .padding(4.dp)
                     )
                 }
             }
             LazyRow(
-                modifier = Modifier.padding(vertical = 1.dp, horizontal = 1.dp)
+                modifier = Modifier
+                    .padding(vertical = 0.dp, horizontal = 1.dp)
+                    .background(color = Color.Black)
             ) {
                 item {
                     Box(
@@ -433,8 +443,9 @@ class LibraryActivity : AppCompatActivity() {
 
             Row(
                 modifier = Modifier
-                    .padding(vertical = 5.dp, horizontal = 1.dp)
-                    .fillMaxWidth(),
+                    .padding(vertical = 8.dp, horizontal = 1.dp)
+                    .fillMaxWidth()
+                    .background(color = Color.Black),
                 horizontalArrangement = Arrangement.SpaceBetween,
 
                 ) {
@@ -491,7 +502,8 @@ class LibraryActivity : AppCompatActivity() {
                 }
             }
 
-            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 140.dp)) {
+            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 140.dp),
+                modifier = Modifier.background(CuriousBlue)) {
                 items(gameList) { game ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -549,4 +561,3 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
 }
-
