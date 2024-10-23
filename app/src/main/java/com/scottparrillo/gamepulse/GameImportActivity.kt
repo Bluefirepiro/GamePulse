@@ -44,6 +44,7 @@ import com.scottparrillo.gamepulse.api.ApiClient
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
+import com.scottparrillo.gamepulse.util.Constants.OPENXBL_API_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -67,13 +68,25 @@ class GameImportActivity: AppCompatActivity() {
     }
     suspend fun getXuidFromGamertag(gamertag: String): String? {
         val response = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag)
+        Log.d("GameImportActivity", "Authorization Header: X-Authorization: $OPENXBL_API_KEY")
+        Log.d("GameImportActivity", "Request URL: https://xbl.io/api/v2/search/$gamertag")
+
+        Log.d("GameImportActivity", "Fetching XUID for Gamertag: $gamertag")
 
         return if (response.isSuccessful) {
-            val person = response.body()?.people?.firstOrNull() // Get the first person in the list
-            person?.xuid
+            val person = response.body()?.people?.firstOrNull()
+            if (person != null) {
+                Log.d("GameImportActivity", "XUID retrieved: ${person.xuid}")
+                return person.xuid
+            } else {
+                Log.e("GameImportActivity", "No person found in the response for gamertag: $gamertag")
+                null
+            }
         } else {
             Log.e("GameImportActivity", "Error retrieving XUID: ${response.errorBody()?.string()}")
-            null
+            Log.e("GameImportActivity", "Response code: ${response.code()}")
+            Log.e("GameImportActivity", "Response headers: ${response.headers()}")
+            return null
         }
     }
 
