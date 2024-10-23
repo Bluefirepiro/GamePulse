@@ -122,9 +122,11 @@ class GameImportActivity: AppCompatActivity() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = CuriousBlue)
+                .padding(horizontal = 1.dp)
         ) {
             item {
-                LazyRow(verticalAlignment = Alignment.CenterVertically) {
+                LazyRow(verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 1.dp)) {
                     item {
                         Box(modifier = Modifier
                             .clip(RoundedCornerShape(mainButtonCut))
@@ -198,7 +200,7 @@ class GameImportActivity: AppCompatActivity() {
                                 //Upon clicking import get the steam user id then load in the games
 
                                 //Start of sync api call
-                                thread(start = true) {
+                                CoroutineScope(Dispatchers.IO).launch {
                                     //Start of first call
                                     val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames(
                                         "4A7BFC2A3443A093EA9953FD5529C795",
@@ -386,7 +388,9 @@ class GameImportActivity: AppCompatActivity() {
             }
 
             item {
-                LazyRow {
+                LazyRow (modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 1.dp)){
                     item {
                         TextField(
                             value = xboxIdText,
