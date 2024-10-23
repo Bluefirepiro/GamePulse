@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.ObjectOutputStream
+import java.net.URLEncoder
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.concurrent.thread
@@ -66,27 +67,39 @@ class GameImportActivity: AppCompatActivity() {
             }
         }
     }
-    suspend fun getXuidFromGamertag(gamertag: String): String? {
-        val response = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag)
+    fun getXuidFromGamertag(gamertag: String): String? {
+        // Make the synchronous API call using .execute()
+        val encodedGamertag = URLEncoder.encode(gamertag, "UTF-8")
+        val call = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(encodedGamertag)
         Log.d("GameImportActivity", "Authorization Header: X-Authorization: $OPENXBL_API_KEY")
         Log.d("GameImportActivity", "Request URL: https://xbl.io/api/v2/search/$gamertag")
-
         Log.d("GameImportActivity", "Fetching XUID for Gamertag: $gamertag")
 
-        return if (response.isSuccessful) {
-            val person = response.body()?.people?.firstOrNull()
-            if (person != null) {
-                Log.d("GameImportActivity", "XUID retrieved: ${person.xuid}")
-                return person.xuid
+        return try {
+            // Execute the call synchronously
+            val response = call.execute()
+
+            if (response.isSuccessful) {
+                // Get the first person in the list
+                val person = response.body()?.people?.firstOrNull()
+                if (person != null) {
+                    Log.d("GameImportActivity", "XUID retrieved: ${person.xuid}")
+                    person.xuid
+                } else {
+                    Log.e("GameImportActivity", "No person found in the response for gamertag: $gamertag")
+                    null
+                }
             } else {
-                Log.e("GameImportActivity", "No person found in the response for gamertag: $gamertag")
+                // Log the error details if the response is not successful
+                Log.e("GameImportActivity", "Error retrieving XUID: ${response.errorBody()?.string()}")
+                Log.e("GameImportActivity", "Response code: ${response.code()}")
+                Log.e("GameImportActivity", "Response headers: ${response.headers()}")
                 null
             }
-        } else {
-            Log.e("GameImportActivity", "Error retrieving XUID: ${response.errorBody()?.string()}")
-            Log.e("GameImportActivity", "Response code: ${response.code()}")
-            Log.e("GameImportActivity", "Response headers: ${response.headers()}")
-            return null
+        } catch (e: Exception) {
+            // Handle exceptions such as network errors
+            Log.e("GameImportActivity", "Exception during XUID retrieval: ${e.message}")
+            null
         }
     }
 

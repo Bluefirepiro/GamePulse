@@ -1,10 +1,19 @@
 package com.scottparrillo.gamepulse.com.scottparrillo.gamepulse
 
-data class XuidResponse(
-    val people: List<Person>
-)
+import com.google.gson.annotations.SerializedName
 
-data class Person(
-    val xuid: String,
-    val gamertag: String
-)
+class XuidResponse {
+
+    @SerializedName("people")
+    val people: List<Person> = listOf()
+
+    class Person {
+
+        @SerializedName("xuid")
+        val xuid: String = ""
+
+        @SerializedName("gamertag")
+        val gamertag: String = ""
+
+    }
+}
