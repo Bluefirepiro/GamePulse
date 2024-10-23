@@ -3,6 +3,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -64,14 +65,15 @@ class GameImportActivity: AppCompatActivity() {
             }
         }
     }
-    private suspend fun getXuidFromGamertag(gamertag: String): String? {
-        return withContext(Dispatchers.IO) {
-            val response = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag)
-            if (response.isSuccessful) {
-                response.body()?.xuid // Assuming xuid is part of the response body
-            } else {
-                null
-            }
+    suspend fun getXuidFromGamertag(gamertag: String): String? {
+        val response = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag)
+
+        return if (response.isSuccessful) {
+            val person = response.body()?.people?.firstOrNull() // Get the first person in the list
+            person?.xuid
+        } else {
+            Log.e("GameImportActivity", "Error retrieving XUID: ${response.errorBody()?.string()}")
+            null
         }
     }
 

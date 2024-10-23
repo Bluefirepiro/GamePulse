@@ -68,9 +68,9 @@ interface XboxWebAPIClient {
         @Path("xuid") xuid: String
     ): Call<XboxOwnedGames>
 
-        @GET("/v2/gamertag/{gamertag}")
-        suspend fun getXuidFromGamertag(
-            @Path("gamertag") gamertag: String,
-            @Header("Authorization") authHeader: String = "Bearer $OPENXBL_API_KEY"
-        ): Response<XuidResponse>
+    @GET("v2/search/{gamertag}")
+    suspend fun getXuidFromGamertag(
+        @Path("gamertag") gamertag: String,
+        @Header("X-Authorization") authHeader: String = "Bearer $OPENXBL_API_KEY"
+    ): Response<XuidResponse>
     }
