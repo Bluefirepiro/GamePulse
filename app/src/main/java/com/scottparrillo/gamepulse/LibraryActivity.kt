@@ -464,7 +464,7 @@ class LibraryActivity : AppCompatActivity() {
                         painter = painterResource(id = R.drawable.descending_filter_icon),
                         contentDescription = "Delete Button",
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(35.dp)
                             .padding(4.dp)
                     )
                 }
@@ -485,7 +485,7 @@ class LibraryActivity : AppCompatActivity() {
                         painter = painterResource(id = R.drawable.delete_icon),
                         contentDescription = "Delete Button",
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(35.dp)
                             .padding(4.dp)
                     )
                 }

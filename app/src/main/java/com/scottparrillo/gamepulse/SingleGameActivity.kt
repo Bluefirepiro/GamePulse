@@ -89,7 +89,7 @@ fun SingleGameScreen(){
         .background(color = CuriousBlue)
         .fillMaxSize()
             ) {
-            Row (horizontalArrangement = Arrangement.Start,
+            Row (horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .padding(0.dp)
                     .fillMaxWidth()
@@ -102,7 +102,7 @@ fun SingleGameScreen(){
                         context.startActivity(
                             Intent(
                                 context,
-                                MainActivity::class.java
+                                LibraryActivity::class.java
                             )
                         )
                     },

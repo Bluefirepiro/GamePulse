@@ -153,7 +153,7 @@ class GameImportActivity: AppCompatActivity() {
                                 context.startActivity(
                                     Intent(
                                         context,
-                                        MainActivity::class.java
+                                        LibraryActivity::class.java
                                     )
                                 )
                             },
