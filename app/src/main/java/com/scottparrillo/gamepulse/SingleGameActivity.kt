@@ -108,10 +108,10 @@ fun SingleGameScreen(){
                     },
                     contentAlignment = Alignment.Center){
                     Image(
-                        painter = painterResource(id = R.drawable.homeicon),
+                        painter = painterResource(id = R.drawable.home_icon),
                         contentDescription = "Back arrow",
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(50.dp)
                             .padding(4.dp)
                     )
                 }

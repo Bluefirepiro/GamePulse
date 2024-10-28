@@ -29,8 +29,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -122,13 +120,16 @@ class LibraryActivity : AppCompatActivity() {
         val searchFlag = rememberSaveable { mutableStateOf(false) }
         //Setting up my fonts
         val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
-        //val joseFin = FontFamily(Font(R.font.josefin_slab_variablefont_wght))
-        //val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
+        val joseFin = FontFamily(Font(R.font.josefin_slab_variablefont_wght))
+        val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
+        //Gameinfo
+
         //Setting up drop down menu
         var expandedDrop by remember { mutableStateOf(false) }
         //Button sizes
         val mainButtonSize = 60.dp
         val mainButtonCut = 10.dp
+        val mainImageSize = 48.dp
         val optionsButtonSizeWidth = 115.dp
         val optionsButtonSizeHeight = 40.dp
         fun getGameFile(): List<Game>? {
@@ -207,7 +208,8 @@ class LibraryActivity : AppCompatActivity() {
             }
 
         }
-        //Setting up a dialog alert
+        val librarySize = Game.gameList.size
+            //Setting up a dialog alert
         when {
             dialogFlag.value -> {
                 AlertDialog(onDismissRequest = { dialogFlag.value = false }, confirmButton = {
@@ -264,10 +266,10 @@ class LibraryActivity : AppCompatActivity() {
                     },
                     contentAlignment = Alignment.Center){
                     Image(
-                        painter = painterResource(id = R.drawable.homeicon),
+                        painter = painterResource(id = R.drawable.home_icon),
                         contentDescription = "Back arrow",
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(mainImageSize)
                             .padding(4.dp)
                     )
                 }
@@ -290,10 +292,11 @@ class LibraryActivity : AppCompatActivity() {
                     },
                     contentAlignment = Alignment.Center){
                     Image(
-                        painter = painterResource(id = R.drawable.gameimport),
+                        painter = painterResource(id = R.drawable.cloud_download_icon),
                         contentDescription = "Game Import Button",
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(mainImageSize)
+                            .padding(4.dp)
                     )
                 }
 
@@ -330,10 +333,10 @@ class LibraryActivity : AppCompatActivity() {
                     },
                     contentAlignment = Alignment.Center){
                     Image(
-                        painter = painterResource(id = R.drawable.searchicon),
+                        painter = painterResource(id = R.drawable.magnifier_glass_icon),
                         contentDescription = "Magnifying Glass",
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(mainImageSize)
                             .padding(4.dp)
                     )
                 }
@@ -449,20 +452,42 @@ class LibraryActivity : AppCompatActivity() {
                 horizontalArrangement = Arrangement.SpaceBetween,
 
                 ) {
-
-                Button(
-                    onClick = { expandedDrop = true },
-                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
-                    modifier = Modifier.size(optionsButtonSizeWidth, optionsButtonSizeHeight)
-
-                ) {
-                    Text(text = "Sort", color = Color.Black)
+                Box(modifier = Modifier
+                    .clip(RoundedCornerShape(mainButtonCut))
+                    .size(width = 60.dp, height = 40.dp)
+                    .background(Lime)
+                    .clickable {
+                        expandedDrop = true
+                    },
+                    contentAlignment = Alignment.Center){
+                    Image(
+                        painter = painterResource(id = R.drawable.descending_filter_icon),
+                        contentDescription = "Delete Button",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(4.dp)
+                    )
                 }
-                Button(onClick = {
-                    dialogFlag.value = true
-                }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
-                    modifier = Modifier.size(optionsButtonSizeWidth, optionsButtonSizeHeight)) {
-                    Text(text = "Clear All", color = Color.Black)
+                Text(text = "$librarySize Games",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontFamily = kdam,
+                    fontSize = 30.sp,
+                    color = Lime)
+                Box(modifier = Modifier
+                    .clip(RoundedCornerShape(mainButtonCut))
+                    .size(width = 60.dp, height = 40.dp)
+                    .background(Lime)
+                    .clickable {
+                        dialogFlag.value = true
+                    },
+                    contentAlignment = Alignment.Center){
+                    Image(
+                        painter = painterResource(id = R.drawable.delete_icon),
+                        contentDescription = "Delete Button",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(4.dp)
+                    )
                 }
                 DropdownMenu(expanded = expandedDrop, onDismissRequest = { expandedDrop = false }) {
 
@@ -494,12 +519,7 @@ class LibraryActivity : AppCompatActivity() {
                 }
 
 
-                Button(onClick = {
-                    context.startActivity(Intent(context, GameInputActivity::class.java))
-                }, colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
-                    modifier = Modifier.size(optionsButtonSizeWidth, optionsButtonSizeHeight)) {
-                    Text(text = "Add Game", color = Color.Black)
-                }
+
             }
 
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 140.dp),
