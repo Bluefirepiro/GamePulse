@@ -89,9 +89,12 @@ class GameImportActivity: AppCompatActivity() {
         val view = LocalView.current
         val mainButtonSize = 60.dp
         val mainButtonCut = 10.dp
+        val mainImageSize = 48.dp
         view.keepScreenOn = true
         //fonts
         val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
+        val joseFin = FontFamily(Font(R.font.josefin_slab_variablefont_wght))
+        val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
         //These are the variables for the text inputs
         var gameName by remember { mutableStateOf("") }
         var gameDesc by remember { mutableStateOf("") }
@@ -149,6 +152,7 @@ class GameImportActivity: AppCompatActivity() {
                             .clip(RoundedCornerShape(mainButtonCut))
                             .size(mainButtonSize)
                             .background(Lime)
+                            .padding(horizontal = 2.dp)
                             .clickable {
                                 context.startActivity(
                                     Intent(
@@ -162,7 +166,7 @@ class GameImportActivity: AppCompatActivity() {
                                 painter = painterResource(id = R.drawable.home_icon),
                                 contentDescription = "Back arrow",
                                 modifier = Modifier
-                                    .size(50.dp)
+                                    .size(mainImageSize)
                                     .padding(4.dp)
                             )
                         }
@@ -182,6 +186,7 @@ class GameImportActivity: AppCompatActivity() {
                             .clip(RoundedCornerShape(mainButtonCut))
                             .size(mainButtonSize)
                             .background(Lime)
+                            .padding(horizontal = 2.dp)
                             .clickable {
                                 dialogFlag.value = true
                             },
@@ -190,7 +195,7 @@ class GameImportActivity: AppCompatActivity() {
                                 painter = painterResource(id = R.drawable.round_information_icon),
                                 contentDescription = "question mark",
                                 modifier = Modifier
-                                    .size(width = 50.dp, height = 50.dp)
+                                    .size(mainImageSize)
                                     .padding(4.dp)
 
                             )
@@ -210,7 +215,11 @@ class GameImportActivity: AppCompatActivity() {
                 }
             }
             item {
-                LazyRow {
+                LazyRow (modifier = Modifier
+                    .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                    ){
                     item {
                         TextField(
                             value = steamIdText, onValueChange = { steamIdText = it },
@@ -222,9 +231,12 @@ class GameImportActivity: AppCompatActivity() {
 
                             )
                     }
-                    item {
-                        Button(
-                            onClick = {
+                    item{
+                        Box(modifier = Modifier
+                            .clip(RoundedCornerShape(mainButtonCut))
+                            .size(mainButtonSize)
+                            .background(Lime)
+                            .clickable {
                                 steamId = steamIdText
                                 steamIdText = "Importing game do not click away"
 
@@ -399,14 +411,18 @@ class GameImportActivity: AppCompatActivity() {
                                     saveGameFile(Game.gameList)
                                     steamIdText = "Done Importing"
                                 }
+                            },
+                            contentAlignment = Alignment.Center){
+                            Image(
+                                painter = painterResource(id = R.drawable.download_file_icon),
+                                contentDescription = "question mark",
+                                modifier = Modifier
+                                    .size(mainImageSize)
+                                    .padding(4.dp)
 
-                            }, modifier = Modifier.padding(horizontal = 2.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                        ) {
-                            Text("Import", color = Color.Black)
+                            )
                         }
                     }
-
                 }
             }
             // Xbox Import Section (Below Steam Import)
@@ -423,7 +439,9 @@ class GameImportActivity: AppCompatActivity() {
             item {
                 LazyRow (modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 1.dp)){
+                    .padding(horizontal = 1.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly){
                     item {
                         TextField(
                             value = xboxIdText,
@@ -437,72 +455,74 @@ class GameImportActivity: AppCompatActivity() {
 
                     }
                     item {
-                        Row {
+                        Box(modifier = Modifier
+                            .clip(RoundedCornerShape(mainButtonCut))
+                            .size(mainButtonSize)
+                            .background(Lime)
+                            .padding(horizontal = 2.dp)
+                            .clickable {
+                                // Start Xbox game import
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    try {
+                                        // Fetch all games by Xbox ID from Xbox API
 
-                            Button(
-                                onClick = {
-                                    // Start Xbox game import
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        try {
-                                            // Fetch all games by Xbox ID from Xbox API
+                                        val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(
+                                            xuid = xboxIdText
+                                        ).execute()  // Using execute() for a synchronous call
 
-                                            val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(
-                                                xuid = xboxIdText
-                                            ).execute()  // Using execute() for a synchronous call
+                                        if (response.isSuccessful) {
+                                            val xboxGamesResponse = response.body()
+                                            val gamesList: List<XboxOwnedGames.XboxGame> =
+                                                xboxGamesResponse?.games ?: emptyList()
 
-                                            if (response.isSuccessful) {
-                                                val xboxGamesResponse = response.body()
-                                                val gamesList: List<XboxOwnedGames.XboxGame> =
-                                                    xboxGamesResponse?.games ?: emptyList()
-
-                                                for (game in gamesList) {
-                                                    val gameConvert = Game().apply {
-                                                        gameName = game.name
-                                                        gameId = game.titleId.toLongOrNull() ?: 0L
-                                                        gamePlatform = "Xbox"
-                                                        coverURL = game.displayImage // Assuming you want the display image
-                                                        //We needed a secure connection and it defaulted to http not https
-                                                        coverURL = coverURL.replace("http", "https")
-                                                        dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
-                                                            .atZone(ZoneId.systemDefault())
-                                                            .toLocalDateTime()
-                                                        //currentGamerscore = game.achievement.currentGamerscore
-                                                        //totalGamerscore = game.achievement.totalGamerscore
-                                                    }
-                                                    Game.gameList.add(gameConvert)
+                                            for (game in gamesList) {
+                                                val gameConvert = Game().apply {
+                                                    gameName = game.name
+                                                    gameId = game.titleId.toLongOrNull() ?: 0L
+                                                    gamePlatform = "Xbox"
+                                                    coverURL = game.displayImage // Assuming you want the display image
+                                                    //We needed a secure connection and it defaulted to http not https
+                                                    coverURL = coverURL.replace("http", "https")
+                                                    dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
+                                                        .atZone(ZoneId.systemDefault())
+                                                        .toLocalDateTime()
+                                                    //currentGamerscore = game.achievement.currentGamerscore
+                                                    //totalGamerscore = game.achievement.totalGamerscore
                                                 }
-                                                saveGameFile(Game.gameList)
-
-                                                // Update UI on the main thread
-                                                withContext(Dispatchers.Main) {
-                                                    xboxIdText = "Done Importing Xbox games"
-                                                }
-                                            }  else {
-                                                // Handle API error
-                                                withContext(Dispatchers.Main) {
-                                                    xboxIdText =
-                                                        "Error importing games."
-                                                }
-                                                println("Error fetching recently played games: ${response.errorBody()}")
+                                                Game.gameList.add(gameConvert)
                                             }
-                                        }  catch (e: Exception) {
-                                            e.printStackTrace()
+                                            saveGameFile(Game.gameList)
+
+                                            // Update UI on the main thread
                                             withContext(Dispatchers.Main) {
-                                                xboxIdText = "Error during import."
+                                                xboxIdText = "Done Importing Xbox games"
                                             }
+                                        }  else {
+                                            // Handle API error
+                                            withContext(Dispatchers.Main) {
+                                                xboxIdText =
+                                                    "Error importing games."
+                                            }
+                                            println("Error fetching recently played games: ${response.errorBody()}")
+                                        }
+                                    }  catch (e: Exception) {
+                                        e.printStackTrace()
+                                        withContext(Dispatchers.Main) {
+                                            xboxIdText = "Error during import."
                                         }
                                     }
-                                },
-                                modifier = Modifier.padding(horizontal = 0.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                            ) {
-                                Text("Import", color = Color.Black)
-                            }
-
+                                }
+                            },
+                            contentAlignment = Alignment.Center){
+                            Image(
+                                painter = painterResource(id = R.drawable.download_file_icon),
+                                contentDescription = "question mark",
+                                modifier = Modifier
+                                    .size(mainImageSize)
+                                    .padding(4.dp)
+                            )
                         }
                     }
-
-
                 }
             }
             item{
