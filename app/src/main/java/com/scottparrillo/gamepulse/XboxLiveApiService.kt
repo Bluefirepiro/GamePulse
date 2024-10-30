@@ -72,6 +72,6 @@ interface XboxWebAPIClient {
     fun getXuidFromGamertag(
         @Path("gamertag") gamertag: String,
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY
-    ): Call<XuidResponse>  // Change to Call<XuidResponse>
+    ): Call<XuidResponse>
 
 }

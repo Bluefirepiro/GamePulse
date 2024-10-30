@@ -1,5 +1,6 @@
 package com.scottparrillo.gamepulse
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -51,16 +52,14 @@ class AchievementActivity : ComponentActivity() {
             }
         }
     }
-//Resize the import buttons, center the screen better
+
     @Composable
     @Preview(showBackground = true)
     fun AchievementScreen() {
         var steamIdText by remember { mutableStateOf("") }
         var xboxIdText by remember { mutableStateOf("") }
         var dialogFlag by remember { mutableStateOf(false) }
-        var steamAchievements by remember {
-            mutableStateOf<List<SteamPlayerAchievements.Playerstats.SteamAchievement>>(emptyList())
-        }
+        var steamAchievements by remember { mutableStateOf<List<SteamPlayerAchievements.Playerstats.SteamAchievement>>(emptyList()) }
         var steamGames by remember { mutableStateOf<List<SteamOwnedGames.Response.SteamGames>>(emptyList()) }
         var selectedGame by remember { mutableStateOf<SteamOwnedGames.Response.SteamGames?>(null) }
         var xboxAchievements by remember { mutableStateOf<List<XboxPlayerAchievements.XboxAchievement>>(emptyList()) }
@@ -70,12 +69,22 @@ class AchievementActivity : ComponentActivity() {
                 .fillMaxSize()
                 .background(color = CuriousBlue)
         ) {
-            // Title row with help icon
+            // Home button and title row
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = R.drawable.homeicon),
+                        contentDescription = "Home Icon",
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clickable {
+                                startActivity(Intent(this@AchievementActivity, MainActivity::class.java))
+                            }
+                            .padding(start = 8.dp, end = 16.dp)
+                    )
                     Text(
                         text = "Achievement Import", fontSize = 30.sp,
-                        modifier = Modifier.padding(vertical = 20.dp, horizontal = 24.dp)
+                        modifier = Modifier.padding(vertical = 20.dp)
                     )
                     Image(
                         painter = painterResource(id = R.drawable.questionmark),
@@ -176,7 +185,6 @@ class AchievementActivity : ComponentActivity() {
                 )
             }
 
-            val titleId = "YOUR_TITLE_ID"
             // Xbox Achievements Section
             item {
                 Text(
@@ -192,7 +200,7 @@ class AchievementActivity : ComponentActivity() {
                     TextField(
                         value = xboxIdText,
                         onValueChange = { xboxIdText = it },
-                        label = { Text("Enter Xbox Live ID") },
+                        label = { Text("Enter Gamertag") },
                         modifier = Modifier
                             .size(width = 280.dp, height = 50.dp)
                             .padding(horizontal = 8.dp, vertical = 8.dp)
@@ -200,8 +208,8 @@ class AchievementActivity : ComponentActivity() {
                     )
                     Button(
                         onClick = {
-                            importXboxAchievements(xboxIdText, titleId) {
-                                xboxAchievements = it
+                            importXboxAchievements(xboxIdText) { achievements ->
+                                xboxAchievements = achievements
                             }
                         },
                         modifier = Modifier.padding(horizontal = 2.dp),
@@ -212,7 +220,7 @@ class AchievementActivity : ComponentActivity() {
                 }
             }
 
-            // Display Xbox Achievements
+            // Display Xbox Achievements in list format
             items(xboxAchievements) { achievement ->
                 Text(
                     text = "Achievement: ${achievement.name}, Unlocked: ${achievement.unlocked}",
@@ -221,7 +229,6 @@ class AchievementActivity : ComponentActivity() {
             }
         }
     }
-}
 
     // Fetch owned games from Steam
     private fun fetchSteamOwnedGames(
@@ -290,7 +297,6 @@ class AchievementActivity : ComponentActivity() {
     // Import Xbox Achievements
     private fun importXboxAchievements(
         xboxId: String,
-        titleId: String,
         onResult: (List<XboxPlayerAchievements.XboxAchievement>) -> Unit
     ) {
         CoroutineScope(Dispatchers.IO).launch {
@@ -298,7 +304,7 @@ class AchievementActivity : ComponentActivity() {
                 val response = ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(
                     apiKey = "139d737c-b4c4-46c4-b972-08e176ce102f",
                     xuid = xboxId,
-                    titleId = titleId // Pass titleId as a parameter
+                    titleId = "YOUR_TITLE_ID" // Change as needed
                 ).execute()
 
                 if (response.isSuccessful) {
@@ -318,6 +324,4 @@ class AchievementActivity : ComponentActivity() {
             }
         }
     }
-
-
-
+}

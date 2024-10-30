@@ -41,17 +41,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.api.ApiClient
+import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.XuidResponse
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
-import com.scottparrillo.gamepulse.util.Constants.OPENXBL_API_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.IOException
 import java.io.ObjectOutputStream
-import java.net.URLEncoder
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.concurrent.thread
@@ -67,40 +69,28 @@ class GameImportActivity: AppCompatActivity() {
             }
         }
     }
-    fun getXuidFromGamertag(gamertag: String): String? {
-        // Make the synchronous API call using .execute()
-        val encodedGamertag = URLEncoder.encode(gamertag, "UTF-8")
-        val call = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(encodedGamertag)
-        Log.d("GameImportActivity", "Authorization Header: X-Authorization: $OPENXBL_API_KEY")
-        Log.d("GameImportActivity", "Request URL: https://xbl.io/api/v2/search/$gamertag")
-        Log.d("GameImportActivity", "Fetching XUID for Gamertag: $gamertag")
+    fun getXuidFromGamertag(gamertag: String) {
+        val call = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag)
 
-        return try {
-            // Execute the call synchronously
-            val response = call.execute()
-
-            if (response.isSuccessful) {
-                // Get the first person in the list
-                val person = response.body()?.people?.firstOrNull()
-                if (person != null) {
-                    Log.d("GameImportActivity", "XUID retrieved: ${person.xuid}")
-                    person.xuid
+        call.enqueue(object : Callback<XuidResponse> {
+            override fun onResponse(call: Call<XuidResponse>, response: Response<XuidResponse>) {
+                if (response.isSuccessful) {
+                    val person = response.body()?.people?.firstOrNull()
+                    if (person != null) {
+                        Log.d("GameImportActivity", "XUID retrieved: ${person.xuid}")
+                    } else {
+                        Log.e("GameImportActivity", "No person found for gamertag: $gamertag")
+                    }
                 } else {
-                    Log.e("GameImportActivity", "No person found in the response for gamertag: $gamertag")
-                    null
+                    Log.e("GameImportActivity", "Error retrieving XUID: ${response.errorBody()?.string()}")
+                    Log.e("GameImportActivity", "Response code: ${response.code()}")
                 }
-            } else {
-                // Log the error details if the response is not successful
-                Log.e("GameImportActivity", "Error retrieving XUID: ${response.errorBody()?.string()}")
-                Log.e("GameImportActivity", "Response code: ${response.code()}")
-                Log.e("GameImportActivity", "Response headers: ${response.headers()}")
-                null
             }
-        } catch (e: Exception) {
-            // Handle exceptions such as network errors
-            Log.e("GameImportActivity", "Exception during XUID retrieval: ${e.message}")
-            null
-        }
+
+            override fun onFailure(call: Call<XuidResponse>, t: Throwable) {
+                Log.e("GameImportActivity", "Exception: ${t.message}")
+            }
+        })
     }
 
     @SuppressLint("SuspiciousIndentation")
@@ -436,7 +426,7 @@ class GameImportActivity: AppCompatActivity() {
                                                 if (xuid != null) {
                                                     // Fetch games for the given XUID
                                                     val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(
-                                                        xuid = xuid
+                                                        xuid = xuid.toString()
                                                     ).execute()
 
                                                     if (response.isSuccessful) {
