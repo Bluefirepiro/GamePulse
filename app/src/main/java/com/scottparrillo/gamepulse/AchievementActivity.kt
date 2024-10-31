@@ -87,7 +87,7 @@ class AchievementActivity : ComponentActivity() {
                         modifier = Modifier.padding(vertical = 20.dp)
                     )
                     Image(
-                        painter = painterResource(id = R.drawable.questionmark),
+                        painter = painterResource(id = R.drawable.round_information_icon),
                         contentDescription = "Help Icon",
                         modifier = Modifier
                             .size(50.dp)
