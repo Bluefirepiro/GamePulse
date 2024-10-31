@@ -3,6 +3,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -48,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.api.ApiClient
+import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.XuidResponse
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.Lime
@@ -72,7 +74,29 @@ class GameImportActivity: AppCompatActivity() {
             }
         }
     }
+    fun getXuidFromGamertag(gamertag: String) {
+        val call = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag)
 
+        call.enqueue(object : Callback<XuidResponse> {
+            override fun onResponse(call: Call<XuidResponse>, response: Response<XuidResponse>) {
+                if (response.isSuccessful) {
+                    val person = response.body()?.people?.firstOrNull()
+                    if (person != null) {
+                        Log.d("GameImportActivity", "XUID retrieved: ${person.xuid}")
+                    } else {
+                        Log.e("GameImportActivity", "No person found for gamertag: $gamertag")
+                    }
+                } else {
+                    Log.e("GameImportActivity", "Error retrieving XUID: ${response.errorBody()?.string()}")
+                    Log.e("GameImportActivity", "Response code: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<XuidResponse>, t: Throwable) {
+                Log.e("GameImportActivity", "Exception: ${t.message}")
+            }
+        })
+    }
 
     @SuppressLint("SuspiciousIndentation")
     @RequiresApi(Build.VERSION_CODES.O)
@@ -330,9 +354,9 @@ class GameImportActivity: AppCompatActivity() {
                                                         //Ignore the warning
                                                         if (ach.achieved == 1) true else false
                                                     val toConvert = Achievement(
-                                                        0, ach.apiname,
-                                                        "", 0.0,
-                                                        earnedFlag, 0, 0, 0
+                                                        //0, ach.apiname,
+                                                        //"", 0.0,
+                                                        //earnedFlag, 0, 0, 0
                                                     )
                                                     game.achievements.add(toConvert)
                                                 } else {
@@ -446,13 +470,12 @@ class GameImportActivity: AppCompatActivity() {
                         TextField(
                             value = xboxIdText,
                             onValueChange = { xboxIdText = it },
-                            label = { Text("Enter Xbox Live ID") },
+                            label = { Text("Enter Gamertag") },  // Updated label to Gamertag
                             modifier = Modifier
                                 .size(width = 280.dp, height = 50.dp)
                                 .padding(horizontal = 8.dp, vertical = 8.dp)
                                 .requiredHeight(height = 50.dp),
                         )
-
                     }
                     item {
                         Box(modifier = Modifier
@@ -461,57 +484,72 @@ class GameImportActivity: AppCompatActivity() {
                             .background(Lime)
                             .padding(horizontal = 2.dp)
                             .clickable {
-                                // Start Xbox game import
                                 CoroutineScope(Dispatchers.IO).launch {
-                                    try {
-                                        // Fetch all games by Xbox ID from Xbox API
+                                        try {
+                                            // Capture the entered Xbox Gamertag from the UI (make sure xboxIdText is a valid gamertag)
+                                            val gamertag = xboxIdText.trim()
 
-                                        val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(
-                                            xuid = xboxIdText
-                                        ).execute()  // Using execute() for a synchronous call
+                                            if (gamertag.isNotEmpty()) {
+                                                // Use the gamertag to get the XUID
+                                                val xuid = getXuidFromGamertag(gamertag)  // Pass the gamertag here
 
-                                        if (response.isSuccessful) {
-                                            val xboxGamesResponse = response.body()
-                                            val gamesList: List<XboxOwnedGames.XboxGame> =
-                                                xboxGamesResponse?.games ?: emptyList()
+                                                if (xuid != null) {
+                                                    // Fetch games for the given XUID
+                                                    val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(
+                                                        xuid = xuid.toString()
+                                                    ).execute()
 
-                                            for (game in gamesList) {
-                                                val gameConvert = Game().apply {
-                                                    gameName = game.name
-                                                    gameId = game.titleId.toLongOrNull() ?: 0L
-                                                    gamePlatform = "Xbox"
-                                                    coverURL = game.displayImage // Assuming you want the display image
-                                                    //We needed a secure connection and it defaulted to http not https
-                                                    coverURL = coverURL.replace("http", "https")
-                                                    dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
-                                                        .atZone(ZoneId.systemDefault())
-                                                        .toLocalDateTime()
-                                                    //currentGamerscore = game.achievement.currentGamerscore
-                                                    //totalGamerscore = game.achievement.totalGamerscore
+                                                    if (response.isSuccessful) {
+                                                        val xboxGamesResponse = response.body()
+                                                        val gamesList: List<XboxOwnedGames.XboxGame> =
+                                                            xboxGamesResponse?.games ?: emptyList()
+
+                                                        for (game in gamesList) {
+                                                            val gameConvert = Game().apply {
+                                                                gameName = game.name
+                                                                gameId = game.titleId.toLongOrNull() ?: 0L
+                                                                gamePlatform = "Xbox"
+                                                                coverURL = game.displayImage
+                                                                dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
+                                                                    .atZone(ZoneId.systemDefault())
+                                                                    .toLocalDateTime()
+                                                            }
+                                                            Game.gameList.add(gameConvert)
+                                                        }
+                                                        saveGameFile(Game.gameList)
+
+                                                        // Update UI on main thread
+                                                        withContext(Dispatchers.Main) {
+                                                            xboxIdText = "Done Importing Xbox games"
+                                                        }
+                                                    } else {
+                                                        withContext(Dispatchers.Main) {
+                                                            xboxIdText = "Error importing games."
+                                                        }
+                                                    }
+                                                } else {
+                                                    withContext(Dispatchers.Main) {
+                                                        xboxIdText = "Could not retrieve XUID. Check Gamertag."
+                                                    }
                                                 }
-                                                Game.gameList.add(gameConvert)
-                                            }
-                                            saveGameFile(Game.gameList)
-
-                                            // Update UI on the main thread
+                                            } else {
+                                                withContext(Dispatchers.Main) {
+                                                    xboxIdText = "Please enter a valid Gamertag."
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
                                             withContext(Dispatchers.Main) {
-                                                xboxIdText = "Done Importing Xbox games"
+                                                xboxIdText = "Error during import."
                                             }
-                                        }  else {
-                                            // Handle API error
-                                            withContext(Dispatchers.Main) {
-                                                xboxIdText =
-                                                    "Error importing games."
-                                            }
-                                            println("Error fetching recently played games: ${response.errorBody()}")
-                                        }
-                                    }  catch (e: Exception) {
-                                        e.printStackTrace()
-                                        withContext(Dispatchers.Main) {
-                                            xboxIdText = "Error during import."
                                         }
                                     }
-                                }
+                                },
+                                modifier = Modifier.padding(horizontal = 0.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                            ) {
+                                Text("Import", color = Color.Black)
+                            }
+                        }
+                    }           
                             },
                             contentAlignment = Alignment.Center){
                             Image(
@@ -595,6 +633,3 @@ class GameImportActivity: AppCompatActivity() {
         }
     }
 }
-
-
-
