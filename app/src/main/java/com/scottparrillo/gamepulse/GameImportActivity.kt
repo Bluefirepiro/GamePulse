@@ -9,6 +9,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,24 +20,29 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.api.ApiClient
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
+import com.scottparrillo.gamepulse.ui.theme.Lime
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,7 +60,6 @@ import java.io.IOException
 import java.io.ObjectOutputStream
 import java.time.Instant
 import java.time.ZoneId
-import kotlin.concurrent.thread
 
 
 class GameImportActivity: AppCompatActivity() {
@@ -79,7 +87,20 @@ class GameImportActivity: AppCompatActivity() {
         // val enterFlag = rememberSaveable { mutableStateOf(false) }
         val context = LocalContext.current
         val view = LocalView.current
+        val mainButtonSize = 60.dp
+        val mainButtonCut = 10.dp
+        val mainImageSize = 48.dp
         view.keepScreenOn = true
+        //fonts
+        val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
+        val joseFin = FontFamily(Font(R.font.josefin_slab_variablefont_wght))
+        val  kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
+        //These are the variables for the text inputs
+        var gameName by remember { mutableStateOf("") }
+        var gameDesc by remember { mutableStateOf("") }
+        var gameTime by remember { mutableStateOf("") }
+        var gameDate by remember { mutableStateOf("") }
+        var gamePlatform by remember { mutableStateOf("") }
         fun saveGameFile(mutableGameList: MutableList<Game>): Boolean {
             try {
                 val fos = context.openFileOutput("gameList", MODE_PRIVATE)
@@ -100,8 +121,10 @@ class GameImportActivity: AppCompatActivity() {
                     title = { Text(text = "Help") },
                     text = {
                         Text(
-                            text = "If steam is not importing correctly please make sure your profile is set to public\n" +
-                                    "If your steam ID is not showing go to your steam profile edit profile and delete your custom URL"
+                            text = "If steam is not importing correctly please make sure your " +
+                                    "profile is set to public\n" +
+                                    "If your steam ID is not showing go to your " +
+                                    "steam profile edit profile and delete your custom URL"
                         )
                     },
                     dismissButton = {
@@ -115,38 +138,68 @@ class GameImportActivity: AppCompatActivity() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = CuriousBlue)
+                .padding(horizontal = 0.dp)
         ) {
             item {
-                LazyRow(verticalAlignment = Alignment.CenterVertically) {
+                LazyRow(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .padding(horizontal = 0.dp)
+                        .fillMaxWidth()
+                        .background(Color.Black)) {
                     item {
-                        Image(
-                            painter = painterResource(id = R.drawable.homeicon),
-                            contentDescription = "Back arrow",
-                            contentScale = ContentScale.Inside,
-                            modifier = Modifier
-                                .size(65.dp)
-                                .padding(horizontal = 8.dp)
-                                .clickable {
-                                    saveGameFile(Game.gameList)
-                                    context.startActivity(Intent(context, MainActivity::class.java))
-                                }
-
-                        )
+                        Box(modifier = Modifier
+                            .clip(RoundedCornerShape(mainButtonCut))
+                            .size(mainButtonSize)
+                            .background(Lime)
+                            .padding(horizontal = 2.dp)
+                            .clickable {
+                                context.startActivity(
+                                    Intent(
+                                        context,
+                                        LibraryActivity::class.java
+                                    )
+                                )
+                            },
+                            contentAlignment = Alignment.Center){
+                            Image(
+                                painter = painterResource(id = R.drawable.home_icon),
+                                contentDescription = "Back arrow",
+                                modifier = Modifier
+                                    .size(mainImageSize)
+                                    .padding(4.dp)
+                            )
+                        }
                     }
                     item {
                         Text(
                             text = "Game Import", fontSize = 40.sp,
-                            modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp)
+                            modifier = Modifier.padding(vertical = 20.dp, horizontal = 8.dp),
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontFamily = jockeyOne,
+                            color = Lime
                         )
                     }
                     item {
-                        Image(painter = painterResource(id = R.drawable.questionmark),
-                            contentDescription = "question mark",
-                            modifier = Modifier
-                                .size(width = 50.dp, height = 50.dp)
-                                .clickable {
-                                    dialogFlag.value = true
-                                })
+
+                        Box(modifier = Modifier
+                            .clip(RoundedCornerShape(mainButtonCut))
+                            .size(mainButtonSize)
+                            .background(Lime)
+                            .padding(horizontal = 2.dp)
+                            .clickable {
+                                dialogFlag.value = true
+                            },
+                            contentAlignment = Alignment.Center){
+                            Image(
+                                painter = painterResource(id = R.drawable.round_information_icon),
+                                contentDescription = "question mark",
+                                modifier = Modifier
+                                    .size(mainImageSize)
+                                    .padding(4.dp)
+
+                            )
+                        }
                     }
                 }
             }
@@ -162,7 +215,11 @@ class GameImportActivity: AppCompatActivity() {
                 }
             }
             item {
-                LazyRow {
+                LazyRow (modifier = Modifier
+                    .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                    ){
                     item {
                         TextField(
                             value = steamIdText, onValueChange = { steamIdText = it },
@@ -174,16 +231,19 @@ class GameImportActivity: AppCompatActivity() {
 
                             )
                     }
-                    item {
-                        Button(
-                            onClick = {
+                    item{
+                        Box(modifier = Modifier
+                            .clip(RoundedCornerShape(mainButtonCut))
+                            .size(mainButtonSize)
+                            .background(Lime)
+                            .clickable {
                                 steamId = steamIdText
                                 steamIdText = "Importing game do not click away"
 
                                 //Upon clicking import get the steam user id then load in the games
 
                                 //Start of sync api call
-                                thread(start = true) {
+                                CoroutineScope(Dispatchers.IO).launch {
                                     //Start of first call
                                     val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames(
                                         "4A7BFC2A3443A093EA9953FD5529C795",
@@ -292,7 +352,8 @@ class GameImportActivity: AppCompatActivity() {
                                         val achPercentResponse = callAchPercent.execute()
                                         if (achPercentResponse.isSuccessful) {
                                             val achPercentList =
-                                                achPercentResponse.body()?.achievementpercentages?.achievements
+                                                achPercentResponse.body()
+                                                    ?.achievementpercentages?.achievements
                                             if (achPercentList != null) {
                                                 for (achPercent in achPercentList) {
                                                     for (ach in game.achievements) {
@@ -313,7 +374,8 @@ class GameImportActivity: AppCompatActivity() {
                                         val achResponse = callAch.execute()
                                         if (achResponse.isSuccessful) {
                                             val achievements =
-                                                achResponse.body()?.game?.availableGameStats?.achievements
+                                                achResponse.body()?.game?.availableGameStats
+                                                    ?.achievements
                                             if (game.achievements.isNotEmpty()) {
                                                 if (achievements != null) {
                                                     for (ach in achievements) {
@@ -349,14 +411,18 @@ class GameImportActivity: AppCompatActivity() {
                                     saveGameFile(Game.gameList)
                                     steamIdText = "Done Importing"
                                 }
+                            },
+                            contentAlignment = Alignment.Center){
+                            Image(
+                                painter = painterResource(id = R.drawable.download_file_icon),
+                                contentDescription = "question mark",
+                                modifier = Modifier
+                                    .size(mainImageSize)
+                                    .padding(4.dp)
 
-                            }, modifier = Modifier.padding(horizontal = 2.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                        ) {
-                            Text("Import", color = Color.Black)
+                            )
                         }
                     }
-
                 }
             }
             // Xbox Import Section (Below Steam Import)
@@ -371,7 +437,11 @@ class GameImportActivity: AppCompatActivity() {
             }
 
             item {
-                LazyRow {
+                LazyRow (modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 1.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly){
                     item {
                         TextField(
                             value = xboxIdText,
@@ -385,72 +455,141 @@ class GameImportActivity: AppCompatActivity() {
 
                     }
                     item {
-                        Row {
+                        Box(modifier = Modifier
+                            .clip(RoundedCornerShape(mainButtonCut))
+                            .size(mainButtonSize)
+                            .background(Lime)
+                            .padding(horizontal = 2.dp)
+                            .clickable {
+                                // Start Xbox game import
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    try {
+                                        // Fetch all games by Xbox ID from Xbox API
 
-                            Button(
-                                onClick = {
-                                    // Start Xbox game import
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        try {
-                                            // Fetch all games by Xbox ID from Xbox API
+                                        val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(
+                                            xuid = xboxIdText
+                                        ).execute()  // Using execute() for a synchronous call
 
-                                            val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(
-                                                xuid = xboxIdText
-                                            ).execute()  // Using execute() for a synchronous call
+                                        if (response.isSuccessful) {
+                                            val xboxGamesResponse = response.body()
+                                            val gamesList: List<XboxOwnedGames.XboxGame> =
+                                                xboxGamesResponse?.games ?: emptyList()
 
-                                            if (response.isSuccessful) {
-                                                val xboxGamesResponse = response.body()
-                                                val gamesList: List<XboxOwnedGames.XboxGame> =
-                                                    xboxGamesResponse?.games ?: emptyList()
-
-                                                for (game in gamesList) {
-                                                    val gameConvert = Game().apply {
-                                                        gameName = game.name
-                                                        gameId = game.titleId.toLongOrNull() ?: 0L
-                                                        gamePlatform = "Xbox"
-                                                        coverURL = game.displayImage // Assuming you want the display image
-                                                        //We needed a secure connection and it defaulted to http not https
-                                                        coverURL = coverURL.replace("http", "https")
-                                                        dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
-                                                            .atZone(ZoneId.systemDefault())
-                                                            .toLocalDateTime()
-                                                        //currentGamerscore = game.achievement.currentGamerscore
-                                                        //totalGamerscore = game.achievement.totalGamerscore
-                                                    }
-                                                    Game.gameList.add(gameConvert)
+                                            for (game in gamesList) {
+                                                val gameConvert = Game().apply {
+                                                    gameName = game.name
+                                                    gameId = game.titleId.toLongOrNull() ?: 0L
+                                                    gamePlatform = "Xbox"
+                                                    coverURL = game.displayImage // Assuming you want the display image
+                                                    //We needed a secure connection and it defaulted to http not https
+                                                    coverURL = coverURL.replace("http", "https")
+                                                    dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
+                                                        .atZone(ZoneId.systemDefault())
+                                                        .toLocalDateTime()
+                                                    //currentGamerscore = game.achievement.currentGamerscore
+                                                    //totalGamerscore = game.achievement.totalGamerscore
                                                 }
-                                                saveGameFile(Game.gameList)
-
-                                                // Update UI on the main thread
-                                                withContext(Dispatchers.Main) {
-                                                    xboxIdText = "Done Importing Xbox games"
-                                                }
-                                            }  else {
-                                                // Handle API error
-                                                withContext(Dispatchers.Main) {
-                                                    xboxIdText =
-                                                        "Error importing games."
-                                                }
-                                                println("Error fetching recently played games: ${response.errorBody()}")
+                                                Game.gameList.add(gameConvert)
                                             }
-                                        }  catch (e: Exception) {
-                                            e.printStackTrace()
+                                            saveGameFile(Game.gameList)
+
+                                            // Update UI on the main thread
                                             withContext(Dispatchers.Main) {
-                                                xboxIdText = "Error during import."
+                                                xboxIdText = "Done Importing Xbox games"
                                             }
+                                        }  else {
+                                            // Handle API error
+                                            withContext(Dispatchers.Main) {
+                                                xboxIdText =
+                                                    "Error importing games."
+                                            }
+                                            println("Error fetching recently played games: ${response.errorBody()}")
+                                        }
+                                    }  catch (e: Exception) {
+                                        e.printStackTrace()
+                                        withContext(Dispatchers.Main) {
+                                            xboxIdText = "Error during import."
                                         }
                                     }
-                                },
-                                modifier = Modifier.padding(horizontal = 0.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                            ) {
-                                Text("Import", color = Color.Black)
-                            }
+                                }
+                            },
+                            contentAlignment = Alignment.Center){
+                            Image(
+                                painter = painterResource(id = R.drawable.download_file_icon),
+                                contentDescription = "question mark",
+                                modifier = Modifier
+                                    .size(mainImageSize)
+                                    .padding(4.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            item{
+                Text(text = "Manual Import", fontSize = 35.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp))
+            }
+            item {
+                Column (modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
 
+                        //Text inputs below
+                        LazyRow (modifier = Modifier.padding(vertical = 20.dp))
+                        {
+                            item{ TextField(value = gameName, onValueChange = {gameName = it},
+                                label = { Text("Game Name") })
+                            }
+                        }
+
+
+                        LazyRow (modifier = Modifier.padding(vertical = 20.dp))
+                        {
+                            item{ TextField(value = gameDesc, onValueChange = {gameDesc = it},
+                                label = { Text("Game Description") })
+                            }
+                        }
+
+                     LazyRow (modifier = Modifier.padding(vertical = 20.dp))
+                    {
+                        item{ TextField(value = gameTime, onValueChange = {gameTime = it},
+                            label = { Text("In Game Time") })
+                        }
+                    }
+                    LazyRow (modifier = Modifier.padding(vertical = 20.dp))
+                    {
+                        item{ TextField(value = gameDate, onValueChange = {gameDate = it},
+                            label = { Text("Release Date") })
                         }
                     }
 
-
+                        LazyRow (modifier = Modifier.padding(vertical = 20.dp))
+                        {
+                            item{ TextField(value = gamePlatform, onValueChange = {gamePlatform = it},
+                                label = { Text("Game Platform") })
+                            }
+                        }
+                    //Buttons
+                     LazyRow (horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
+                         .fillMaxWidth()
+                         .padding(horizontal = 4.dp)){
+                        item {
+                            Button(onClick = { context.startActivity(Intent(context, LibraryActivity::class.java)) },
+                                colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                                Text(text = "Back",color = Color.Black)
+                            } }
+                        //On click we used the method I made to convert the string inputs to a gameDB object
+                        item { Button(onClick = { val gameInput = GameUtil.InputToGame(gameName, gameDesc, gameTime, gameDate, gamePlatform)
+                            //Now we add the game to the list
+                            Game.gameList.add(gameInput)
+                            saveGameFile(Game.gameList)
+                            context.startActivity(Intent(context, LibraryActivity::class.java))
+                        },
+                            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)) {
+                            Text(text = "Confirm Inputs",color = Color.Black)
+                        } }
+                    }
                 }
             }
         }
