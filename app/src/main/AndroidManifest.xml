@@ -37,10 +37,6 @@
             android:label="Library"
             android:theme="@style/Theme.GamePulse" />
         <activity
-            android:name=".GameInputActivity"
-            android:label="GameInput"
-            android:theme="@style/Theme.GamePulse" />
-        <activity
             android:name=".FriendsActivity"
             android:label="Friends"
             android:theme="@style/Theme.GamePulse"/>
