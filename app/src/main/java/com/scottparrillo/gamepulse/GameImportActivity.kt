@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -105,6 +106,9 @@ class GameImportActivity: AppCompatActivity() {
         @Preview(showBackground = true)
         @Composable
         fun GameImportScreen() {
+            //Progress Bar
+            var currentProgress by rememberSaveable { mutableStateOf(0f) }
+            var loading by rememberSaveable { mutableStateOf(false) }
             var steamIdText by rememberSaveable { mutableStateOf("") }
             var steamId by rememberSaveable { mutableStateOf("") }
             var dialogFlag = rememberSaveable { mutableStateOf(false) }
@@ -273,6 +277,12 @@ class GameImportActivity: AppCompatActivity() {
                                     .clickable {
                                         steamId = steamIdText
                                         steamIdText = "Importing game do not click away"
+                                        loading = true
+                                        var totalGames = 0.0f
+                                        var iterOne = 0.0f
+                                        var iterTwo = 0.0f
+                                        var iterThree = 0.0f
+                                        var iterFour = 0.0f
 
                                         //Upon clicking import get the steam user id then load in the games
 
@@ -334,11 +344,13 @@ class GameImportActivity: AppCompatActivity() {
                                                             gameconvert.newlyAdded = true
                                                         }
                                                         Game.gameList.add(gameconvert)
+                                                        totalGames += 1.0f
                                                     } else {
                                                         //Do nothing
                                                     }
                                                 }
                                                 saveGameFile(Game.gameList)
+
                                             }
                                             //End of game import api call
                                             for (game in Game.gameList) {
@@ -377,6 +389,8 @@ class GameImportActivity: AppCompatActivity() {
                                                         }
                                                     }
                                                 }
+                                                iterOne += 1.0f
+                                                currentProgress = (iterOne / totalGames)
                                             }
                                             //End of player achievement Call
                                             //Start of achievement percentage call
@@ -402,6 +416,8 @@ class GameImportActivity: AppCompatActivity() {
                                                         }
                                                     }
                                                 }
+                                                iterTwo += 1.0f
+                                                currentProgress = (iterTwo / totalGames)
                                             }
                                             saveGameFile(Game.gameList)
                                             for (game in Game.gameList) {
@@ -432,6 +448,8 @@ class GameImportActivity: AppCompatActivity() {
                                                         }
                                                     }
                                                 }
+                                                iterThree += 1.0f
+                                                currentProgress = (iterThree / totalGames)
                                             }
                                             //Determine which games have been completed
                                             if (Game.gameList.isNotEmpty()) {
@@ -447,10 +465,14 @@ class GameImportActivity: AppCompatActivity() {
                                                             game.allAchiev = true
                                                         }
                                                     }
+                                                    iterFour += 1.0f
+                                                    currentProgress = (iterFour / totalGames)
+
                                                 }
                                             }
                                             saveGameFile(Game.gameList)
                                             steamIdText = "Done Importing"
+                                            loading = false
                                         }
                                     },
                                 contentAlignment = Alignment.Center
@@ -587,6 +609,21 @@ class GameImportActivity: AppCompatActivity() {
                                     )
                             }
                         }
+                    }
+                }
+                //This item contains the loading bar
+                item{
+                    if(loading){
+                        Column (modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally){
+                            Text(text="Loading", fontSize = 25.sp )
+                            LinearProgressIndicator(progress = currentProgress,
+                            modifier = Modifier
+                                .size(width = 400.dp,height = 20.dp),
+                            trackColor = Lime,
+                        ) }
+
+
                     }
                 }
                 item {
