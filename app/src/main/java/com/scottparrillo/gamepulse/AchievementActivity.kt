@@ -64,6 +64,7 @@ class AchievementActivity : ComponentActivity() {
         var selectedGame by remember { mutableStateOf<SteamOwnedGames.Response.SteamGames?>(null) }
         var xboxAchievements by remember { mutableStateOf<List<XboxPlayerAchievements.XboxAchievement>>(emptyList()) }
 
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -186,6 +187,7 @@ class AchievementActivity : ComponentActivity() {
             }
 
             // Xbox Achievements Section
+
             item {
                 Text(
                     text = "Xbox Achievements", fontSize = 25.sp,
