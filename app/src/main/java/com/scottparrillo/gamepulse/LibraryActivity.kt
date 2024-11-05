@@ -311,8 +311,7 @@ class LibraryActivity : AppCompatActivity() {
                     value = searchText, onValueChange = { searchText = it },
                     label = { Text("Search Game") },
                     modifier = Modifier
-                        .size(width = 312.dp, height = 50.dp)
-                        .fillMaxWidth()
+                        .size(width = 280.dp, height = 50.dp)
                         //.requiredSize(width = 291.dp, height = 50.dp)
                         .onKeyEvent {
                             if (it.key == Key.Enter) {
@@ -327,6 +326,7 @@ class LibraryActivity : AppCompatActivity() {
                 )
                 Box(modifier = Modifier
                     .clip(RoundedCornerShape(mainButtonCut))
+                    .requiredSize(mainButtonSize)
                     .size(mainButtonSize)
                     .background(Lime)
                     .clickable {

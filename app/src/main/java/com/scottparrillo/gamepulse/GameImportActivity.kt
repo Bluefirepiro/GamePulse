@@ -108,6 +108,7 @@ class GameImportActivity: AppCompatActivity() {
         fun GameImportScreen() {
             //Progress Bar
             var currentProgress by rememberSaveable { mutableStateOf(0f) }
+            var threeStepCurrentProgress by rememberSaveable { mutableStateOf(0f) }
             var loading by rememberSaveable { mutableStateOf(false) }
             var steamIdText by rememberSaveable { mutableStateOf("") }
             var steamId by rememberSaveable { mutableStateOf("") }
@@ -350,7 +351,7 @@ class GameImportActivity: AppCompatActivity() {
                                                     }
                                                 }
                                                 saveGameFile(Game.gameList)
-
+                                                threeStepCurrentProgress = 0.20f
                                             }
                                             //End of game import api call
                                             for (game in Game.gameList) {
@@ -391,7 +392,9 @@ class GameImportActivity: AppCompatActivity() {
                                                 }
                                                 iterOne += 1.0f
                                                 currentProgress = (iterOne / totalGames)
+
                                             }
+                                            threeStepCurrentProgress = 0.40f
                                             //End of player achievement Call
                                             //Start of achievement percentage call
                                             for (game in Game.gameList) {
@@ -419,6 +422,7 @@ class GameImportActivity: AppCompatActivity() {
                                                 iterTwo += 1.0f
                                                 currentProgress = (iterTwo / totalGames)
                                             }
+                                            threeStepCurrentProgress = 0.60f
                                             saveGameFile(Game.gameList)
                                             for (game in Game.gameList) {
                                                 val callAch =
@@ -451,6 +455,7 @@ class GameImportActivity: AppCompatActivity() {
                                                 iterThree += 1.0f
                                                 currentProgress = (iterThree / totalGames)
                                             }
+                                            threeStepCurrentProgress = 0.80f
                                             //Determine which games have been completed
                                             if (Game.gameList.isNotEmpty()) {
                                                 for (game in Game.gameList) {
@@ -472,6 +477,7 @@ class GameImportActivity: AppCompatActivity() {
                                             }
                                             saveGameFile(Game.gameList)
                                             steamIdText = "Done Importing"
+                                            threeStepCurrentProgress = 1.00f
                                             loading = false
                                         }
                                     },
@@ -614,16 +620,27 @@ class GameImportActivity: AppCompatActivity() {
                 //This item contains the loading bar
                 item{
                     if(loading){
-                        Column (modifier = Modifier.fillMaxWidth(),
+                        Column (modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
                             horizontalAlignment = Alignment.CenterHorizontally){
                             Text(text="Loading", fontSize = 25.sp )
                             LinearProgressIndicator(progress = currentProgress,
                             modifier = Modifier
                                 .size(width = 400.dp,height = 20.dp),
-                            trackColor = Lime,
+                                trackColor = Color.Black,
+                                color = Lime,
                         ) }
-
-
+                    }
+                    if(loading){
+                        Column (modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally){
+                            LinearProgressIndicator(progress = threeStepCurrentProgress,
+                                modifier = Modifier
+                                    .size(width = 400.dp,height = 20.dp),
+                                trackColor = Color.Black,
+                                color = Lime,
+                            ) }
                     }
                 }
                 item {
