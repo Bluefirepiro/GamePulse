@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -57,7 +56,6 @@ import com.scottparrillo.gamepulse.ui.theme.Lime
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -102,101 +100,12 @@ class GameImportActivity: AppCompatActivity() {
         return null
     }
 
-    private fun saveGameFile(mutableGameList: MutableList<Game>): Boolean {
-        return try {
-            val fos = openFileOutput("gameList", MODE_PRIVATE)
-            val oos = ObjectOutputStream(fos)
-            oos.writeObject(mutableGameList)
-            oos.close()
-            true
-        } catch (e: IOException) {
-            e.printStackTrace()
-            false
-        }
-    }
-
-    // Import Xbox games and achievements in parallel
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun importXboxData(
-        gamertag: String,
-        onGamesResult: (List<Game>) -> Unit,
-        onAchievementsResult: (List<XboxPlayerAchievements.XboxAchievement>) -> Unit,
-        onError: (String) -> Unit // Explicitly specify the type for onError here
-    ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val xuid = getXuidFromGamertag(gamertag)
-            if (xuid != null) {
-                // Parallel fetch for games and achievements
-                val gamesDeferred = async { fetchXboxGames(xuid.toString()) }
-                val achievementsDeferred = async { fetchXboxAchievements(xuid.toString(), "YOUR_TITLE_ID") }
-
-                try {
-                    val games = gamesDeferred.await()
-                    val achievements = achievementsDeferred.await()
-                    withContext(Dispatchers.Main) {
-                        onGamesResult(games)
-                        onAchievementsResult(achievements)
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        onError("Error during import: ${e.message}") // Pass error message to onError
-                    }
-                }
-            } else {
-                withContext(Dispatchers.Main) {
-                    onError("Could not retrieve XUID. Check Gamertag.") // Pass error if XUID is null
-                }
-            }
-        }
-    }
-
-    // Fetch Xbox games by XUID
-    @RequiresApi(Build.VERSION_CODES.O)
-    private suspend fun fetchXboxGames(xuid: String): List<Game> = withContext(Dispatchers.IO) {
-        val gamesList = mutableListOf<Game>()
-        val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(xuid = xuid).execute()
-        if (response.isSuccessful) {
-            response.body()?.games?.forEach { game ->
-                gamesList.add(
-                    Game().apply {
-                        gameName = game.name
-                        xboxGameId = game.titleId.toLongOrNull() ?: 0L
-                        gamePlatform = "Xbox"
-                        coverURL = game.displayImage.replace("http", "https")
-                        dateTimeLastPlayed = Instant.parse(game.titleHistory?.lastTimePlayed)
-                            .atZone(ZoneId.systemDefault()).toLocalDateTime()
-                    }
-                )
-            }
-        }
-        gamesList
-    }
-
-    // Fetch Xbox achievements for a specific title by XUID
-    private suspend fun fetchXboxAchievements(
-        xuid: String,
-        titleId: String
-    ): List<XboxPlayerAchievements.XboxAchievement> = withContext(Dispatchers.IO) {
-        val achievementsList = mutableListOf<XboxPlayerAchievements.XboxAchievement>()
-        val response =
-            ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(xuid = xuid, titleId = titleId)
-                .execute()
-        if (response.isSuccessful) {
-            achievementsList.addAll(response.body()?.achievements ?: emptyList())
-        }
-        achievementsList
-    }
-
-
     @SuppressLint("SuspiciousIndentation")
     @RequiresApi(Build.VERSION_CODES.O)
     @Preview(showBackground = true)
     @Composable
     fun GameImportScreen() {
         var steamIdText by rememberSaveable { mutableStateOf("") }
-        var xboxGames by remember { mutableStateOf<List<Game>>(emptyList()) }
-        var xboxAchievements by remember { mutableStateOf<List<XboxPlayerAchievements.XboxAchievement>>(emptyList()) }
-        var errorMessage by remember { mutableStateOf("") }
         var steamId by rememberSaveable { mutableStateOf("") }
         var dialogFlag = rememberSaveable { mutableStateOf(false) }
         var xboxIdText by rememberSaveable { mutableStateOf("") }
@@ -561,17 +470,19 @@ class GameImportActivity: AppCompatActivity() {
             // Xbox Import Section (Below Steam Import)
             item {
                 Text(
-                    text = "Xbox Live Import",
-                    fontSize = 35.sp,
+                    text = "Xbox Live Import", fontSize = 35.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp)
                 )
             }
+
             item {
                 LazyRow(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 1.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 1.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
@@ -579,175 +490,206 @@ class GameImportActivity: AppCompatActivity() {
                         TextField(
                             value = xboxIdText,
                             onValueChange = { xboxIdText = it },
-                            label = { Text("Enter Gamertag") },
+                            label = { Text("Enter Gamertag") },  // Updated label to Gamertag
                             modifier = Modifier
                                 .size(width = 280.dp, height = 50.dp)
-                                .padding(horizontal = 8.dp)
+                                .padding(horizontal = 8.dp, vertical = 8.dp)
+                                .requiredHeight(height = 50.dp),
                         )
                     }
                     item {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .size(60.dp)
+                                .clip(RoundedCornerShape(mainButtonCut))
+                                .size(mainButtonSize)
                                 .background(Lime)
+                                .padding(horizontal = 2.dp)
+                                .padding(horizontal = 0.dp)
                                 .clickable {
-                                    if (xboxIdText.isNotBlank()) {
-                                        importXboxData(
-                                            gamertag = xboxIdText.trim(),
-                                            onGamesResult = { games -> xboxGames = games },
-                                            onAchievementsResult = { achievements -> xboxAchievements = achievements },
-                                            onError = { message -> errorMessage = message }
-                                        )
-                                    } else {
-                                        errorMessage = "Please enter a valid Gamertag."
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        try {
+                                            // Capture the entered Xbox Gamertag from the UI (make sure xboxIdText is a valid gamertag)
+                                            val gamertag = xboxIdText.trim()
+
+                                            if (gamertag.isNotEmpty()) {
+                                                // Use the gamertag to get the XUID
+                                                val xuid =
+                                                    getXuidFromGamertag(gamertag)?.xuid  // Pass the gamertag here
+
+                                                if (xuid != null) {
+                                                    // Fetch games for the given XUID
+                                                    val response =
+                                                        ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(
+                                                            xuid = xuid.toString()
+                                                        ).execute()
+                                                    if (response.isSuccessful) {
+                                                        val xboxGamesResponse = response.body()
+                                                        val gamesList: List<XboxOwnedGames.XboxGame> =
+                                                            xboxGamesResponse?.games
+                                                                ?: emptyList()
+
+                                                        for (game in gamesList) {
+                                                            val gameConvert = Game().apply {
+                                                                gameName = game.name
+                                                                gameId =
+                                                                    game.titleId.toLongOrNull()
+                                                                        ?: 0L
+                                                                gamePlatform = "Xbox"
+                                                                coverURL = game.displayImage
+                                                                //We needed a secure connection and it defaulted to http not https
+                                                                coverURL = coverURL.replace("http", "https")
+                                                                dateTimeLastPlayed =
+                                                                    Instant.parse(game.titleHistory?.lastTimePlayed)
+                                                                        .atZone(ZoneId.systemDefault())
+                                                                        .toLocalDateTime()
+                                                            }
+                                                            Game.gameList.add(gameConvert)
+                                                        }
+                                                        saveGameFile(Game.gameList)
+
+                                                        // Update UI on main thread
+                                                        withContext(Dispatchers.Main) {
+                                                            xboxIdText =
+                                                                "Done Importing Xbox games"
+                                                        }
+                                                    } else {
+                                                        withContext(Dispatchers.Main) {
+                                                            xboxIdText =
+                                                                "Error importing games."
+                                                        }
+                                                    }
+                                                } else {
+                                                    withContext(Dispatchers.Main) {
+                                                        xboxIdText =
+                                                            "Could not retrieve XUID. Check Gamertag."
+                                                    }
+                                                }
+                                            } else {
+                                                withContext(Dispatchers.Main) {
+                                                    xboxIdText =
+                                                        "Please enter a valid Gamertag."
+                                                }
+                                            }
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                            withContext(Dispatchers.Main) {
+                                                xboxIdText = "Error during import."
+                                            }
+                                        }
                                     }
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
+                                },contentAlignment = Alignment.Center) {
                             Image(
                                 painter = painterResource(id = R.drawable.download_file_icon),
-                                contentDescription = "Import Icon",
-                                modifier = Modifier.size(48.dp).padding(4.dp)
+                                contentDescription = "question mark",
+                                modifier = Modifier
+                                    .size(mainImageSize)
+                                    .padding(4.dp)
                             )
                         }
                     }
                 }
             }
-            if (errorMessage.isNotEmpty()) {
-                item {
-                    Text(
-                        text = errorMessage,
-                        color = Color.Red,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            }
-            // Xbox Games Section
             item {
-                Text("Xbox Games:", fontSize = 20.sp, modifier = Modifier.padding(8.dp))
-            }
-            items(xboxGames) { game ->
                 Text(
-                    text = "Game: ${game.gameName}, Last Played: ${game.dateTimeLastPlayed}",
-                    modifier = Modifier.padding(4.dp)
+                    text = "Manual Import", fontSize = 35.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
                 )
             }
-
-            // Xbox Achievements Section
             item {
-                Text("Xbox Achievements:", fontSize = 20.sp, modifier = Modifier.padding(8.dp))
-            }
-            items(xboxAchievements) { achievement ->
-                Text(
-                    text = "Achievement: ${achievement.name}, Unlocked: ${achievement.unlocked}",
-                    modifier = Modifier.padding(4.dp)
-                )
-            }
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    //Text inputs below
+                    LazyRow(modifier = Modifier.padding(vertical = 20.dp))
+                    {
+                        item {
+                            TextField(value = gameNameM, onValueChange = { gameNameM = it },
+                                label = { Text("Game Name") })
+                        }
+                    }
 
 
-                item {
-                    Text(
-                        text = "Manual Import", fontSize = 35.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
+                    LazyRow(modifier = Modifier.padding(vertical = 20.dp))
+                    {
+                        item {
+                            TextField(value = gameDescM, onValueChange = { gameDescM = it },
+                                label = { Text("Game Description") })
+                        }
+                    }
+
+                    LazyRow(modifier = Modifier.padding(vertical = 20.dp))
+                    {
+                        item {
+                            TextField(value = gameTimeM, onValueChange = { gameTimeM = it },
+                                label = { Text("In Game Time") })
+                        }
+                    }
+                    LazyRow(modifier = Modifier.padding(vertical = 20.dp))
+                    {
+                        item {
+                            TextField(value = gameDateM, onValueChange = { gameDateM = it },
+                                label = { Text("Release Date") })
+                        }
+                    }
+
+                    LazyRow(modifier = Modifier.padding(vertical = 20.dp))
+                    {
+                        item {
+                            TextField(value = gamePlatformM,
+                                onValueChange = { gamePlatformM = it },
+                                label = { Text("Game Platform") })
+                        }
+                    }
+                    //Buttons
+                    LazyRow(
+                        horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 16.dp)
-                    )
-                }
-                item {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(horizontal = 4.dp)
                     ) {
-
-                        //Text inputs below
-                        LazyRow(modifier = Modifier.padding(vertical = 20.dp))
-                        {
-                            item {
-                                TextField(value = gameNameM, onValueChange = { gameNameM = it },
-                                    label = { Text("Game Name") })
-                            }
-                        }
-
-
-                        LazyRow(modifier = Modifier.padding(vertical = 20.dp))
-                        {
-                            item {
-                                TextField(value = gameDescM, onValueChange = { gameDescM = it },
-                                    label = { Text("Game Description") })
-                            }
-                        }
-
-                        LazyRow(modifier = Modifier.padding(vertical = 20.dp))
-                        {
-                            item {
-                                TextField(value = gameTimeM, onValueChange = { gameTimeM = it },
-                                    label = { Text("In Game Time") })
-                            }
-                        }
-                        LazyRow(modifier = Modifier.padding(vertical = 20.dp))
-                        {
-                            item {
-                                TextField(value = gameDateM, onValueChange = { gameDateM = it },
-                                    label = { Text("Release Date") })
-                            }
-                        }
-
-                        LazyRow(modifier = Modifier.padding(vertical = 20.dp))
-                        {
-                            item {
-                                TextField(value = gamePlatformM,
-                                    onValueChange = { gamePlatformM = it },
-                                    label = { Text("Game Platform") })
-                            }
-                        }
-                        //Buttons
-                        LazyRow(
-                            horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 4.dp)
-                        ) {
-                            item {
-                                Button(
-                                    onClick = {
-                                        context.startActivity(
-                                            Intent(
-                                                context,
-                                                LibraryActivity::class.java
-                                            )
+                        item {
+                            Button(
+                                onClick = {
+                                    context.startActivity(
+                                        Intent(
+                                            context,
+                                            LibraryActivity::class.java
                                         )
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                                ) {
-                                    Text(text = "Back", color = Color.Black)
-                                }
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                            ) {
+                                Text(text = "Back", color = Color.Black)
                             }
-                            //On click we used the method I made to convert the string inputs to a gameDB object
-                            item {
-                                Button(
-                                    onClick = {
-                                        val gameInput = GameUtil.InputToGame(
-                                            gameNameM,
-                                            gameDescM,
-                                            gameTimeM,
-                                            gameDateM,
-                                            gamePlatformM
+                        }
+                        //On click we used the method I made to convert the string inputs to a gameDB object
+                        item {
+                            Button(
+                                onClick = {
+                                    val gameInput = GameUtil.InputToGame(
+                                        gameNameM,
+                                        gameDescM,
+                                        gameTimeM,
+                                        gameDateM,
+                                        gamePlatformM
+                                    )
+                                    //Now we add the game to the list
+                                    Game.gameList.add(gameInput)
+                                    saveGameFile(Game.gameList)
+                                    context.startActivity(
+                                        Intent(
+                                            context,
+                                            LibraryActivity::class.java
                                         )
-                                        //Now we add the game to the list
-                                        Game.gameList.add(gameInput)
-                                        saveGameFile(Game.gameList)
-                                        context.startActivity(
-                                            Intent(
-                                                context,
-                                                LibraryActivity::class.java
-                                            )
-                                        )
-                                    },
-                                    colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
-                                ) {
-                                    Text(text = "Confirm Inputs", color = Color.Black)
-                                }
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                            ) {
+                                Text(text = "Confirm Inputs", color = Color.Black)
                             }
                         }
                     }
@@ -755,3 +697,4 @@ class GameImportActivity: AppCompatActivity() {
             }
         }
     }
+}
