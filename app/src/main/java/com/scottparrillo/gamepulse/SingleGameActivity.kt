@@ -93,7 +93,7 @@ fun SingleGameScreen(){
                 modifier = Modifier
                     .padding(0.dp)
                     .fillMaxWidth()
-                    .background(Color.Black)){
+                    .background(Lime)){
                 Box(modifier = Modifier
                     .clip(RoundedCornerShape(mainButtonCut))
                     .size(mainButtonSize)

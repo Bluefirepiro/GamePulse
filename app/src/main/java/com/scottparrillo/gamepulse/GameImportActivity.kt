@@ -168,7 +168,7 @@ class GameImportActivity: AppCompatActivity() {
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color = CuriousBlue)
-                    .padding(horizontal = 0.dp)
+                    .padding(horizontal = 5.dp)
             ) {
                 item {
                     LazyRow(
