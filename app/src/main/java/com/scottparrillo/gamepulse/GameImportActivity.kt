@@ -55,6 +55,7 @@ import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.Lime
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
+import com.scottparrillo.gamepulse.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -291,7 +292,7 @@ class GameImportActivity: AppCompatActivity() {
                                         CoroutineScope(Dispatchers.IO).launch {
                                             //Start of first call
                                             val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames(
-                                                "4A7BFC2A3443A093EA9953FD5529C795",
+                                                Constants.STEAM_API_KEY,
                                                 true,
                                                 steamId.toLong(),
                                                 "json"
@@ -358,7 +359,7 @@ class GameImportActivity: AppCompatActivity() {
                                                 val callAch =
                                                     SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
                                                         game.gameId,
-                                                        "4A7BFC2A3443A093EA9953FD5529C795",
+                                                        Constants.STEAM_API_KEY,
                                                         steamId.toLong()
                                                     )
                                                 val achResponse = callAch.execute()
@@ -427,7 +428,7 @@ class GameImportActivity: AppCompatActivity() {
                                             for (game in Game.gameList) {
                                                 val callAch =
                                                     SteamRetrofit.apiSteam.apiS.getGameSchema(
-                                                        "4A7BFC2A3443A093EA9953FD5529C795",
+                                                        Constants.STEAM_API_KEY,
                                                         game.gameId
                                                     )
                                                 val achResponse = callAch.execute()
