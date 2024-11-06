@@ -38,6 +38,7 @@ import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.SteamPlayerAchiev
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
+import com.scottparrillo.gamepulse.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -61,8 +62,10 @@ class AchievementActivity : ComponentActivity() {
         var dialogFlag by remember { mutableStateOf(false) }
         var steamAchievements by remember { mutableStateOf<List<SteamPlayerAchievements.Playerstats.SteamAchievement>>(emptyList()) }
         var steamGames by remember { mutableStateOf<List<SteamOwnedGames.Response.SteamGames>>(emptyList()) }
-        var selectedGame by remember { mutableStateOf<SteamOwnedGames.Response.SteamGames?>(null) }
+        var selectedSteamGame by remember { mutableStateOf<SteamOwnedGames.Response.SteamGames?>(null) }
         var xboxAchievements by remember { mutableStateOf<List<XboxPlayerAchievements.XboxAchievement>>(emptyList()) }
+        var xboxGames by remember { mutableStateOf<List<XboxOwnedGames.XboxGame>>(emptyList()) }
+        var selectedXboxGame by remember { mutableStateOf<XboxOwnedGames.XboxGame?>(null) }
 
         LazyColumn(
             modifier = Modifier
@@ -153,7 +156,7 @@ class AchievementActivity : ComponentActivity() {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { selectedGame = game }
+                        .clickable { selectedSteamGame = game }
                         .padding(8.dp)
                 ) {
                     Text(text = "Game: ${game.name}", modifier = Modifier.padding(4.dp))
@@ -161,7 +164,7 @@ class AchievementActivity : ComponentActivity() {
             }
 
             // Fetch Steam Achievements for the selected game
-            selectedGame?.let { game ->
+            selectedSteamGame?.let { game ->
                 item {
                     Button(
                         onClick = {
@@ -208,8 +211,8 @@ class AchievementActivity : ComponentActivity() {
                     )
                     Button(
                         onClick = {
-                            importXboxAchievements(xboxIdText) { achievements ->
-                                xboxAchievements = achievements
+                            fetchXboxOwnedGames(xboxIdText) {
+                                xboxGames = it
                             }
                         },
                         modifier = Modifier.padding(horizontal = 2.dp),
@@ -220,7 +223,36 @@ class AchievementActivity : ComponentActivity() {
                 }
             }
 
-            // Display Xbox Achievements in list format
+            // List of Xbox Games
+            items(xboxGames) { game ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { selectedXboxGame = game }
+                        .padding(8.dp)
+                ) {
+                    Text(text = "Game: ${game.name}", modifier = Modifier.padding(4.dp))
+                }
+            }
+
+            // Fetch Xbox Achievements for the selected game
+            selectedXboxGame?.let { game ->
+                item {
+                    Button(
+                        onClick = {
+                            importXboxAchievements(xboxIdText, game.titleId) { achievements ->
+                                xboxAchievements = achievements
+                            }
+                        },
+                        modifier = Modifier.padding(horizontal = 2.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SpringGreen)
+                    ) {
+                        Text("Import Achievements for ${game.name}", color = Color.Black)
+                    }
+                }
+            }
+
+            // Display Xbox Achievements
             items(xboxAchievements) { achievement ->
                 Text(
                     text = "Achievement: ${achievement.name}, Unlocked: ${achievement.unlocked}",
@@ -230,6 +262,28 @@ class AchievementActivity : ComponentActivity() {
         }
     }
 
+    // Fetch Xbox Owned Games
+    private fun fetchXboxOwnedGames(
+        gamertag: String,
+        onResult: (List<XboxOwnedGames.XboxGame>) -> Unit
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val xuidResponse = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag).execute()
+            val xuid = xuidResponse.body()?.people?.firstOrNull()?.xuid ?: return@launch
+
+            val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(xuid = xuid.toString()).execute()
+            if (response.isSuccessful) {
+                val games = response.body()?.games ?: emptyList()
+                withContext(Dispatchers.Main) {
+                    onResult(games)
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    onResult(emptyList()) // Handle API failure
+                }
+            }
+        }
+    }
     // Fetch owned games from Steam
     private fun fetchSteamOwnedGames(
         steamId: String,
@@ -238,7 +292,7 @@ class AchievementActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = SteamRetrofit.apiSteam.apiS.getAllOwnedGames(
-                    key = "4A7BFC2A3443A093EA9953FD5529C795",
+                    key = Constants.STEAM_API_KEY,
                     include_appinfo = true,
                     steamid = steamId.toLong(),
                     format = "json"
@@ -272,7 +326,7 @@ class AchievementActivity : ComponentActivity() {
             try {
                 val response = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
                     appid = appId,
-                    key = "4A7BFC2A3443A093EA9953FD5529C795",
+                    key = Constants.STEAM_API_KEY,
                     steamid = steamId.toLong()
                 ).execute()
 
@@ -294,32 +348,25 @@ class AchievementActivity : ComponentActivity() {
         }
     }
 
-    // Import Xbox Achievements
+    // Import Xbox Achievements for a specific game
     private fun importXboxAchievements(
-        xboxId: String,
+        gamertag: String,
+        titleId: String,
         onResult: (List<XboxPlayerAchievements.XboxAchievement>) -> Unit
     ) {
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(
-                    apiKey = "139d737c-b4c4-46c4-b972-08e176ce102f",
-                    xuid = xboxId,
-                    titleId = "YOUR_TITLE_ID" // Change as needed
-                ).execute()
+            val xuidResponse = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag).execute()
+            val xuid = xuidResponse.body()?.people?.firstOrNull()?.xuid ?: return@launch
 
-                if (response.isSuccessful) {
-                    val achievements = response.body()?.achievements ?: emptyList()
-                    withContext(Dispatchers.Main) {
-                        onResult(achievements)
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        onResult(emptyList()) // Handle API failure
-                    }
-                }
-            } catch (e: Exception) {
+            val response = ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(xuid = xuid.toString(), titleId = titleId).execute()
+            if (response.isSuccessful) {
+                val achievements = response.body()?.achievements ?: emptyList()
                 withContext(Dispatchers.Main) {
-                    onResult(emptyList()) // Handle exception
+                    onResult(achievements)
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    onResult(emptyList()) // Handle API failure
                 }
             }
         }
