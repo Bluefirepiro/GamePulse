@@ -18,12 +18,11 @@ interface XboxWebAPIClient {
         @Header("Authorization") accessToken: String
     ): Call<ProfileResponse>
 
-    // Get achievements for a specific game and user
-    @GET("/xbox/users/{xuid}/achievements")
+    @GET("/api/v2/achievements/player/{xuid}/{titleId}")
     fun getUserAchievements(
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("xuid") xuid: String,
-        @Query("titleId") titleId: String
+        @Path("titleId") titleId: String
     ): Call<XboxPlayerAchievements>
 
     // Get details of a game using titleId
