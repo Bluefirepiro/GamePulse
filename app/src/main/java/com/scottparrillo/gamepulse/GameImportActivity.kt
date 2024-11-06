@@ -507,53 +507,57 @@ class GameImportActivity: AppCompatActivity() {
                                 .clickable {
                                     CoroutineScope(Dispatchers.IO).launch {
                                         try {
-                                            // Capture the entered Xbox Gamertag from the UI
                                             val gamertag = xboxIdText.trim()
 
                                             if (gamertag.isNotEmpty()) {
-                                                // Use the gamertag to get the XUID
                                                 val xuid = getXuidFromGamertag(gamertag)?.xuid
                                                 if (xuid != null) {
-                                                    // Fetch Xbox games for the given XUID
                                                     val gamesResponse =
                                                         ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(xuid = xuid.toString()).execute()
                                                     if (gamesResponse.isSuccessful) {
                                                         val xboxGames = gamesResponse.body()?.games ?: emptyList()
 
                                                         for (xboxGame in xboxGames) {
-                                                            // Convert Xbox game data to Game object
-                                                            val gameConvert = Game().apply {
-                                                                gameName = xboxGame.name
-                                                                gameId = xboxGame.titleId.toLongOrNull() ?: 0L
-                                                                gamePlatform = "Xbox"
-                                                                coverURL = xboxGame.displayImage.replace("http", "https")
-                                                                dateTimeLastPlayed = Instant.parse(xboxGame.titleHistory?.lastTimePlayed)
-                                                                    .atZone(ZoneId.systemDefault())
-                                                                    .toLocalDateTime()
+                                                            // Sanity check to avoid duplicates
+                                                            val isDuplicate = Game.gameList.any { existingGame ->
+                                                                existingGame.gameName == xboxGame.name && existingGame.gamePlatform == "Xbox"
                                                             }
 
-                                                            // Fetch achievements for each Xbox game
-                                                            val achievementsResponse =
-                                                                ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(
-                                                                    xuid = xuid.toString(),
-                                                                    titleId = xboxGame.titleId
-                                                                ).execute()
-
-                                                            if (achievementsResponse.isSuccessful) {
-                                                                val xboxAchievements = achievementsResponse.body()?.achievements ?: emptyList()
-
-                                                                for (achievement in xboxAchievements) {
-                                                                    val achievementData = Achievement().apply {
-                                                                        title = achievement.name
-                                                                        isEarned = achievement.unlocked
-                                                                        description = achievement.description
-                                                                        achImageUrl = achievement.mediaAssets.firstOrNull()?.url ?: ""
-                                                                    }
-                                                                    gameConvert.achievements.add(achievementData)
+                                                            if (!isDuplicate) {
+                                                                // Convert Xbox game data to Game object
+                                                                val gameConvert = Game().apply {
+                                                                    gameName = xboxGame.name
+                                                                    gameId = xboxGame.titleId.toLongOrNull() ?: 0L
+                                                                    gamePlatform = "Xbox"
+                                                                    coverURL = xboxGame.displayImage.replace("http", "https")
+                                                                    dateTimeLastPlayed = Instant.parse(xboxGame.titleHistory?.lastTimePlayed)
+                                                                        .atZone(ZoneId.systemDefault())
+                                                                        .toLocalDateTime()
                                                                 }
-                                                            }
 
-                                                            Game.gameList.add(gameConvert)
+                                                                // Fetch achievements for each Xbox game
+                                                                val achievementsResponse =
+                                                                    ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(
+                                                                        xuid = xuid.toString(),
+                                                                        titleId = xboxGame.titleId
+                                                                    ).execute()
+
+                                                                if (achievementsResponse.isSuccessful) {
+                                                                    val xboxAchievements = achievementsResponse.body()?.achievements ?: emptyList()
+
+                                                                    for (achievement in xboxAchievements) {
+                                                                        val achievementData = Achievement().apply {
+                                                                            title = achievement.name
+                                                                            isEarned = achievement.unlocked
+                                                                            description = achievement.description
+                                                                            achImageUrl = achievement.mediaAssets.firstOrNull()?.url ?: ""
+                                                                        }
+                                                                        gameConvert.achievements.add(achievementData)
+                                                                    }
+                                                                }
+
+                                                                Game.gameList.add(gameConvert)
+                                                            }
                                                         }
 
                                                         saveGameFile(Game.gameList)
