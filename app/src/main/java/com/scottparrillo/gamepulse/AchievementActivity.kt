@@ -38,6 +38,7 @@ import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.SteamPlayerAchiev
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
+import com.scottparrillo.gamepulse.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -291,7 +292,7 @@ class AchievementActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val response = SteamRetrofit.apiSteam.apiS.getAllOwnedGames(
-                    key = "4A7BFC2A3443A093EA9953FD5529C795",
+                    key = Constants.STEAM_API_KEY,
                     include_appinfo = true,
                     steamid = steamId.toLong(),
                     format = "json"
@@ -325,7 +326,7 @@ class AchievementActivity : ComponentActivity() {
             try {
                 val response = SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
                     appid = appId,
-                    key = "4A7BFC2A3443A093EA9953FD5529C795",
+                    key = Constants.STEAM_API_KEY,
                     steamid = steamId.toLong()
                 ).execute()
 

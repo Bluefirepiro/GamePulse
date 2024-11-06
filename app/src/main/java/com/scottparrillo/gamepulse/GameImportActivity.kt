@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -54,6 +55,7 @@ import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.Lime
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
+import com.scottparrillo.gamepulse.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -105,6 +107,10 @@ class GameImportActivity: AppCompatActivity() {
     @Preview(showBackground = true)
     @Composable
     fun GameImportScreen() {
+        val steamKey = Constants.STEAM_API_KEY
+        var currentProgress by rememberSaveable { mutableStateOf(0f) }
+        var threeStepCurrentProgress by rememberSaveable { mutableStateOf(0f) }
+        var loading by rememberSaveable { mutableStateOf(false) }
         var steamIdText by rememberSaveable { mutableStateOf("") }
         var steamId by rememberSaveable { mutableStateOf("") }
         var dialogFlag = rememberSaveable { mutableStateOf(false) }
@@ -148,9 +154,9 @@ class GameImportActivity: AppCompatActivity() {
                     text = {
                         Text(
                             text = "If steam is not importing correctly please make sure your " +
-                                "profile is set to public\n" +
-                                "If your steam ID is not showing go to your " +
-                                "steam profile edit profile and delete your custom URL"
+                                    "profile is set to public\n" +
+                                    "If your steam ID is not showing go to your " +
+                                    "steam profile edit profile and delete your custom URL"
                         )
                     },
                     dismissButton = {
@@ -271,8 +277,15 @@ class GameImportActivity: AppCompatActivity() {
                                 .size(mainButtonSize)
                                 .background(Lime)
                                 .clickable {
+
                                     steamId = steamIdText
                                     steamIdText = "Importing game do not click away"
+                                    loading = true
+                                    var totalGames = 0.0f
+                                    var iterOne = 0.0f
+                                    var iterTwo = 0.0f
+                                    var iterThree = 0.0f
+                                    var iterFour = 0.0f
 
                                     //Upon clicking import get the steam user id then load in the games
 
@@ -280,7 +293,7 @@ class GameImportActivity: AppCompatActivity() {
                                     CoroutineScope(Dispatchers.IO).launch {
                                         //Start of first call
                                         val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames(
-                                            "4A7BFC2A3443A093EA9953FD5529C795",
+                                            steamKey,
                                             true,
                                             steamId.toLong(),
                                             "json"
@@ -334,18 +347,20 @@ class GameImportActivity: AppCompatActivity() {
                                                         gameconvert.newlyAdded = true
                                                     }
                                                     Game.gameList.add(gameconvert)
+                                                    totalGames += 1.0f
                                                 } else {
                                                     //Do nothing
                                                 }
                                             }
                                             saveGameFile(Game.gameList)
+                                            threeStepCurrentProgress = 0.20f
                                         }
                                         //End of game import api call
                                         for (game in Game.gameList) {
                                             val callAch =
                                                 SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
                                                     game.gameId,
-                                                    "4A7BFC2A3443A093EA9953FD5529C795",
+                                                    steamKey,
                                                     steamId.toLong()
                                                 )
                                             val achResponse = callAch.execute()
@@ -377,7 +392,11 @@ class GameImportActivity: AppCompatActivity() {
                                                     }
                                                 }
                                             }
+                                            iterOne += 1.0f
+                                            currentProgress = (iterOne / totalGames)
+
                                         }
+                                        threeStepCurrentProgress = 0.40f
                                         //End of player achievement Call
                                         //Start of achievement percentage call
                                         for (game in Game.gameList) {
@@ -402,12 +421,15 @@ class GameImportActivity: AppCompatActivity() {
                                                     }
                                                 }
                                             }
+                                            iterTwo += 1.0f
+                                            currentProgress = (iterTwo / totalGames)
                                         }
+                                        threeStepCurrentProgress = 0.60f
                                         saveGameFile(Game.gameList)
                                         for (game in Game.gameList) {
                                             val callAch =
                                                 SteamRetrofit.apiSteam.apiS.getGameSchema(
-                                                    "4A7BFC2A3443A093EA9953FD5529C795",
+                                                    steamKey,
                                                     game.gameId
                                                 )
                                             val achResponse = callAch.execute()
@@ -432,7 +454,10 @@ class GameImportActivity: AppCompatActivity() {
                                                     }
                                                 }
                                             }
+                                            iterThree += 1.0f
+                                            currentProgress = (iterThree / totalGames)
                                         }
+                                        threeStepCurrentProgress = 0.80f
                                         //Determine which games have been completed
                                         if (Game.gameList.isNotEmpty()) {
                                             for (game in Game.gameList) {
@@ -447,10 +472,15 @@ class GameImportActivity: AppCompatActivity() {
                                                         game.allAchiev = true
                                                     }
                                                 }
+                                                iterFour += 1.0f
+                                                currentProgress = (iterFour / totalGames)
+
                                             }
                                         }
                                         saveGameFile(Game.gameList)
                                         steamIdText = "Done Importing"
+                                        threeStepCurrentProgress = 1.00f
+                                        loading = false
                                     }
                                 },
                             contentAlignment = Alignment.Center
@@ -600,6 +630,31 @@ class GameImportActivity: AppCompatActivity() {
                             )
                         }
                     }
+                }
+            }
+            item{
+                if(loading){
+                    Column (modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally){
+                        Text(text="Loading", fontSize = 25.sp )
+                        LinearProgressIndicator(progress = currentProgress,
+                            modifier = Modifier
+                                .size(width = 400.dp,height = 20.dp),
+                            trackColor = Color.Black,
+                            color = Lime,
+                        ) }
+                }
+                if(loading){
+                    Column (modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally){
+                        LinearProgressIndicator(progress = threeStepCurrentProgress,
+                            modifier = Modifier
+                                .size(width = 400.dp,height = 20.dp),
+                            trackColor = Color.Black,
+                            color = Lime,
+                        ) }
                 }
             }
             item {
