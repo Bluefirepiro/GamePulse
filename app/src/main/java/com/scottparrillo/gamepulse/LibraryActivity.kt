@@ -100,7 +100,7 @@ class LibraryActivity : AppCompatActivity() {
     give score based on achievements possibly based on rarity
     have a score based on all consoles and platforms
     grand/meta/omni score based on pc and xbox
-    Scroll till lock on single game detail screen
+    Scroll till lock on single game detail screen (Done)
      */
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalFoundationApi::class)
@@ -237,13 +237,13 @@ class LibraryActivity : AppCompatActivity() {
                 .fillMaxSize()
                 //.background(color = CuriousBlue)
                 .background(color = Color.Black)
-                .padding(0.dp)
+                .padding(horizontal = 10.dp, vertical = 5.dp)
         ) {
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .padding(vertical = 0.dp, horizontal = 1.dp)
+                    .padding(vertical = 0.dp, horizontal = 0.dp)
                     .fillMaxWidth()
                     .size(width = 100.dp, height = 100.dp)
                     .background(color = Color.Black),
@@ -305,14 +305,14 @@ class LibraryActivity : AppCompatActivity() {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 1.dp, vertical = 4.dp)
+                    .padding(horizontal = 0.dp, vertical = 4.dp)
                     .background(color = Color.Black)) {
                 TextField(
                     value = searchText, onValueChange = { searchText = it },
                     label = { Text("Search Game") },
                     modifier = Modifier
-                        .size(width = 291.dp, height = 50.dp)
-                        .requiredSize(width = 291.dp, height = 50.dp)
+                        .size(width = 280.dp, height = 50.dp)
+                        //.requiredSize(width = 291.dp, height = 50.dp)
                         .onKeyEvent {
                             if (it.key == Key.Enter) {
                                 SearchList()
@@ -326,6 +326,7 @@ class LibraryActivity : AppCompatActivity() {
                 )
                 Box(modifier = Modifier
                     .clip(RoundedCornerShape(mainButtonCut))
+                    .requiredSize(mainButtonSize)
                     .size(mainButtonSize)
                     .background(Lime)
                     .clickable {
@@ -343,7 +344,7 @@ class LibraryActivity : AppCompatActivity() {
             }
             LazyRow(
                 modifier = Modifier
-                    .padding(vertical = 0.dp, horizontal = 1.dp)
+                    .padding(vertical = 0.dp, horizontal = 0.dp)
                     .background(color = Color.Black)
             ) {
                 item {
@@ -446,7 +447,7 @@ class LibraryActivity : AppCompatActivity() {
 
             Row(
                 modifier = Modifier
-                    .padding(vertical = 8.dp, horizontal = 1.dp)
+                    .padding(vertical = 8.dp, horizontal = 0.dp)
                     .fillMaxWidth()
                     .background(color = Color.Black),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -517,13 +518,11 @@ class LibraryActivity : AppCompatActivity() {
 
                     })
                 }
-
-
-
             }
-
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 140.dp),
-                modifier = Modifier.background(CuriousBlue)) {
+                modifier = Modifier
+                    .background(CuriousBlue)
+                    .padding(horizontal = 0.dp)) {
                 items(gameList) { game ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -579,5 +578,7 @@ class LibraryActivity : AppCompatActivity() {
                 }
             }
         }
+        //End of main column
+
     }
 }
