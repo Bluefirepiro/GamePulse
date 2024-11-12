@@ -109,6 +109,9 @@ class GameImportActivity: AppCompatActivity() {
     fun GameImportScreen() {
         val steamKey = Constants.STEAM_API_KEY
         var currentProgress by rememberSaveable { mutableStateOf(0f) }
+        var apiTick by rememberSaveable { mutableStateOf(0f) }
+        var gameSize by rememberSaveable { mutableStateOf(0f) }
+        var gameTrack by rememberSaveable { mutableStateOf(0) }
         var threeStepCurrentProgress by rememberSaveable { mutableStateOf(0f) }
         var loading by rememberSaveable { mutableStateOf(false) }
         var steamIdText by rememberSaveable { mutableStateOf("") }
@@ -352,8 +355,10 @@ class GameImportActivity: AppCompatActivity() {
                                                     //Do nothing
                                                 }
                                             }
+                                            gameSize = totalGames
                                             saveGameFile(Game.gameList)
                                             threeStepCurrentProgress = 0.20f
+                                            //apiTick += 1
                                         }
                                         //End of game import api call
                                         for (game in Game.gameList) {
@@ -393,9 +398,11 @@ class GameImportActivity: AppCompatActivity() {
                                                 }
                                             }
                                             iterOne += 1.0f
+                                            gameTrack = iterOne.toInt()
                                             currentProgress = (iterOne / totalGames)
 
                                         }
+                                        apiTick += 1
                                         threeStepCurrentProgress = 0.40f
                                         //End of player achievement Call
                                         //Start of achievement percentage call
@@ -422,8 +429,10 @@ class GameImportActivity: AppCompatActivity() {
                                                 }
                                             }
                                             iterTwo += 1.0f
+                                            gameTrack = iterTwo.toInt()
                                             currentProgress = (iterTwo / totalGames)
                                         }
+                                        apiTick += 1
                                         threeStepCurrentProgress = 0.60f
                                         saveGameFile(Game.gameList)
                                         for (game in Game.gameList) {
@@ -455,8 +464,10 @@ class GameImportActivity: AppCompatActivity() {
                                                 }
                                             }
                                             iterThree += 1.0f
+                                            gameTrack = iterThree.toInt()
                                             currentProgress = (iterThree / totalGames)
                                         }
+                                        apiTick += 1
                                         threeStepCurrentProgress = 0.80f
                                         //Determine which games have been completed
                                         if (Game.gameList.isNotEmpty()) {
@@ -473,10 +484,12 @@ class GameImportActivity: AppCompatActivity() {
                                                     }
                                                 }
                                                 iterFour += 1.0f
+                                                gameTrack = iterFour.toInt()
                                                 currentProgress = (iterFour / totalGames)
 
                                             }
                                         }
+                                        apiTick += 1
                                         saveGameFile(Game.gameList)
                                         steamIdText = "Done Importing"
                                         threeStepCurrentProgress = 1.00f
@@ -638,7 +651,7 @@ class GameImportActivity: AppCompatActivity() {
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally){
-                        Text(text="Loading", fontSize = 25.sp )
+                        Text(text="Loading $apiTick / 4", fontSize = 25.sp )
                         LinearProgressIndicator(progress = currentProgress,
                             modifier = Modifier
                                 .size(width = 400.dp,height = 20.dp),
@@ -649,6 +662,7 @@ class GameImportActivity: AppCompatActivity() {
                 if(loading){
                     Column (modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally){
+                        Text(text= "Game $gameTrack / $gameSize")
                         LinearProgressIndicator(progress = threeStepCurrentProgress,
                             modifier = Modifier
                                 .size(width = 400.dp,height = 20.dp),
