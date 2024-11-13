@@ -107,6 +107,7 @@ class GameImportActivity: AppCompatActivity() {
     @Preview(showBackground = true)
     @Composable
     fun GameImportScreen() {
+        var xboxLoad by rememberSaveable { mutableStateOf(false) }
         val steamKey = Constants.STEAM_API_KEY
         var currentProgress by rememberSaveable { mutableStateOf(0f) }
         var apiTick by rememberSaveable { mutableStateOf(0f) }
@@ -358,7 +359,7 @@ class GameImportActivity: AppCompatActivity() {
                                             gameSize = totalGames
                                             saveGameFile(Game.gameList)
                                             threeStepCurrentProgress = 0.20f
-                                            //apiTick += 1
+                                            apiTick += 1
                                         }
                                         //End of game import api call
                                         for (game in Game.gameList) {
@@ -489,12 +490,17 @@ class GameImportActivity: AppCompatActivity() {
 
                                             }
                                         }
-                                        apiTick += 1
+
                                         saveGameFile(Game.gameList)
                                         steamIdText = "Done Importing"
                                         threeStepCurrentProgress = 1.00f
                                         loading = false
                                     }
+                                    //Reset mem
+                                    currentProgress = 0F
+                                     apiTick = 0F
+                                     gameSize = 0F
+                                    gameTrack = 0
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -559,8 +565,10 @@ class GameImportActivity: AppCompatActivity() {
                                                         ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(xuid = xuid.toString()).execute()
                                                     if (gamesResponse.isSuccessful) {
                                                         val xboxGames = gamesResponse.body()?.games ?: emptyList()
-
+                                                        xboxLoad = true
+                                                        loading = true
                                                         for (xboxGame in xboxGames) {
+                                                            gameSize = xboxGames.size.toFloat()
                                                             // Sanity check to avoid duplicates
                                                             val isDuplicate = Game.gameList.any { existingGame ->
                                                                 existingGame.gameName == xboxGame.name && existingGame.gamePlatform == "Xbox"
@@ -601,8 +609,15 @@ class GameImportActivity: AppCompatActivity() {
 
                                                                 Game.gameList.add(gameConvert)
                                                             }
+                                                            gameTrack += 1
+                                                            currentProgress = gameTrack.toFloat() / gameSize
                                                         }
-
+                                                        loading = false
+                                                        //Reset mem
+                                                        currentProgress = 0F
+                                                        apiTick = 0F
+                                                        gameSize = 0F
+                                                        gameTrack = 0
                                                         saveGameFile(Game.gameList)
 
                                                         // Update UI on main thread
@@ -646,13 +661,13 @@ class GameImportActivity: AppCompatActivity() {
                 }
             }
             item{
-                if(loading){
+                if(loading && !xboxLoad){
                     Column (modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally){
                         Text(text="Loading $apiTick / 4", fontSize = 25.sp )
-                        LinearProgressIndicator(progress = currentProgress,
+                        LinearProgressIndicator(progress = threeStepCurrentProgress,
                             modifier = Modifier
                                 .size(width = 400.dp,height = 20.dp),
                             trackColor = Color.Black,
@@ -663,7 +678,7 @@ class GameImportActivity: AppCompatActivity() {
                     Column (modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally){
                         Text(text= "Game $gameTrack / $gameSize")
-                        LinearProgressIndicator(progress = threeStepCurrentProgress,
+                        LinearProgressIndicator(progress = currentProgress,
                             modifier = Modifier
                                 .size(width = 400.dp,height = 20.dp),
                             trackColor = Color.Black,
