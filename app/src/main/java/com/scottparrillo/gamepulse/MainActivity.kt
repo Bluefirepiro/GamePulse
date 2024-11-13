@@ -1,6 +1,7 @@
 package com.scottparrillo.gamepulse
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,6 +13,10 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -32,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -54,11 +60,12 @@ import java.util.concurrent.TimeUnit
 class MainActivity : ComponentActivity() {
 
     private lateinit var pickImageLauncher: ActivityResultLauncher<String>
+    //private lateinit var cropImageLauncher: ActivityResultLauncher<Intent>
+    private lateinit var requestStoragePermissionLauncher: ActivityResultLauncher<String>
     private lateinit var requestNotificationPermissionLauncher: ActivityResultLauncher<String>
 
     private val recentlyPlayedGamesList = mutableStateListOf<Game>()
     private val recentlyAchievedAchievementsList = mutableStateListOf<Achievement>()
-
 
     private var profileImageUri by mutableStateOf<Uri?>(null)
 
@@ -74,8 +81,18 @@ class MainActivity : ComponentActivity() {
             uri?.let { updateProfileImage(it) }
         }
 
+        // Initialize the storage permission request launcher
+        requestStoragePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                launchImagePicker()
+            } else {
+                Toast.makeText(this, "Storage permission is required to select profile image", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
         // Initialize the notification permission request launcher
-        requestNotificationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+        requestNotificationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 sendNotificationIfAllowed()
             } else {
@@ -99,14 +116,46 @@ class MainActivity : ComponentActivity() {
                     onNavigateToLibrary = { startActivity(Intent(this, LibraryActivity::class.java)) },
                     onNavigateToFriends = { startActivity(Intent(this, FriendsActivity::class.java)) },
                     onOpenSettings = { openDeviceSettings() },
-                    onChangeProfilePicture = { pickImageLauncher.launch("image/*") }
+                    onChangeProfilePicture = { requestStoragePermission() }
                 )
             }
         }
     }
+
     override fun onResume() {
         super.onResume()
         loadPersistedData() // Reload data when activity resumes
+    }
+
+    // Request storage permission if necessary, or launch the image picker if permission is already granted
+    private fun requestStoragePermission() {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                // For Android 13+, use the Photo Picker API, which does not require permission
+                pickImageLauncher.launch("image/*")
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
+                // For Android 6 to 12, use READ_EXTERNAL_STORAGE permission
+                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestStoragePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                } else {
+                    pickImageLauncher.launch("image/*")
+                }
+            }
+            else -> {
+                // For SDK < M, no runtime permission needed
+                pickImageLauncher.launch("image/*")
+            }
+        }
+    }
+
+    private fun launchImagePicker() {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Intent(MediaStore.ACTION_PICK_IMAGES) // Android 13+ Photo Picker API
+        } else {
+            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        }
+        pickImageLauncher.launch(intent.toString())
     }
 
     private fun updateProfileImage(uri: Uri) {
@@ -156,6 +205,7 @@ class MainActivity : ComponentActivity() {
             recentlyAchievedAchievementsList.addAll(achievements)
         }
     }
+
 
     private fun openDeviceSettings() {
         val intent = Intent(android.provider.Settings.ACTION_SETTINGS)
@@ -320,24 +370,32 @@ fun HomeScreen(
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ProfileImage(profileImageUri: Uri?, onChangeProfilePicture: () -> Unit) {
-    if (profileImageUri != null) {
-        GlideImage(
-            model = profileImageUri,
-            contentDescription = "Profile Picture",
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .clickable { onChangeProfilePicture() }
-        )
-    } else {
-        Image(
-            painter = painterResource(id = R.drawable.profile_picture_placeholder),
-            contentDescription = "Default Profile Picture",
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .clickable { onChangeProfilePicture() }
-        )
+    Box(
+        modifier = Modifier
+            .size(60.dp) // Adjust the size as needed
+            .clip(CircleShape)
+            .background(Color.Gray) // Add a background color for visibility or use Color.Transparent
+            .clickable { onChangeProfilePicture() }
+    ) {
+        if (profileImageUri != null) {
+            GlideImage(
+                model = profileImageUri,
+                contentDescription = "Profile Picture",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop // This ensures the image is cropped to fit within the circle
+            )
+        } else {
+            Image(
+                painter = painterResource(id = R.drawable.profile_picture_placeholder),
+                contentDescription = "Default Profile Picture",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        }
     }
 }
 
