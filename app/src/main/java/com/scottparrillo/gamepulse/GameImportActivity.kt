@@ -49,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scottparrillo.gamepulse.api.ApiClient
+import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.PreferencesUtil
 import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.XuidResponse
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
@@ -450,6 +451,11 @@ class GameImportActivity: AppCompatActivity() {
                                             }
                                         }
                                         saveGameFile(Game.gameList)
+                                        PreferencesUtil.saveDataToPreferences(
+                                            context = this@GameImportActivity,
+                                            games = Game.gameList,
+                                            achievements = Game.gameList.flatMap { it.achievements }
+                                        )
                                         steamIdText = "Done Importing"
                                     }
                                 },
@@ -518,13 +524,11 @@ class GameImportActivity: AppCompatActivity() {
                                                         val xboxGames = gamesResponse.body()?.games ?: emptyList()
 
                                                         for (xboxGame in xboxGames) {
-                                                            // Sanity check to avoid duplicates
                                                             val isDuplicate = Game.gameList.any { existingGame ->
                                                                 existingGame.gameName == xboxGame.name && existingGame.gamePlatform == "Xbox"
                                                             }
 
                                                             if (!isDuplicate) {
-                                                                // Convert Xbox game data to Game object
                                                                 val gameConvert = Game().apply {
                                                                     gameName = xboxGame.name
                                                                     gameId = xboxGame.titleId.toLongOrNull() ?: 0L
@@ -535,12 +539,10 @@ class GameImportActivity: AppCompatActivity() {
                                                                         .toLocalDateTime()
                                                                 }
 
-                                                                // Fetch achievements for each Xbox game
-                                                                val achievementsResponse =
-                                                                    ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(
-                                                                        xuid = xuid.toString(),
-                                                                        titleId = xboxGame.titleId
-                                                                    ).execute()
+                                                                val achievementsResponse = ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(
+                                                                    xuid = xuid.toString(),
+                                                                    titleId = xboxGame.titleId
+                                                                ).execute()
 
                                                                 if (achievementsResponse.isSuccessful) {
                                                                     val xboxAchievements = achievementsResponse.body()?.achievements ?: emptyList()
@@ -560,9 +562,14 @@ class GameImportActivity: AppCompatActivity() {
                                                             }
                                                         }
 
-                                                        saveGameFile(Game.gameList)
+                                                        // Save data to SharedPreferences after importing Xbox games
+                                                        PreferencesUtil.saveDataToPreferences(
+                                                            context = this@GameImportActivity,
+                                                            games = Game.gameList,
+                                                            achievements = Game.gameList.flatMap { it.achievements }
+                                                        )
 
-                                                        // Update UI on main thread
+                                                        saveGameFile(Game.gameList)
                                                         withContext(Dispatchers.Main) {
                                                             xboxIdText = "Done Importing Xbox games and achievements"
                                                         }
