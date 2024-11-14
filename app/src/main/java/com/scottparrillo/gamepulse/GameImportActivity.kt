@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,6 +56,7 @@ import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import com.scottparrillo.gamepulse.ui.theme.Lime
 import com.scottparrillo.gamepulse.ui.theme.SpringGreen
+import com.scottparrillo.gamepulse.util.Constants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -106,6 +108,14 @@ class GameImportActivity: AppCompatActivity() {
     @Preview(showBackground = true)
     @Composable
     fun GameImportScreen() {
+        var xboxLoad by rememberSaveable { mutableStateOf(false) }
+        val steamKey = Constants.STEAM_API_KEY
+        var currentProgress by rememberSaveable { mutableStateOf(0f) }
+        var apiTick by rememberSaveable { mutableStateOf(0f) }
+        var gameSize by rememberSaveable { mutableStateOf(0f) }
+        var gameTrack by rememberSaveable { mutableStateOf(0) }
+        var threeStepCurrentProgress by rememberSaveable { mutableStateOf(0f) }
+        var loading by rememberSaveable { mutableStateOf(false) }
         var steamIdText by rememberSaveable { mutableStateOf("") }
         var steamId by rememberSaveable { mutableStateOf("") }
         var dialogFlag = rememberSaveable { mutableStateOf(false) }
@@ -149,9 +159,9 @@ class GameImportActivity: AppCompatActivity() {
                     text = {
                         Text(
                             text = "If steam is not importing correctly please make sure your " +
-                                "profile is set to public\n" +
-                                "If your steam ID is not showing go to your " +
-                                "steam profile edit profile and delete your custom URL"
+                                    "profile is set to public\n" +
+                                    "If your steam ID is not showing go to your " +
+                                    "steam profile edit profile and delete your custom URL"
                         )
                     },
                     dismissButton = {
@@ -272,8 +282,15 @@ class GameImportActivity: AppCompatActivity() {
                                 .size(mainButtonSize)
                                 .background(Lime)
                                 .clickable {
+
                                     steamId = steamIdText
                                     steamIdText = "Importing game do not click away"
+                                    loading = true
+                                    var totalGames = 0.0f
+                                    var iterOne = 0.0f
+                                    var iterTwo = 0.0f
+                                    var iterThree = 0.0f
+                                    var iterFour = 0.0f
 
                                     //Upon clicking import get the steam user id then load in the games
 
@@ -281,7 +298,7 @@ class GameImportActivity: AppCompatActivity() {
                                     CoroutineScope(Dispatchers.IO).launch {
                                         //Start of first call
                                         val call = SteamRetrofit.apiSteam.apiS.getAllOwnedGames(
-                                            "4A7BFC2A3443A093EA9953FD5529C795",
+                                            steamKey,
                                             true,
                                             steamId.toLong(),
                                             "json"
@@ -335,18 +352,22 @@ class GameImportActivity: AppCompatActivity() {
                                                         gameconvert.newlyAdded = true
                                                     }
                                                     Game.gameList.add(gameconvert)
+                                                    totalGames += 1.0f
                                                 } else {
                                                     //Do nothing
                                                 }
                                             }
+                                            gameSize = totalGames
                                             saveGameFile(Game.gameList)
+                                            threeStepCurrentProgress = 0.20f
+                                            apiTick += 1
                                         }
                                         //End of game import api call
                                         for (game in Game.gameList) {
                                             val callAch =
                                                 SteamRetrofit.apiSteam.apiS.getAllGameAchievements(
                                                     game.gameId,
-                                                    "4A7BFC2A3443A093EA9953FD5529C795",
+                                                    steamKey,
                                                     steamId.toLong()
                                                 )
                                             val achResponse = callAch.execute()
@@ -378,7 +399,13 @@ class GameImportActivity: AppCompatActivity() {
                                                     }
                                                 }
                                             }
+                                            iterOne += 1.0f
+                                            gameTrack = iterOne.toInt()
+                                            currentProgress = (iterOne / totalGames)
+
                                         }
+                                        apiTick += 1
+                                        threeStepCurrentProgress = 0.40f
                                         //End of player achievement Call
                                         //Start of achievement percentage call
                                         for (game in Game.gameList) {
@@ -403,12 +430,17 @@ class GameImportActivity: AppCompatActivity() {
                                                     }
                                                 }
                                             }
+                                            iterTwo += 1.0f
+                                            gameTrack = iterTwo.toInt()
+                                            currentProgress = (iterTwo / totalGames)
                                         }
+                                        apiTick += 1
+                                        threeStepCurrentProgress = 0.60f
                                         saveGameFile(Game.gameList)
                                         for (game in Game.gameList) {
                                             val callAch =
                                                 SteamRetrofit.apiSteam.apiS.getGameSchema(
-                                                    "4A7BFC2A3443A093EA9953FD5529C795",
+                                                    steamKey,
                                                     game.gameId
                                                 )
                                             val achResponse = callAch.execute()
@@ -433,7 +465,12 @@ class GameImportActivity: AppCompatActivity() {
                                                     }
                                                 }
                                             }
+                                            iterThree += 1.0f
+                                            gameTrack = iterThree.toInt()
+                                            currentProgress = (iterThree / totalGames)
                                         }
+                                        apiTick += 1
+                                        threeStepCurrentProgress = 0.80f
                                         //Determine which games have been completed
                                         if (Game.gameList.isNotEmpty()) {
                                             for (game in Game.gameList) {
@@ -448,8 +485,13 @@ class GameImportActivity: AppCompatActivity() {
                                                         game.allAchiev = true
                                                     }
                                                 }
+                                                iterFour += 1.0f
+                                                gameTrack = iterFour.toInt()
+                                                currentProgress = (iterFour / totalGames)
+
                                             }
                                         }
+
                                         saveGameFile(Game.gameList)
                                         PreferencesUtil.saveDataToPreferences(
                                             context = this@GameImportActivity,
@@ -457,7 +499,14 @@ class GameImportActivity: AppCompatActivity() {
                                             achievements = Game.gameList.flatMap { it.achievements }
                                         )
                                         steamIdText = "Done Importing"
+                                        threeStepCurrentProgress = 1.00f
+                                        loading = false
                                     }
+                                    //Reset mem
+                                    currentProgress = 0F
+                                     apiTick = 0F
+                                     gameSize = 0F
+                                    gameTrack = 0
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -522,8 +571,13 @@ class GameImportActivity: AppCompatActivity() {
                                                         ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(xuid = xuid.toString()).execute()
                                                     if (gamesResponse.isSuccessful) {
                                                         val xboxGames = gamesResponse.body()?.games ?: emptyList()
-
+                                                        xboxLoad = true
+                                                        loading = true
                                                         for (xboxGame in xboxGames) {
+
+                                                            gameSize = xboxGames.size.toFloat()
+                                                            // Sanity check to avoid duplicates
+
                                                             val isDuplicate = Game.gameList.any { existingGame ->
                                                                 existingGame.gameName == xboxGame.name && existingGame.gamePlatform == "Xbox"
                                                             }
@@ -560,7 +614,10 @@ class GameImportActivity: AppCompatActivity() {
 
                                                                 Game.gameList.add(gameConvert)
                                                             }
+                                                            gameTrack += 1
+                                                            currentProgress = gameTrack.toFloat() / gameSize
                                                         }
+
 
                                                         // Save data to SharedPreferences after importing Xbox games
                                                         PreferencesUtil.saveDataToPreferences(
@@ -568,6 +625,15 @@ class GameImportActivity: AppCompatActivity() {
                                                             games = Game.gameList,
                                                             achievements = Game.gameList.flatMap { it.achievements }
                                                         )
+
+                                                        loading = false
+                                                        //Reset mem
+                                                        currentProgress = 0F
+                                                        apiTick = 0F
+                                                        gameSize = 0F
+                                                        gameTrack = 0
+                                                        
+
 
                                                         saveGameFile(Game.gameList)
                                                         withContext(Dispatchers.Main) {
@@ -607,6 +673,32 @@ class GameImportActivity: AppCompatActivity() {
                             )
                         }
                     }
+                }
+            }
+            item{
+                if(loading && !xboxLoad){
+                    Column (modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally){
+                        Text(text="Loading $apiTick / 4", fontSize = 25.sp )
+                        LinearProgressIndicator(progress = threeStepCurrentProgress,
+                            modifier = Modifier
+                                .size(width = 400.dp,height = 20.dp),
+                            trackColor = Color.Black,
+                            color = Lime,
+                        ) }
+                }
+                if(loading){
+                    Column (modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally){
+                        Text(text= "Game $gameTrack / $gameSize")
+                        LinearProgressIndicator(progress = currentProgress,
+                            modifier = Modifier
+                                .size(width = 400.dp,height = 20.dp),
+                            trackColor = Color.Black,
+                            color = Lime,
+                        ) }
                 }
             }
             item {
