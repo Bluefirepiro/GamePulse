@@ -3,20 +3,20 @@ package com.scottparrillo.gamepulse
 import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.XuidResponse
 import com.scottparrillo.gamepulse.util.Constants.OPENXBL_API_KEY
 import retrofit2.Call
-import retrofit2.Response
+//import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
-import retrofit2.http.Query
+
 
 interface XboxWebAPIClient {
 
 
     // Get Xbox Profile Information
-    @GET("profile")
+    /*@GET("profile")
     fun getProfile(
         @Header("Authorization") accessToken: String
-    ): Call<ProfileResponse>
+    ): Call<ProfileResponse>*/
 
     @GET("/api/v2/achievements/player/{xuid}/{titleId}")
     fun getUserAchievements(
@@ -26,40 +26,40 @@ interface XboxWebAPIClient {
     ): Call<XboxPlayerAchievements>
 
     // Get details of a game using titleId
-    @GET("/xbox/titles/{titleId}")
+    /*@GET("/xbox/titles/{titleId}")
     fun getGameDetails(
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("titleId") titleId: String
-    ): Call<XboxOwnedGames>
+    ): Call<XboxOwnedGames>*/
 
     // Get recently played games by a user
-    @GET("/xbox/users/{xuid}/recentlyplayed")
+    /*@GET("/xbox/users/{xuid}/recentlyplayed")
     suspend fun getRecentlyPlayedGames(
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("xuid") xuid: String
-    ): Response<XboxRecentlyPlayedGames>
+    ): Response<XboxRecentlyPlayedGames>*/
 
     // Get recent achievements for a user
-    @GET("achievements/recent/{xuid}")
+   /* @GET("achievements/recent/{xuid}")
     suspend fun getRecentAchievements(
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("xuid") xuid: String
-    ): Response<List<AchievementResponse>>
+    ): Response<List<AchievementResponse>>*/
 
     // Get achievements for a specific game
-    @GET("achievements/{xuid}/{titleId}")
+    /*@GET("achievements/{xuid}/{titleId}")
     fun getAchievements(
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("xuid") xuid: String,
         @Path("titleId") titleId: String
-    ): Call<AchievementResponse>
+    ): Call<AchievementResponse>*/
 
     // Get recently played games (as an alternative to /xbox/users/{xuid}/recentlyplayed)
-    @GET("recentlyplayed/{xuid}")
+   /* @GET("recentlyplayed/{xuid}")
     fun getRecentlyPlayedGamesAlternative(
         @Header("X-Authorization") apiKey: String = OPENXBL_API_KEY,
         @Path("xuid") xuid: String
-    ): Call<List<GameDetailsResponse>>
+    ): Call<List<GameDetailsResponse>>*/
 
     @GET("player/titleHistory/{xuid}")
     fun getAllGamesByID(
