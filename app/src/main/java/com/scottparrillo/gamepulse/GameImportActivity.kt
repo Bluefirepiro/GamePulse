@@ -32,6 +32,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -78,7 +80,7 @@ class GameImportActivity: AppCompatActivity() {
         }
     }
 
-    fun getXuidFromGamertag(gamertag: String): XuidResponse.Person? {
+    private fun getXuidFromGamertag(gamertag: String): XuidResponse.Person? {
         try {
             val call = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag)
             val response = call.execute()
@@ -110,18 +112,16 @@ class GameImportActivity: AppCompatActivity() {
     fun GameImportScreen() {
         var xboxLoad by rememberSaveable { mutableStateOf(false) }
         val steamKey = Constants.STEAM_API_KEY
-        var currentProgress by rememberSaveable { mutableStateOf(0f) }
-        var apiTick by rememberSaveable { mutableStateOf(0f) }
-        var gameSize by rememberSaveable { mutableStateOf(0f) }
-        var gameTrack by rememberSaveable { mutableStateOf(0) }
-        var threeStepCurrentProgress by rememberSaveable { mutableStateOf(0f) }
+        var currentProgress by rememberSaveable { mutableFloatStateOf(0f) }
+        var apiTick by rememberSaveable { mutableFloatStateOf(0f) }
+        var gameSize by rememberSaveable { mutableFloatStateOf(0f) }
+        var gameTrack by rememberSaveable { mutableIntStateOf(0) }
+        var threeStepCurrentProgress by rememberSaveable { mutableFloatStateOf(0f) }
         var loading by rememberSaveable { mutableStateOf(false) }
         var steamIdText by rememberSaveable { mutableStateOf("") }
         var steamId by rememberSaveable { mutableStateOf("") }
-        var dialogFlag = rememberSaveable { mutableStateOf(false) }
+        val dialogFlag = rememberSaveable { mutableStateOf(false) }
         var xboxIdText by rememberSaveable { mutableStateOf("") }
-        var xboxId by rememberSaveable { mutableStateOf("") }
-        // val enterFlag = rememberSaveable { mutableStateOf(false) }
         val context = LocalContext.current
         val view = LocalView.current
         val mainButtonSize = 60.dp
@@ -130,8 +130,6 @@ class GameImportActivity: AppCompatActivity() {
         view.keepScreenOn = true
         //fonts
         val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
-        val joseFin = FontFamily(Font(R.font.josefin_slab_variablefont_wght))
-        val kdam = FontFamily(Font(R.font.kdam_thmorpro_regular))
         //These are the variables for the text inputs
         var gameNameM by remember { mutableStateOf("") }
         var gameDescM by remember { mutableStateOf("") }
@@ -306,10 +304,8 @@ class GameImportActivity: AppCompatActivity() {
                                         val response = call.execute()
                                         if (response.isSuccessful) {
                                             val post = response.body()!!
-                                            //We need this and it is used
-                                            val res = post.response!!
                                             val games: List<SteamOwnedGames.Response.SteamGames> =
-                                                post.response.games
+                                                post.response?.games!!
                                             for (game in games) {
                                                 //Sanity check to make sure we are not adding the same game
                                                 var sameNameFlag = false
@@ -507,6 +503,7 @@ class GameImportActivity: AppCompatActivity() {
                                      apiTick = 0F
                                      gameSize = 0F
                                     gameTrack = 0
+                                    threeStepCurrentProgress = 0f
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -682,23 +679,27 @@ class GameImportActivity: AppCompatActivity() {
                         .padding(vertical = 4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally){
                         Text(text="Loading $apiTick / 4", fontSize = 25.sp )
-                        LinearProgressIndicator(progress = threeStepCurrentProgress,
+                        LinearProgressIndicator(
+                            progress = { threeStepCurrentProgress },
                             modifier = Modifier
                                 .size(width = 400.dp,height = 20.dp),
-                            trackColor = Color.Black,
                             color = Lime,
-                        ) }
+                            trackColor = Color.Black,
+                        )
+                    }
                 }
                 if(loading){
                     Column (modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally){
                         Text(text= "Game $gameTrack / $gameSize")
-                        LinearProgressIndicator(progress = currentProgress,
+                        LinearProgressIndicator(
+                            progress = { currentProgress },
                             modifier = Modifier
                                 .size(width = 400.dp,height = 20.dp),
-                            trackColor = Color.Black,
                             color = Lime,
-                        ) }
+                            trackColor = Color.Black,
+                        )
+                    }
                 }
             }
             item {
