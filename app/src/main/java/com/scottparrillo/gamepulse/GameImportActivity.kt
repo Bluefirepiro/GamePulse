@@ -558,6 +558,9 @@ class GameImportActivity: AppCompatActivity() {
                                 .padding(horizontal = 2.dp)
                                 .clickable {
                                     CoroutineScope(Dispatchers.IO).launch {
+                                        gameTrack = 0
+                                        gameSize = 0f
+                                        currentProgress = 0f
                                         try {
                                             val gamertag = xboxIdText.trim()
 
