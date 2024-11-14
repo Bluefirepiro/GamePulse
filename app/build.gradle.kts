@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    // Uncomment if you need annotation processing
-    // alias(libs.plugins.kapt)
+    id("org.jetbrains.kotlin.kapt") // Required for annotation processing
+    id("dagger.hilt.android.plugin") // Hilt plugin
 }
 
 android {
@@ -85,6 +85,14 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
 
+    // User Profile Picture dependencies
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+    implementation ("com.github.bumptech.glide:compose:1.0.0-alpha.1")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -94,4 +102,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+}
+
+kapt {
+    correctErrorTypes = true // Required by Hilt
 }
