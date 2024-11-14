@@ -1,19 +1,21 @@
 [versions]
-agp = "8.5.1"
+agp = "8.7.2"
 coilCompose = "2.7.0"
+compiler = "<compose-compiler-version>"
+compilerVersion = "1.5.15"
 gson = "2.10.1"
-gsonVersion = "2.8.8"
-kotlin = "1.9.0"
-coreKtx = "1.13.1"
+gsonVersion = "2.10.1"
+kotlin = "2.0.0"
+coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-kotlinxCoroutinesAndroid = "1.7.3"
+kotlinxCoroutinesAndroid = "1.8.1"
 kotlinxCoroutinesCore = "1.7.3"
-lifecycleRuntimeKtx = "2.8.3"
-activityCompose = "1.9.0"
-composeBom = "2023.08.00"
-composeMaterial = "1.3.1"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.3"
+composeBom = "2024.11.00"
+composeMaterial = "1.4.0"
 roomRuntime = "2.6.1"
 recyclerview = "1.3.2"
 appcompat = "1.7.0"
@@ -26,11 +28,17 @@ converterGson = "2.11.0"
 hilt = "2.44"
 
 [libraries]
+#noinspection SimilarGradleDependency
+androidx-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compiler" }
+#noinspection SimilarGradleDependency
+androidx-compiler-v1515 = { module = "androidx.compose.compiler:compiler", version.ref = "compilerVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+#noinspection SimilarGradleDependency
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+#noinspection SimilarGradleDependency
 gson-v288 = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -63,4 +71,4 @@ converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", ve
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

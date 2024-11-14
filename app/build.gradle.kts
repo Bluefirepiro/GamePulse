@@ -1,13 +1,14 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id("org.jetbrains.kotlin.kapt") // Required for annotation processing
+    id("com.google.devtools.ksp") // Use KSP instead of KAPT
     id("dagger.hilt.android.plugin") // Hilt plugin
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
 }
 
 android {
     namespace = "com.scottparrillo.gamepulse"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.scottparrillo.gamepulse"
@@ -15,7 +16,6 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -42,31 +42,35 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.2" // Latest Compose-compatible version for Kotlin 2.0
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
 }
 
 dependencies {
+    // Core libraries
     implementation(libs.gson)
-    implementation(libs.gson.v288)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
-    // define a BOM and its version
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
-    implementation(libs.coil.compose)
 
-    // define any required OkHttp artifacts without version
+    // Networking libraries
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.12.0"))
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Compose and UI libraries
+    implementation(libs.coil.compose)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
@@ -74,26 +78,17 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.appcompat)
-    implementation(libs.play.services.games)
-    implementation(libs.firebase.crashlytics.buildtools)
 
+    // Glide dependencies
+    implementation("com.github.bumptech.glide:glide:4.14.2")
+    ksp("com.github.bumptech.glide:ksp:4.14.2")
+    implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
 
-    // Retrofit & Coroutines dependencies
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
+    // Hilt dependencies
+    implementation("com.google.dagger:hilt-android:2.40.5")
+    ksp("com.google.dagger:hilt-compiler:2.40.5")
 
-
-    // User Profile Picture dependencies
-    implementation ("com.github.bumptech.glide:glide:4.12.0")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
-    implementation ("com.github.bumptech.glide:compose:1.0.0-alpha.1")
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
-
-
-
+    // Testing libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -101,9 +96,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-}
-
-kapt {
-    correctErrorTypes = true // Required by Hilt
 }
