@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -41,6 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -82,23 +84,29 @@ class MainActivity : ComponentActivity() {
         }
 
         // Initialize the storage permission request launcher
-        requestStoragePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                launchImagePicker()
-            } else {
-                Toast.makeText(this, "Storage permission is required to select profile image", Toast.LENGTH_SHORT).show()
+        requestStoragePermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                if (isGranted) {
+                    launchImagePicker()
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Storage permission is required to select profile image",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
-        }
 
 
         // Initialize the notification permission request launcher
-        requestNotificationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                sendNotificationIfAllowed()
-            } else {
-                println("Notification permission denied.")
+        requestNotificationPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                if (isGranted) {
+                    sendNotificationIfAllowed()
+                } else {
+                    println("Notification permission denied.")
+                }
             }
-        }
 
         if (shouldRequestNotificationPermission()) {
             requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -112,11 +120,38 @@ class MainActivity : ComponentActivity() {
                     recentlyPlayedGames = recentlyPlayedGamesList,
                     recentlyAchievedAchievements = recentlyAchievedAchievementsList,
                     profileImageUri = profileImageUri,
-                    onNavigateToAchievements = { startActivity(Intent(this, AchievementActivity::class.java)) },
-                    onNavigateToLibrary = { startActivity(Intent(this, LibraryActivity::class.java)) },
-                    onNavigateToFriends = { startActivity(Intent(this, FriendsActivity::class.java)) },
+                    onNavigateToAchievements = {
+                        startActivity(
+                            Intent(
+                                this,
+                                AchievementActivity::class.java
+                            )
+                        )
+                    },
+                    onNavigateToLibrary = {
+                        startActivity(
+                            Intent(
+                                this,
+                                LibraryActivity::class.java
+                            )
+                        )
+                    },
+                    onNavigateToFriends = {
+                        startActivity(
+                            Intent(
+                                this,
+                                FriendsActivity::class.java
+                            )
+                        )
+                    },
                     onOpenSettings = { openDeviceSettings() },
-                    onChangeProfilePicture = { requestStoragePermission() }
+                    onChangeProfilePicture = { requestStoragePermission() },
+                    onGameClick = { selectedGame ->
+                        val intent = Intent(this, SingleGameActivity::class.java).apply {
+                            putExtra("game", Gson().toJson(selectedGame)) // Pass game data as JSON
+                        }
+                        startActivity(intent)
+                    }
                 )
             }
         }
@@ -283,7 +318,8 @@ fun HomeScreen(
     onNavigateToLibrary: () -> Unit,
     onNavigateToFriends: () -> Unit,
     onOpenSettings: () -> Unit,
-    onChangeProfilePicture: () -> Unit
+    onChangeProfilePicture: () -> Unit,
+    onGameClick: (Game) -> Unit // New parameter for handling game clicks
 ) {
     val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
     val SpringGreen = Color(0xFF16F2A1)
@@ -323,7 +359,7 @@ fun HomeScreen(
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             items(recentlyPlayedGames) { game ->
-                GameItem(game)
+                GameItem(game) { onGameClick(it) } // Pass the click event
             }
         }
 
@@ -410,34 +446,89 @@ fun SectionTitle(title: String, fontFamily: FontFamily) {
     )
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun GameItem(game: Game) {
-    Box(
+fun GameItem(game: Game, onClick: (Game) -> Unit) {
+    Column(
         modifier = Modifier
-            .size(100.dp)
+            .width(120.dp)
+            .clickable { onClick(game) } // Add click handler
             .background(MaterialTheme.colorScheme.primary)
-            .padding(8.dp)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            GlideImage(
+                model = game.coverURL,
+                contentDescription = "${game.gameName} Cover",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
         Text(
             text = game.gameName,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.White
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun AchievementItem(achievement: Achievement) {
-    Box(
+    Column(
         modifier = Modifier
-            .size(100.dp)
+            .width(120.dp) // Adjust width for the image and text
             .background(MaterialTheme.colorScheme.secondary)
-            .padding(8.dp)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Display the achievement image if available
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(8.dp)) // Rounded corners for the image
+        ) {
+            if (!achievement.imageURL.isNullOrEmpty()) { // Check if an image URL is available
+                GlideImage(
+                    model = achievement.imageURL, // Use the imageURL property from Achievement
+                    contentDescription = "${achievement.title} Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Fallback: Show a placeholder if no image URL is available
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No Image",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondary
+                    )
+                }
+            }
+        }
+
+        // Display the achievement title below the image
         Text(
             text = achievement.title,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.White
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis, // Truncate text if it's too long
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }

@@ -14,4 +14,5 @@ class Achievement : Serializable{
     var isFavorite: Boolean = false
     var achImageUrl: String = ""
     var achImageUrlGray: String = ""
+    val imageURL: String? = null
 }
