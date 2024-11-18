@@ -1,6 +1,6 @@
 package com.scottparrillo.gamepulse.com.scottparrillo.gamepulse
 
-import android.content.Context
+/*import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.scottparrillo.gamepulse.Game
@@ -23,4 +23,4 @@ fun loadRecentGames(context: Context): List<Game> {
     } else {
         emptyList()
     }
-}
+}*/

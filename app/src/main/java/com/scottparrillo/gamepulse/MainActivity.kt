@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.lifecycleScope
+//import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.google.gson.Gson
@@ -52,7 +52,7 @@ import com.google.gson.reflect.TypeToken
 import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.PreferencesUtil
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
-import kotlinx.coroutines.launch
+//import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -152,7 +152,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    fun clearLibrary() {
+    private fun clearLibrary() {
         recentlyPlayedGamesList.clear() // Clear the library
         PreferencesUtil.saveDataToPreferences(
             context = this,
@@ -213,7 +213,7 @@ class MainActivity : ComponentActivity() {
     }
 
     // Function to save lists of games and achievements to SharedPreferences
-    private fun saveDataToPreferences() {
+    /*private fun saveDataToPreferences() {
         lifecycleScope.launch {
             PreferencesUtil.saveDataToPreferences(
                 context = this@MainActivity,
@@ -221,7 +221,7 @@ class MainActivity : ComponentActivity() {
                 achievements = recentlyAchievedAchievementsList
             )
         }
-    }
+    }*/
 
     // Function to load lists of games and achievements from SharedPreferences
     private fun loadPersistedData() {
