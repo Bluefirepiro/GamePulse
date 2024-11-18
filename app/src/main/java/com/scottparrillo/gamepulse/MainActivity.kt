@@ -148,13 +148,22 @@ class MainActivity : ComponentActivity() {
                     onChangeProfilePicture = { requestStoragePermission() },
                     onGameClick = { selectedGame ->
                         val intent = Intent(this, SingleGameActivity::class.java).apply {
-                            putExtra("game", Gson().toJson(selectedGame)) // Pass game data as JSON
+                            putExtra("game", Gson().toJson(selectedGame)) // Pass the selected game as JSON
                         }
                         startActivity(intent)
-                    }
+                    },
+                    onClearLibrary = { clearLibrary() }
                 )
             }
         }
+    }
+    fun clearLibrary() {
+        recentlyPlayedGamesList.clear() // Clear the library
+        PreferencesUtil.saveDataToPreferences(
+            context = this,
+            games = emptyList(), // Save the cleared state
+            achievements = emptyList()
+        )
     }
 
     override fun onResume() {
@@ -319,7 +328,8 @@ fun HomeScreen(
     onNavigateToFriends: () -> Unit,
     onOpenSettings: () -> Unit,
     onChangeProfilePicture: () -> Unit,
-    onGameClick: (Game) -> Unit // New parameter for handling game clicks
+    onGameClick: (Game) -> Unit,
+    onClearLibrary: () -> Unit // New parameter for handling game clicks
 ) {
     val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
     val SpringGreen = Color(0xFF16F2A1)
@@ -359,7 +369,9 @@ fun HomeScreen(
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             items(recentlyPlayedGames) { game ->
-                GameItem(game) { onGameClick(it) } // Pass the click event
+                GameItem(game) { selectedGame ->
+                    onGameClick(selectedGame) // Pass the correct game
+                }
             }
         }
 
@@ -399,6 +411,16 @@ fun HomeScreen(
             ) {
                 Text(text = "Friends", fontFamily = jockeyOne, color = Color.Black)
             }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Add a clear library button
+        Button(
+            onClick = onClearLibrary, // Call the clear library callback
+            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Clear Library", fontFamily = jockeyOne, color = Color.Black)
         }
     }
 }
@@ -532,3 +554,4 @@ fun AchievementItem(achievement: Achievement) {
         )
     }
 }
+

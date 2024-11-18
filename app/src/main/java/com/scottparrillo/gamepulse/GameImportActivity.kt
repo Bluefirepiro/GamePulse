@@ -560,8 +560,6 @@ class GameImportActivity: AppCompatActivity() {
                                 .background(Lime)
                                 .padding(horizontal = 2.dp)
                                 .clickable {
-                                    xboxIdText = "Importing games, do not click away"
-                                    loading = true
                                     CoroutineScope(Dispatchers.IO).launch {
                                         try {
                                             val gamertag = xboxIdText.trim()
