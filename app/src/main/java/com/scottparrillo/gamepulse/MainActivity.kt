@@ -1,8 +1,6 @@
 package com.scottparrillo.gamepulse
 
 import android.Manifest
-import android.app.Activity
-import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -13,9 +11,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
-import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -57,7 +53,6 @@ import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.PreferencesUtil
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
 
@@ -317,7 +312,7 @@ class MainActivity : ComponentActivity() {
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 }
-@OptIn(ExperimentalGlideComposeApi::class)
+
 @Composable
 fun HomeScreen(
     recentlyPlayedGames: List<Game>,

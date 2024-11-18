@@ -271,7 +271,7 @@ class AchievementActivity : ComponentActivity() {
             val xuidResponse = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag).execute()
             val xuid = xuidResponse.body()?.people?.firstOrNull()?.xuid ?: return@launch
 
-            val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(xuid = xuid.toString()).execute()
+            val response = ApiClient.openXBL.xboxWebAPIClient.getAllGamesByID(xuid = xuid).execute()
             if (response.isSuccessful) {
                 val games = response.body()?.games ?: emptyList()
                 withContext(Dispatchers.Main) {
@@ -358,7 +358,7 @@ class AchievementActivity : ComponentActivity() {
             val xuidResponse = ApiClient.openXBL.xboxWebAPIClient.getXuidFromGamertag(gamertag).execute()
             val xuid = xuidResponse.body()?.people?.firstOrNull()?.xuid ?: return@launch
 
-            val response = ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(xuid = xuid.toString(), titleId = titleId).execute()
+            val response = ApiClient.openXBL.xboxWebAPIClient.getUserAchievements(xuid = xuid, titleId = titleId).execute()
             if (response.isSuccessful) {
                 val achievements = response.body()?.achievements ?: emptyList()
                 withContext(Dispatchers.Main) {
