@@ -20,6 +20,6 @@ fun getAllOwnedGames(@Query("key") key: String,@Query("include_appinfo") include
     fun getAllGameAchievements(@Query("appid") appid: Long,@Query("key") key: String, @Query("steamid") steamid:Long)
                                                     : Call<SteamPlayerAchievements>
     @GET("/ISteamUserStats/GetSchemaForGame/v2/")
-    fun getGameSchema(@Query("key") key: String,@Query("appid") appid: Long,)
+    fun getGameSchema(@Query("key") key: String, @Query("appid") appid: Long)
             : Call<SteamGameSchema>
 }

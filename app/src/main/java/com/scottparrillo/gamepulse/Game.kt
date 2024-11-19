@@ -7,22 +7,22 @@ import java.io.Serializable
 import java.time.LocalDateTime
 
 class Game: Serializable {
-    var completed: Boolean = false
+    //var completed: Boolean = false
     var allAchiev: Boolean = false
     var isFavorite: Boolean = false // Add this property
     var gameTime: Float = 0f
-    var timeToBeat: Float = 0f
+    //var timeToBeat: Float = 0f
     var gameId: Long = 0
-    var xboxGameId: Long = 0
+    //var xboxGameId: Long = 0
     var gamePlatform: String = ""
     var coverURL: String = ""
     var gameName: String = ""
     var gameDescription: String = ""
-    var gameGenre: String = ""
-    var recentlyPlayed: Boolean = false
-    var currentlyPlaying: Boolean = false
+    //var gameGenre: String = ""
+    //var recentlyPlayed: Boolean = false
+    //var currentlyPlaying: Boolean = false
     var newlyAdded: Boolean = false
-    var gameReleaseDate: String = ""
+    //var gameReleaseDate: String = ""
     @RequiresApi(Build.VERSION_CODES.O)
     //Just setting it to now till it's over written
     var dateTimeLastPlayed:LocalDateTime = LocalDateTime.now()

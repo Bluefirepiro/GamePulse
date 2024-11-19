@@ -1,8 +1,6 @@
 package com.scottparrillo.gamepulse
 
 import android.Manifest
-import android.app.Activity
-import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -13,9 +11,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
-import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,6 +25,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -41,12 +38,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.lifecycleScope
+//import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.google.gson.Gson
@@ -54,8 +54,7 @@ import com.google.gson.reflect.TypeToken
 import com.scottparrillo.gamepulse.com.scottparrillo.gamepulse.PreferencesUtil
 import com.scottparrillo.gamepulse.ui.theme.CuriousBlue
 import com.scottparrillo.gamepulse.ui.theme.GamePulseTheme
-import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
+//import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -82,23 +81,29 @@ class MainActivity : ComponentActivity() {
         }
 
         // Initialize the storage permission request launcher
-        requestStoragePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                launchImagePicker()
-            } else {
-                Toast.makeText(this, "Storage permission is required to select profile image", Toast.LENGTH_SHORT).show()
+        requestStoragePermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                if (isGranted) {
+                    launchImagePicker()
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Storage permission is required to select profile image",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
-        }
 
 
         // Initialize the notification permission request launcher
-        requestNotificationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                sendNotificationIfAllowed()
-            } else {
-                println("Notification permission denied.")
+        requestNotificationPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                if (isGranted) {
+                    sendNotificationIfAllowed()
+                } else {
+                    println("Notification permission denied.")
+                }
             }
-        }
 
         if (shouldRequestNotificationPermission()) {
             requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -112,14 +117,50 @@ class MainActivity : ComponentActivity() {
                     recentlyPlayedGames = recentlyPlayedGamesList,
                     recentlyAchievedAchievements = recentlyAchievedAchievementsList,
                     profileImageUri = profileImageUri,
-                    onNavigateToAchievements = { startActivity(Intent(this, AchievementActivity::class.java)) },
-                    onNavigateToLibrary = { startActivity(Intent(this, LibraryActivity::class.java)) },
-                    onNavigateToFriends = { startActivity(Intent(this, FriendsActivity::class.java)) },
+                    onNavigateToAchievements = {
+                        startActivity(
+                            Intent(
+                                this,
+                                AchievementActivity::class.java
+                            )
+                        )
+                    },
+                    onNavigateToLibrary = {
+                        startActivity(
+                            Intent(
+                                this,
+                                LibraryActivity::class.java
+                            )
+                        )
+                    },
+                    onNavigateToFriends = {
+                        startActivity(
+                            Intent(
+                                this,
+                                FriendsActivity::class.java
+                            )
+                        )
+                    },
                     onOpenSettings = { openDeviceSettings() },
-                    onChangeProfilePicture = { requestStoragePermission() }
+                    onChangeProfilePicture = { requestStoragePermission() },
+                    onGameClick = { selectedGame ->
+                        val intent = Intent(this, SingleGameActivity::class.java).apply {
+                            putExtra("game", Gson().toJson(selectedGame)) // Pass the selected game as JSON
+                        }
+                        startActivity(intent)
+                    },
+                    onClearLibrary = { clearLibrary() }
                 )
             }
         }
+    }
+    private fun clearLibrary() {
+        recentlyPlayedGamesList.clear() // Clear the library
+        PreferencesUtil.saveDataToPreferences(
+            context = this,
+            games = emptyList(), // Save the cleared state
+            achievements = emptyList()
+        )
     }
 
     override fun onResume() {
@@ -174,7 +215,7 @@ class MainActivity : ComponentActivity() {
     }
 
     // Function to save lists of games and achievements to SharedPreferences
-    private fun saveDataToPreferences() {
+    /*private fun saveDataToPreferences() {
         lifecycleScope.launch {
             PreferencesUtil.saveDataToPreferences(
                 context = this@MainActivity,
@@ -182,7 +223,7 @@ class MainActivity : ComponentActivity() {
                 achievements = recentlyAchievedAchievementsList
             )
         }
-    }
+    }*/
 
     // Function to load lists of games and achievements from SharedPreferences
     private fun loadPersistedData() {
@@ -273,7 +314,7 @@ class MainActivity : ComponentActivity() {
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 }
-@OptIn(ExperimentalGlideComposeApi::class)
+
 @Composable
 fun HomeScreen(
     recentlyPlayedGames: List<Game>,
@@ -283,7 +324,9 @@ fun HomeScreen(
     onNavigateToLibrary: () -> Unit,
     onNavigateToFriends: () -> Unit,
     onOpenSettings: () -> Unit,
-    onChangeProfilePicture: () -> Unit
+    onChangeProfilePicture: () -> Unit,
+    onGameClick: (Game) -> Unit,
+    onClearLibrary: () -> Unit // New parameter for handling game clicks
 ) {
     val jockeyOne = FontFamily(Font(R.font.jockey_one_regular))
     val SpringGreen = Color(0xFF16F2A1)
@@ -323,7 +366,9 @@ fun HomeScreen(
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             items(recentlyPlayedGames) { game ->
-                GameItem(game)
+                GameItem(game) { selectedGame ->
+                    onGameClick(selectedGame) // Pass the correct game
+                }
             }
         }
 
@@ -363,6 +408,16 @@ fun HomeScreen(
             ) {
                 Text(text = "Friends", fontFamily = jockeyOne, color = Color.Black)
             }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Add a clear library button
+        Button(
+            onClick = onClearLibrary, // Call the clear library callback
+            colors = ButtonDefaults.buttonColors(containerColor = SpringGreen),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Clear Library", fontFamily = jockeyOne, color = Color.Black)
         }
     }
 }
@@ -410,34 +465,99 @@ fun SectionTitle(title: String, fontFamily: FontFamily) {
     )
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun GameItem(game: Game) {
-    Box(
+fun GameItem(game: Game, onClick: (Game) -> Unit) {
+    Column(
         modifier = Modifier
-            .size(100.dp)
+            .width(120.dp)
+            .clickable { onClick(game) } // Add click handler
             .background(MaterialTheme.colorScheme.primary)
-            .padding(8.dp)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+            GlideImage(
+                model = game.coverURL,
+                contentDescription = "${game.gameName} Cover",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
         Text(
             text = game.gameName,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.White
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun AchievementItem(achievement: Achievement) {
-    Box(
+    Column(
         modifier = Modifier
-            .size(100.dp)
+            .width(120.dp) // Adjust width for the image and text
             .background(MaterialTheme.colorScheme.secondary)
-            .padding(8.dp)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Display the achievement image if available
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(8.dp)) // Rounded corners for the image
+        ) {
+            if (!achievement.imageURL.isNullOrEmpty()) { // Check if an image URL is available
+                GlideImage(
+                    model = achievement.imageURL, // Use the imageURL property from Achievement
+                    contentDescription = "${achievement.title} Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            else if(!achievement.achImageUrl.isNullOrEmpty()){
+                GlideImage(
+                    model = achievement.achImageUrl, // Use the imageURL property from Achievement
+                    contentDescription = "${achievement.title} Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            else {
+                // Fallback: Show a placeholder if no image URL is available
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No Image",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondary
+                    )
+                }
+            }
+        }
+
+        // Display the achievement title below the image
         Text(
             text = achievement.title,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.White
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis, // Truncate text if it's too long
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }
+
