@@ -39,6 +39,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -521,7 +523,16 @@ fun AchievementItem(achievement: Achievement) {
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-            } else {
+            }
+            else if(!achievement.achImageUrl.isNullOrEmpty()){
+                GlideImage(
+                    model = achievement.achImageUrl, // Use the imageURL property from Achievement
+                    contentDescription = "${achievement.title} Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            else {
                 // Fallback: Show a placeholder if no image URL is available
                 Box(
                     modifier = Modifier
