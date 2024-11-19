@@ -63,7 +63,7 @@ fun SingleGameScreen(){
     //Vars and vals
     val game = Game.selectedGame
     val context = LocalContext.current
-    val gameTitle = game.gameName
+    //val gameTitle = game.gameName
     val gamePlatform = game.gamePlatform
     val gameTimeTotal = game.gameTime
     val gameLastPlayed = game.dateTimeLastPlayed.truncatedTo(ChronoUnit.DAYS)

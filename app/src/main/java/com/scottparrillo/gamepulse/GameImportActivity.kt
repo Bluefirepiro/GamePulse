@@ -632,7 +632,7 @@ class GameImportActivity: AppCompatActivity() {
                                                         apiTick = 0F
                                                         gameSize = 0F
                                                         gameTrack = 0
-                                                        
+
 
 
                                                         saveGameFile(Game.gameList)
